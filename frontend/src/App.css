@@ -1,34 +1,154 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App-specific styles */
+.App {
+    min-height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
+/* Landing page specific */
+.gold-text-gradient {
+    background: linear-gradient(135deg, #D4AF37 0%, #F5DEB3 50%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.grid-pattern {
+    background-image: 
+        linear-gradient(rgba(38, 38, 38, 0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(38, 38, 38, 0.5) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+
+/* Prose overrides for AI chat */
+.prose-invert {
+    --tw-prose-body: #888;
+    --tw-prose-headings: #fff;
+    --tw-prose-bold: #fff;
+    --tw-prose-links: #D4AF37;
+}
+
+.prose ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.prose li {
+    position: relative;
+    padding-left: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.prose li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #D4AF37;
+}
+
+/* Chart customizations */
+.recharts-tooltip-wrapper {
+    outline: none;
+}
+
+.recharts-default-tooltip {
+    background-color: #0F0F0F !important;
+    border: 1px solid #262626 !important;
+    border-radius: 0 !important;
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0F0F0F;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #D4AF37;
+}
+
+/* Focus ring customization */
+*:focus-visible {
+    outline: 2px solid #D4AF37;
+    outline-offset: 2px;
+}
+
+/* Button active state */
+button:active {
+    transform: scale(0.98);
+}
+
+/* Card hover effects */
+.card-hover {
+    transition: border-color 0.2s ease;
+}
+
+.card-hover:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+/* Loading animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
     }
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.loading-shimmer {
+    background: linear-gradient(90deg, #1A1A1A 25%, #262626 50%, #1A1A1A 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
 }
 
-.App-link {
-    color: #61dafb;
+/* Text selection */
+::selection {
+    background-color: rgba(212, 175, 55, 0.3);
+    color: #F5F5F7;
 }
 
-@keyframes App-logo-spin {
+/* Input autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #0A0A0A inset;
+    -webkit-text-fill-color: #F5F5F7;
+    caret-color: #F5F5F7;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none;
+    }
+}
+
+/* Animation utilities */
+.animate-in {
+    animation: animate-in 0.3s ease-out;
+}
+
+@keyframes animate-in {
     from {
-        transform: rotate(0deg);
+        opacity: 0;
+        transform: translateY(10px);
     }
     to {
-        transform: rotate(360deg);
+        opacity: 1;
+        transform: translateY(0);
     }
 }
