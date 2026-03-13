@@ -1,0 +1,164 @@
+{
+  "project_name": "Aureos AI",
+  "design_philosophy": {
+    "core_identity": "E1: The Anti-AI Designer",
+    "brand_essence": "Porsche Design × Revolut × Goldman Sachs",
+    "key_principles": [
+      "Fusion over Imitation: Architectural precision meets financial clarity.",
+      "Emotion First: Controlled sophistication, credibility, and foresight.",
+      "Content is King: Every pixel serves the trade decision.",
+      "Zoom In: High-definition data visualization.",
+      "Negative Space: Generous breathing room (2-3x standard padding).",
+      "Contrast: Deep blacks vs. glowing data points."
+    ],
+    "anti_patterns": [
+      "Purple/Teal primary buttons (Use Gold/White/Grey).",
+      "Center-aligned everything (Use asymmetric tension).",
+      "Generic gradients (Use noise/texture).",
+      "Rounded-xl corners (Use sharp or minimal rounded-sm)."
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Space Grotesk, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scaling": {
+      "h1": "text-5xl md:text-7xl font-bold tracking-tighter leading-none",
+      "h2": "text-4xl md:text-5xl font-semibold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-medium tracking-tight",
+      "body": "text-base leading-relaxed text-muted-foreground",
+      "caption": "text-xs tracking-wider uppercase text-muted-foreground/70"
+    }
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": "#050505",
+      "foreground": "#F5F5F7",
+      "card": "#0F0F0F",
+      "card_foreground": "#FFFFFF",
+      "popover": "#121212",
+      "popover_foreground": "#FFFFFF",
+      "primary": "#D4AF37",
+      "primary_foreground": "#000000",
+      "secondary": "#1A1A1A",
+      "secondary_foreground": "#FFFFFF",
+      "muted": "#1A1A1A",
+      "muted_foreground": "#888888",
+      "accent": "#262626",
+      "accent_foreground": "#FFFFFF",
+      "destructive": "#990000",
+      "destructive_foreground": "#FFFFFF",
+      "border": "#262626",
+      "input": "#1A1A1A",
+      "ring": "#D4AF37",
+      "chart": {
+        "bullish": "#00E096",
+        "bearish": "#FF3B30",
+        "neutral": "#888888",
+        "volatility": "#FFD700"
+      }
+    },
+    "gradients": {
+      "gold_shine": "linear-gradient(135deg, #D4AF37 0%, #F5DEB3 50%, #D4AF37 100%)",
+      "glass_surface": "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%)"
+    }
+  },
+  "layout_strategy": {
+    "container_width": "max-w-7xl mx-auto px-6 md:px-12",
+    "spacing": {
+      "section_gap": "py-24 md:py-32",
+      "component_gap": "gap-8",
+      "internal_padding": "p-6 md:p-8"
+    },
+    "grid_system": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "bento_hero": "grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-4"
+    },
+    "border_radius": {
+      "default": "rounded-sm",
+      "card": "rounded-sm",
+      "button": "rounded-none"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#D4AF37] text-black hover:bg-[#C5A028] font-bold rounded-none px-8 py-3 uppercase tracking-widest text-xs transition-transform active:scale-95",
+      "secondary": "bg-transparent border border-[#333] text-white hover:border-[#D4AF37] hover:text-[#D4AF37] rounded-none px-8 py-3 uppercase tracking-widest text-xs",
+      "ghost": "text-muted-foreground hover:text-white uppercase tracking-widest text-xs"
+    },
+    "cards": {
+      "dashboard_widget": "bg-[#0F0F0F] border border-[#262626] rounded-sm p-6 relative overflow-hidden group hover:border-[#D4AF37]/50 transition-colors",
+      "glass_panel": "backdrop-blur-xl bg-black/40 border border-white/10 rounded-sm"
+    },
+    "inputs": {
+      "default": "bg-[#0A0A0A] border border-[#333] text-white focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] rounded-none h-12"
+    },
+    "charts": {
+      "library": "Recharts (via Shadcn/UI)",
+      "style": "Minimalist, thin lines, glowing gradients for area charts, neon accents."
+    }
+  },
+  "visual_enhancers": {
+    "textures": {
+      "noise": "url('/assets/noise.png') opacity-5",
+      "grid": "linear-gradient(#262626 1px, transparent 1px), linear-gradient(90deg, #262626 1px, transparent 1px)"
+    },
+    "motion": {
+      "fade_in": "initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}",
+      "hover_lift": "whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300 }}"
+    }
+  },
+  "image_assets": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1682923875240-3ef0a52a9e7e",
+      "alt": "Abstract architectural glass structure",
+      "usage": "Hero section background with dark overlay"
+    },
+    "data_visualization": {
+      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
+      "alt": "Glowing dark financial charts",
+      "usage": "Feature section showcasing analytics"
+    },
+    "ai_concept": {
+      "url": "https://images.unsplash.com/photo-1684610529682-553625a1ffed",
+      "alt": "Abstract sphere data lines",
+      "usage": "AI Copilot section background or accent"
+    },
+    "testimonials": [
+      {
+        "url": "https://images.unsplash.com/photo-1712174766230-cb7304feaafe",
+        "alt": "Professional woman in suit"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1659353221237-6a1cfb73fd90",
+        "alt": "Professional man in suit"
+      }
+    ],
+    "office_atmosphere": {
+      "url": "https://images.unsplash.com/photo-1763567823709-9df979a3b7b8",
+      "alt": "Modern office blur",
+      "usage": "About us or Contact section background"
+    }
+  },
+  "universal_guidelines": [
+    "CRITICAL: Use .js or .jsx extension for all new React files. DO NOT use .ts or .tsx.",
+    "Dark Mode is the DEFAULT. Ensure 'dark' class is applied to the html/body tag.",
+    "Do not use gradients for backgrounds unless it is a subtle noise overlay.",
+    "Use uppercase tracking-widest text for labels and small headers.",
+    "Avoid rounded buttons. Use sharp edges or minimal rounding (2px).",
+    "All interactive elements MUST have a data-testid attribute.",
+    "Use 'sonner' for toast notifications.",
+    "Use Lucide-react for icons."
+  ],
+  "instructions_to_main_agent": {
+    "step_1": "Setup global CSS variables in index.css to match the 'colors' section above. Force dark mode defaults.",
+    "step_2": "Install necessary dependencies: framer-motion, recharts, lucide-react, sonner.",
+    "step_3": "Create the Dashboard layout using the Bento Grid strategy defined in 'layout_strategy'.",
+    "step_4": "Implement the AI Copilot Panel using a glassmorphic sidebar.",
+    "step_5": "Build the Landing Page using the provided image assets and architectural typography.",
+    "step_6": "Ensure all forms (Login, Register, Contact) use the custom input styles defined."
+  }
+}
