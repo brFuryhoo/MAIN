@@ -12,12 +12,18 @@ import {
   Target,
   AlertTriangle,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import axios from 'axios';
 
@@ -29,6 +35,15 @@ const CopilotPage = () => {
   const [history, setHistory] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Voice state
+  const [isRecording, setIsRecording] = useState(false);
+  const [autoNarrate, setAutoNarrate] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [voiceLoading, setVoiceLoading] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const audioRef = useRef(null);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -41,11 +56,10 @@ const CopilotPage = () => {
 
   useEffect(() => {
     fetchHistory();
-    // Add welcome message
     setMessages([{
       id: 'welcome',
       type: 'assistant',
-      content: "Hello! I'm your AI Copilot. I can help you with:\n\n• **Trade Analysis** - Get probability-based trade suggestions\n• **Market Insights** - Understand market conditions\n• **Risk Assessment** - Evaluate entry/exit points\n• **Strategy Guidance** - Learn optimal trading approaches\n\nAsk me anything about the markets!",
+      content: "Hello! I'm your AI Copilot. I can help you with:\n\n• **Trade Analysis** - Get probability-based trade suggestions\n• **Market Insights** - Understand market conditions\n• **Risk Assessment** - Evaluate entry/exit points\n• **Strategy Guidance** - Learn optimal trading approaches\n\n🎤 **Voice Enabled**: Click the microphone to speak, or toggle auto-narrate for voice responses.\n\nAsk me anything about the markets!",
       timestamp: new Date().toISOString()
     }]);
   }, []);
@@ -61,6 +75,148 @@ const CopilotPage = () => {
     } catch (error) {
       console.error('Failed to fetch history');
     }
+  };
+
+  // Voice Recording Functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        stream.getTracks().forEach(track => track.stop());
+        await processVoiceInput(audioBlob);
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+      toast.info('Recording... Click again to stop');
+    } catch (error) {
+      toast.error('Microphone access denied');
+      console.error('Microphone error:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const processVoiceInput = async (audioBlob) => {
+    setVoiceLoading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      const res = await axios.post(`${API}/voice/copilot-voice`, formData, {
+        headers: {
+          ...headers,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      const { user_text, ai_response, audio_base64 } = res.data;
+
+      // Add user message
+      const userMessage = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: user_text,
+        isVoice: true,
+        timestamp: new Date().toISOString()
+      };
+
+      // Add AI response
+      const assistantMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: ai_response,
+        audioBase64: audio_base64,
+        isVoice: true,
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, userMessage, assistantMessage]);
+
+      // Auto-play response
+      if (audio_base64) {
+        playAudio(audio_base64);
+      }
+
+      fetchHistory();
+    } catch (error) {
+      toast.error('Voice processing failed. Please try again.');
+      console.error('Voice error:', error);
+    }
+    
+    setVoiceLoading(false);
+  };
+
+  const playAudio = (base64Audio) => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+      audioRef.current = audio;
+      
+      audio.onplay = () => setIsPlaying(true);
+      audio.onended = () => setIsPlaying(false);
+      audio.onerror = () => {
+        setIsPlaying(false);
+        toast.error('Audio playback failed');
+      };
+      
+      audio.play();
+    } catch (error) {
+      console.error('Audio playback error:', error);
+    }
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  };
+
+  const narrateMessage = async (text) => {
+    setVoiceLoading(true);
+    try {
+      const res = await axios.post(`${API}/voice/text-to-speech`, {
+        text: text.substring(0, 1000),
+        voice: 'onyx',
+        speed: 1.0
+      }, { headers });
+
+      if (res.data.audio_base64) {
+        playAudio(res.data.audio_base64);
+      }
+    } catch (error) {
+      toast.error('Text-to-speech failed');
+    }
+    setVoiceLoading(false);
   };
 
   const handleSend = async () => {
@@ -93,10 +249,15 @@ const CopilotPage = () => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Auto-narrate if enabled
+      if (autoNarrate && res.data.response) {
+        await narrateMessage(res.data.response);
+      }
+
       fetchHistory();
     } catch (error) {
       toast.error('Failed to get response. Please try again.');
-      // Remove the user message if we failed
       setMessages(prev => prev.filter(m => m.id !== userMessage.id));
     }
     
@@ -110,13 +271,10 @@ const CopilotPage = () => {
   };
 
   const formatMessage = (content) => {
-    // Simple markdown-like formatting
     return content
       .split('\n')
       .map((line, i) => {
-        // Bold text
         line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        // Bullet points
         if (line.startsWith('• ') || line.startsWith('- ')) {
           return `<li key=${i}>${line.substring(2)}</li>`;
         }
@@ -140,19 +298,32 @@ const CopilotPage = () => {
                 <h2 className="font-['Space_Grotesk'] font-semibold">AI Copilot</h2>
                 <p className="text-xs text-[#00E096] flex items-center gap-1">
                   <span className="w-2 h-2 bg-[#00E096] rounded-full animate-pulse" />
-                  Powered by GPT-5.2
+                  Powered by GPT-5.2 • Voice Enabled
                 </p>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setMessages([messages[0]])}
-              className="text-[#888] hover:text-white"
-              data-testid="clear-chat-btn"
-            >
-              <RefreshCw size={18} />
-            </Button>
+            <div className="flex items-center gap-3">
+              {/* Auto-narrate toggle */}
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#0A0A0A] border border-[#1A1A1A]">
+                <Volume2 size={14} className="text-[#888]" />
+                <span className="text-xs text-[#888]">Auto-narrate</span>
+                <Switch 
+                  checked={autoNarrate}
+                  onCheckedChange={setAutoNarrate}
+                  className="scale-75"
+                  data-testid="auto-narrate-toggle"
+                />
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setMessages([messages[0]])}
+                className="text-[#888] hover:text-white"
+                data-testid="clear-chat-btn"
+              >
+                <RefreshCw size={18} />
+              </Button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -185,6 +356,12 @@ const CopilotPage = () => {
                           ? 'bg-[#1A1A1A] max-w-[80%]' 
                           : 'bg-[#0A0A0A] border border-[#1A1A1A] max-w-full'
                       }`}>
+                        {message.isVoice && (
+                          <div className="flex items-center gap-1 mb-2 text-xs text-[#D4AF37]">
+                            <Mic size={12} />
+                            <span>Voice message</span>
+                          </div>
+                        )}
                         <div 
                           className="text-sm leading-relaxed prose prose-invert prose-sm max-w-none"
                           dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
@@ -221,6 +398,23 @@ const CopilotPage = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Narrate button for assistant messages */}
+                        {message.type === 'assistant' && message.id !== 'welcome' && (
+                          <div className="mt-3 pt-3 border-t border-[#1A1A1A] flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => message.audioBase64 ? playAudio(message.audioBase64) : narrateMessage(message.content)}
+                              disabled={voiceLoading}
+                              className="text-xs text-[#888] hover:text-[#D4AF37]"
+                              data-testid={`narrate-btn-${message.id}`}
+                            >
+                              {isPlaying ? <VolumeX size={14} className="mr-1" /> : <Volume2 size={14} className="mr-1" />}
+                              {isPlaying ? 'Stop' : 'Narrate'}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                       <p className="text-xs text-[#888] mt-2">
                         {new Date(message.timestamp).toLocaleTimeString()}
@@ -230,7 +424,7 @@ const CopilotPage = () => {
                 ))}
               </AnimatePresence>
 
-              {loading && (
+              {(loading || voiceLoading) && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -242,7 +436,9 @@ const CopilotPage = () => {
                   <div className="bg-[#0A0A0A] border border-[#1A1A1A] p-4">
                     <div className="flex items-center gap-2">
                       <Sparkles className="text-[#D4AF37] animate-pulse" size={16} />
-                      <span className="text-sm text-[#888]">Analyzing market data...</span>
+                      <span className="text-sm text-[#888]">
+                        {voiceLoading ? 'Processing voice...' : 'Analyzing market data...'}
+                      </span>
                     </div>
                   </div>
                 </motion.div>
@@ -281,18 +477,33 @@ const CopilotPage = () => {
               onSubmit={(e) => { e.preventDefault(); handleSend(); }}
               className="flex gap-3"
             >
+              {/* Voice Record Button */}
+              <Button
+                type="button"
+                onClick={toggleRecording}
+                disabled={loading || voiceLoading}
+                className={`rounded-none h-12 px-4 ${
+                  isRecording 
+                    ? 'bg-[#FF3B30] hover:bg-[#FF3B30]/80 animate-pulse' 
+                    : 'bg-[#1A1A1A] hover:bg-[#262626] border border-[#333]'
+                }`}
+                data-testid="voice-record-btn"
+              >
+                {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+              </Button>
+
               <Input
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about any market, stock, or trading strategy..."
                 className="flex-1 bg-[#0A0A0A] border-[#333] focus:border-[#D4AF37] rounded-none h-12"
-                disabled={loading}
+                disabled={loading || isRecording}
                 data-testid="copilot-input"
               />
               <Button 
                 type="submit"
-                disabled={loading || !input.trim()}
+                disabled={loading || !input.trim() || isRecording}
                 className="bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none px-6 h-12"
                 data-testid="copilot-send-btn"
               >
@@ -300,7 +511,7 @@ const CopilotPage = () => {
               </Button>
             </form>
             <p className="text-xs text-[#888] mt-2 text-center">
-              AI suggestions are for educational purposes. Always do your own research.
+              🎤 Voice enabled • AI suggestions are for educational purposes
             </p>
           </div>
         </div>
@@ -324,7 +535,10 @@ const CopilotPage = () => {
                           inputRef.current?.focus();
                         }}
                       >
-                        <p className="text-sm truncate">{item.message}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          {item.voice_interaction && <Mic size={12} className="text-[#D4AF37]" />}
+                          <p className="text-sm truncate flex-1">{item.message}</p>
+                        </div>
                         <p className="text-xs text-[#888] mt-1">
                           {new Date(item.timestamp).toLocaleDateString()}
                         </p>

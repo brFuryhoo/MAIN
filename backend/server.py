@@ -16,6 +16,10 @@ import httpx
 import asyncio
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest, CheckoutSessionResponse
+from emergentintegrations.llm.openai import OpenAITextToSpeech, OpenAISpeechToText
+from fastapi import UploadFile, File
+from fastapi.responses import Response
+import base64
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -109,28 +113,28 @@ class PaymentStatusResponse(BaseModel):
     payment_status: str
     plan_id: Optional[str] = None
 
-# Subscription Plans
+# Subscription Plans (Updated Pricing)
 SUBSCRIPTION_PLANS = {
     "essential": {
         "id": "essential",
         "name": "Essential",
-        "price": 29.00,
+        "price": 39.00,
         "currency": "usd",
-        "features": ["Core charts", "Basic AI predictions", "5 watchlist items", "Daily market brief"]
+        "features": ["Core charts & live data", "Basic AI predictions", "10 watchlist items", "Daily market brief", "Email support"]
     },
     "pro": {
         "id": "pro",
         "name": "Pro",
-        "price": 79.00,
+        "price": 99.00,
         "currency": "usd",
-        "features": ["All Essential features", "Advanced analytics", "Portfolio insights", "Risk alerts", "50 watchlist items", "Priority support"]
+        "features": ["All Essential features", "Advanced analytics", "Portfolio insights", "Real-time risk alerts", "100 watchlist items", "Priority support", "Historical backtesting"]
     },
     "elite": {
         "id": "elite",
         "name": "Elite",
-        "price": 199.00,
+        "price": 239.00,
         "currency": "usd",
-        "features": ["All Pro features", "Institutional-grade analytics", "API access", "Dedicated AI guidance", "Unlimited watchlist", "Personal account manager"]
+        "features": ["All Pro features", "Institutional-grade analytics", "Full API access", "Dedicated AI guidance", "Unlimited watchlist", "Personal account manager", "Custom alerts", "White-glove onboarding"]
     }
 }
 
@@ -870,6 +874,201 @@ async def submit_contact(data: ContactForm):
     }
     await db.contacts.insert_one(contact_doc)
     return {"message": "Thank you for contacting us. We'll get back to you soon."}
+
+# ==================== VOICE INTERACTION ENDPOINTS ====================
+
+class TTSRequest(BaseModel):
+    text: str
+    voice: str = "onyx"  # Professional voice for trading
+    speed: float = 1.0
+
+class VoiceSettings(BaseModel):
+    tts_enabled: bool = True
+    stt_enabled: bool = True
+    voice: str = "onyx"
+    auto_narrate: bool = False
+
+@api_router.post("/voice/text-to-speech")
+async def text_to_speech(data: TTSRequest, user: dict = Depends(get_current_user)):
+    """Convert text to speech audio using OpenAI TTS"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Voice service not configured")
+        
+        # Limit text length
+        text = data.text[:4000]  # TTS has 4096 char limit
+        
+        tts = OpenAITextToSpeech(api_key=api_key)
+        audio_bytes = await tts.generate_speech(
+            text=text,
+            model="tts-1",
+            voice=data.voice,
+            speed=data.speed,
+            response_format="mp3"
+        )
+        
+        # Return audio as base64 for easy frontend handling
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+        
+        return {
+            "audio_base64": audio_base64,
+            "format": "mp3",
+            "voice": data.voice,
+            "text_length": len(text)
+        }
+        
+    except Exception as e:
+        logger.error(f"TTS error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Voice synthesis error: {str(e)}")
+
+@api_router.post("/voice/speech-to-text")
+async def speech_to_text(
+    audio: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
+    """Convert speech audio to text using OpenAI Whisper"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Voice service not configured")
+        
+        # Validate file type
+        allowed_types = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/webm', 'audio/m4a', 'audio/mp4']
+        if audio.content_type and audio.content_type not in allowed_types:
+            # Allow anyway as content_type detection can be unreliable
+            pass
+        
+        # Read audio file
+        audio_content = await audio.read()
+        
+        # Check file size (25MB limit)
+        if len(audio_content) > 25 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Audio file too large (max 25MB)")
+        
+        stt = OpenAISpeechToText(api_key=api_key)
+        
+        # Create a file-like object
+        import io
+        audio_file = io.BytesIO(audio_content)
+        audio_file.name = audio.filename or "audio.webm"
+        
+        response = await stt.transcribe(
+            file=audio_file,
+            model="whisper-1",
+            response_format="json",
+            language="en",
+            prompt="This is a financial trading discussion about stocks, crypto, forex, market analysis, and investment strategies."
+        )
+        
+        return {
+            "text": response.text,
+            "language": "en",
+            "duration_estimate": len(audio_content) / 16000  # Rough estimate
+        }
+        
+    except Exception as e:
+        logger.error(f"STT error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Speech recognition error: {str(e)}")
+
+@api_router.post("/voice/copilot-voice")
+async def copilot_voice_interaction(
+    audio: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
+    """Full voice interaction: STT -> AI Copilot -> TTS"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Voice service not configured")
+        
+        # Step 1: Speech to Text
+        audio_content = await audio.read()
+        stt = OpenAISpeechToText(api_key=api_key)
+        
+        import io
+        audio_file = io.BytesIO(audio_content)
+        audio_file.name = audio.filename or "audio.webm"
+        
+        stt_response = await stt.transcribe(
+            file=audio_file,
+            model="whisper-1",
+            response_format="json",
+            language="en",
+            prompt="Financial trading discussion about stocks, crypto, forex analysis."
+        )
+        
+        user_message = stt_response.text
+        
+        # Step 2: AI Copilot Processing
+        system_message = """You are Aureos AI Copilot, an advanced trading intelligence assistant. 
+        You are responding via voice, so keep responses concise (2-3 sentences max) and conversational.
+        Provide probability-based trade suggestions when asked. Be direct and actionable."""
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"voice_{user['id']}_{datetime.now().strftime('%Y%m%d')}",
+            system_message=system_message
+        ).with_model("openai", "gpt-5.2")
+        
+        ai_response = await chat.send_message(UserMessage(text=user_message))
+        
+        # Truncate for voice (keep it concise)
+        voice_response = ai_response[:500] if len(ai_response) > 500 else ai_response
+        
+        # Step 3: Text to Speech
+        tts = OpenAITextToSpeech(api_key=api_key)
+        audio_bytes = await tts.generate_speech(
+            text=voice_response,
+            model="tts-1",
+            voice="onyx",
+            speed=1.0,
+            response_format="mp3"
+        )
+        
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+        
+        # Store conversation
+        conversation_doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "message": user_message,
+            "response": ai_response,
+            "voice_interaction": True,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.copilot_conversations.insert_one(conversation_doc)
+        
+        return {
+            "user_text": user_message,
+            "ai_response": ai_response,
+            "audio_base64": audio_base64,
+            "format": "mp3"
+        }
+        
+    except Exception as e:
+        logger.error(f"Voice copilot error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Voice interaction error: {str(e)}")
+
+@api_router.get("/voice/settings")
+async def get_voice_settings(user: dict = Depends(get_current_user)):
+    """Get user voice settings"""
+    settings = user.get("voice_settings", {
+        "tts_enabled": True,
+        "stt_enabled": True,
+        "voice": "onyx",
+        "auto_narrate": False
+    })
+    return settings
+
+@api_router.post("/voice/settings")
+async def update_voice_settings(settings: VoiceSettings, user: dict = Depends(get_current_user)):
+    """Update user voice settings"""
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"voice_settings": settings.model_dump()}}
+    )
+    return {"message": "Voice settings updated", "settings": settings}
 
 # ==================== ROOT ENDPOINT ====================
 

@@ -51,24 +51,24 @@ const LandingPage = () => {
     {
       id: 'essential',
       name: 'Essential',
-      price: 29,
+      price: 39,
       description: 'Perfect for getting started',
-      features: ['Core charts & data', 'Basic AI predictions', '5 watchlist items', 'Daily market brief']
+      features: ['Core charts & live data', 'Basic AI predictions', '10 watchlist items', 'Daily market brief', 'Email support']
     },
     {
       id: 'pro',
       name: 'Pro',
-      price: 79,
+      price: 99,
       popular: true,
       description: 'For serious traders',
-      features: ['All Essential features', 'Advanced analytics', 'Portfolio insights', 'Risk alerts', '50 watchlist items', 'Priority support']
+      features: ['All Essential features', 'Advanced analytics', 'Portfolio insights', 'Real-time risk alerts', '100 watchlist items', 'Priority support', 'Historical backtesting']
     },
     {
       id: 'elite',
       name: 'Elite',
-      price: 199,
+      price: 239,
       description: 'Institutional grade',
-      features: ['All Pro features', 'Institutional analytics', 'API access', 'Dedicated AI guidance', 'Unlimited watchlist', 'Personal account manager']
+      features: ['All Pro features', 'Institutional analytics', 'Full API access', 'Dedicated AI guidance', 'Unlimited watchlist', 'Personal account manager', 'Custom alerts']
     }
   ];
 
