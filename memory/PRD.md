@@ -106,7 +106,7 @@ Develop a complete fintech brand and product ecosystem called "Aureos AI" - a ne
 - **Health Score:** 100%
 - **Security Score:** 100%
 - **Voice Integration:** Operational
-- **URL:** https://aureos-dashboard.preview.emergentagent.com
+- **URL:** https://premium-fintech-13.preview.emergentagent.com
 
 ## Notes
 - Market data uses mock data (live API integration in Week 2)

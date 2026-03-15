@@ -1,215 +1,387 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUREOS AI - PREMIUM DESIGN SYSTEM
+   Version 2.0 | Vortex-Style Premium Interface
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-    :root {
-        --background: 0 0% 2%;
-        --foreground: 0 0% 96%;
-        --card: 0 0% 6%;
-        --card-foreground: 0 0% 100%;
-        --popover: 0 0% 7%;
-        --popover-foreground: 0 0% 100%;
-        --primary: 43 76% 52%;
-        --primary-foreground: 0 0% 0%;
-        --secondary: 0 0% 10%;
-        --secondary-foreground: 0 0% 100%;
-        --muted: 0 0% 10%;
-        --muted-foreground: 0 0% 53%;
-        --accent: 0 0% 15%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 0 100% 30%;
-        --destructive-foreground: 0 0% 100%;
-        --border: 0 0% 15%;
-        --input: 0 0% 10%;
-        --ring: 43 76% 52%;
-        --radius: 0.125rem;
-        
-        /* Aureos Custom Colors */
-        --aureos-gold: 43 76% 52%;
-        --aureos-bullish: 156 100% 44%;
-        --aureos-bearish: 4 100% 59%;
-        --aureos-neutral: 0 0% 53%;
-        
-        /* Chart colors */
-        --chart-1: 43 76% 52%;
-        --chart-2: 156 100% 44%;
-        --chart-3: 4 100% 59%;
-        --chart-4: 0 0% 53%;
-        --chart-5: 220 70% 50%;
-    }
+/* ═══════════════════════════════════════════════════════════════════════════
+   CSS VARIABLES - AUREOS BRANDING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Core Aureos Colors */
+  --aureos-black: #0D0D0D;
+  --aureos-gold: #CFAE46;
+  --aureos-gold-light: #E5C85A;
+  --aureos-gold-dark: #A8893A;
+  --aureos-blue: #00B4FF;
+  --aureos-blue-light: #33C4FF;
+  --aureos-grey: #161718;
+  --aureos-grey-light: #1E1F20;
+  --aureos-white: #F2F2F2;
+  
+  /* Signal Colors */
+  --aureos-bullish: #00E676;
+  --aureos-bearish: #FF5252;
+  --aureos-neutral: #888888;
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(22, 23, 24, 0.7);
+  --glass-border: rgba(207, 174, 70, 0.15);
+  --glass-blur: 20px;
+  
+  /* Shadows & Glows */
+  --glow-gold: 0 0 20px rgba(207, 174, 70, 0.3);
+  --glow-blue: 0 0 20px rgba(0, 180, 255, 0.3);
+  --glow-bullish: 0 0 15px rgba(0, 230, 118, 0.4);
+  --glow-bearish: 0 0 15px rgba(255, 82, 82, 0.4);
+  
+  /* Tailwind overrides */
+  --background: 0 0% 5%;
+  --foreground: 0 0% 95%;
+  --card: 0 0% 9%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 45 60% 54%;
+  --primary-foreground: 0 0% 5%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 53%;
+  --accent: 200 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 100% 66%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 15%;
+  --input: 0 0% 12%;
+  --ring: 45 60% 54%;
+  --radius: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 html {
-    color-scheme: dark;
-}
-
-html, body {
-    background-color: #050505;
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
-    margin: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: #050505;
-    color: #F5F5F7;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--aureos-black);
+  color: var(--aureos-white);
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
 }
 
 code, .mono {
-    font-family: 'JetBrains Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUREOS COMPONENT CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+  /* Premium Card */
+  .aureos-card {
+    @apply relative overflow-hidden;
+    background: linear-gradient(145deg, rgba(22, 23, 24, 0.9), rgba(13, 13, 13, 0.95));
+    border: 1px solid rgba(207, 174, 70, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .aureos-card:hover {
+    border-color: rgba(207, 174, 70, 0.25);
+    box-shadow: var(--glow-gold);
+    transform: translateY(-2px);
+  }
+  
+  .aureos-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(207, 174, 70, 0.3), transparent);
+  }
+  
+  /* Glass Panel */
+  .aureos-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+  }
+  
+  /* Gold Button */
+  .aureos-btn-gold {
+    @apply px-6 py-3 font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, var(--aureos-gold), var(--aureos-gold-dark));
+    color: var(--aureos-black);
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(207, 174, 70, 0.3);
+  }
+  
+  .aureos-btn-gold:hover {
+    background: linear-gradient(135deg, var(--aureos-gold-light), var(--aureos-gold));
+    box-shadow: 0 6px 25px rgba(207, 174, 70, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Blue Button */
+  .aureos-btn-blue {
+    @apply px-6 py-3 font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, var(--aureos-blue), #0090CC);
+    color: white;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 180, 255, 0.3);
+  }
+  
+  .aureos-btn-blue:hover {
+    background: linear-gradient(135deg, var(--aureos-blue-light), var(--aureos-blue));
+    box-shadow: 0 6px 25px rgba(0, 180, 255, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Outline Button */
+  .aureos-btn-outline {
+    @apply px-6 py-3 font-semibold transition-all duration-300;
+    background: transparent;
+    color: var(--aureos-gold);
+    border: 1px solid var(--aureos-gold);
+    border-radius: 10px;
+  }
+  
+  .aureos-btn-outline:hover {
+    background: rgba(207, 174, 70, 0.1);
+    box-shadow: var(--glow-gold);
+  }
+  
+  /* Input Field */
+  .aureos-input {
+    @apply w-full px-4 py-3 transition-all duration-300;
+    background: rgba(22, 23, 24, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: var(--aureos-white);
+  }
+  
+  .aureos-input:focus {
+    outline: none;
+    border-color: var(--aureos-gold);
+    box-shadow: 0 0 0 3px rgba(207, 174, 70, 0.1);
+  }
+  
+  .aureos-input::placeholder {
+    color: rgba(242, 242, 242, 0.4);
+  }
+  
+  /* Signal Badges */
+  .aureos-signal-buy {
+    @apply px-4 py-2 font-bold uppercase tracking-wider;
+    background: linear-gradient(135deg, rgba(0, 230, 118, 0.2), rgba(0, 230, 118, 0.1));
+    color: var(--aureos-bullish);
+    border: 1px solid var(--aureos-bullish);
+    border-radius: 8px;
+    box-shadow: var(--glow-bullish);
+  }
+  
+  .aureos-signal-sell {
+    @apply px-4 py-2 font-bold uppercase tracking-wider;
+    background: linear-gradient(135deg, rgba(255, 82, 82, 0.2), rgba(255, 82, 82, 0.1));
+    color: var(--aureos-bearish);
+    border: 1px solid var(--aureos-bearish);
+    border-radius: 8px;
+    box-shadow: var(--glow-bearish);
+  }
+  
+  /* Progress Bar */
+  .aureos-progress {
+    @apply relative h-2 overflow-hidden;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  .aureos-progress-bar {
+    @apply h-full transition-all duration-500;
+    background: linear-gradient(90deg, var(--aureos-gold), var(--aureos-blue));
+    border-radius: 4px;
+  }
+  
+  /* Glow Text */
+  .aureos-glow-gold {
+    text-shadow: 0 0 10px rgba(207, 174, 70, 0.5), 0 0 20px rgba(207, 174, 70, 0.3);
+  }
+  
+  .aureos-glow-blue {
+    text-shadow: 0 0 10px rgba(0, 180, 255, 0.5), 0 0 20px rgba(0, 180, 255, 0.3);
+  }
 }
 
-/* Aureos Custom Utilities */
-@layer utilities {
-    .text-gold {
-        color: #D4AF37;
-    }
-    
-    .bg-gold {
-        background-color: #D4AF37;
-    }
-    
-    .border-gold {
-        border-color: #D4AF37;
-    }
-    
-    .text-bullish {
-        color: #00E096;
-    }
-    
-    .text-bearish {
-        color: #FF3B30;
-    }
-    
-    .glass-panel {
-        background: rgba(15, 15, 15, 0.8);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .gold-gradient {
-        background: linear-gradient(135deg, #D4AF37 0%, #F5DEB3 50%, #D4AF37 100%);
-    }
-    
-    .gold-text-gradient {
-        background: linear-gradient(135deg, #D4AF37 0%, #F5DEB3 50%, #D4AF37 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .noise-overlay {
-        position: relative;
-    }
-    
-    .noise-overlay::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        opacity: 0.03;
-        pointer-events: none;
-        z-index: 1;
-    }
-    
-    .grid-pattern {
-        background-image: 
-            linear-gradient(rgba(38, 38, 38, 0.5) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(38, 38, 38, 0.5) 1px, transparent 1px);
-        background-size: 60px 60px;
-    }
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes aureos-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-/* Custom Scrollbar */
+@keyframes aureos-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(207, 174, 70, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(207, 174, 70, 0.6); }
+}
+
+@keyframes aureos-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes aureos-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes aureos-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aureos-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-aureos-pulse { animation: aureos-pulse 2s ease-in-out infinite; }
+.animate-aureos-glow { animation: aureos-glow 2s ease-in-out infinite; }
+.animate-aureos-float { animation: aureos-float 3s ease-in-out infinite; }
+.animate-aureos-spin { animation: aureos-spin 1s linear infinite; }
+.animate-slide-up { animation: slide-up 0.5s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #0F0F0F;
+  background: var(--aureos-black);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 3px;
+  background: linear-gradient(180deg, var(--aureos-gold-dark), var(--aureos-grey));
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #D4AF37;
+  background: var(--aureos-gold);
 }
 
-/* Animation Classes */
-@keyframes fade-in-up {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   SELECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-@keyframes pulse-gold {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
-    }
-    50% {
-        box-shadow: 0 0 20px 5px rgba(212, 175, 55, 0.2);
-    }
-}
-
-.animate-fade-in-up {
-    animation: fade-in-up 0.5s ease-out forwards;
-}
-
-.animate-pulse-gold {
-    animation: pulse-gold 2s infinite;
-}
-
-/* Candlestick Chart Colors */
-.recharts-bar-rectangle.bullish {
-    fill: #00E096;
-}
-
-.recharts-bar-rectangle.bearish {
-    fill: #FF3B30;
-}
-
-/* Selection */
 ::selection {
-    background-color: rgba(212, 175, 55, 0.3);
-    color: #F5F5F7;
+  background: rgba(207, 174, 70, 0.3);
+  color: var(--aureos-white);
 }
 
-/* Focus States */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS STATES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 *:focus-visible {
-    outline: 2px solid #D4AF37;
-    outline-offset: 2px;
+  outline: 2px solid var(--aureos-gold);
+  outline-offset: 2px;
 }
 
-/* Debug wrapper */
-@layer base {
-    [data-debug-wrapper="true"] {
-        display: contents !important;
-    }
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.text-aureos-gold { color: var(--aureos-gold); }
+.text-aureos-blue { color: var(--aureos-blue); }
+.text-aureos-bullish { color: var(--aureos-bullish); }
+.text-aureos-bearish { color: var(--aureos-bearish); }
+
+.bg-aureos-black { background-color: var(--aureos-black); }
+.bg-aureos-grey { background-color: var(--aureos-grey); }
+.bg-aureos-gold { background-color: var(--aureos-gold); }
+
+.border-aureos-gold { border-color: var(--aureos-gold); }
+.border-aureos-blue { border-color: var(--aureos-blue); }
+
+/* Gradient backgrounds */
+.bg-gradient-aureos {
+  background: linear-gradient(135deg, var(--aureos-black), var(--aureos-grey));
+}
+
+.bg-gradient-gold {
+  background: linear-gradient(135deg, var(--aureos-gold), var(--aureos-gold-dark));
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, var(--aureos-blue), #0090CC);
+}
+
+/* Text gradient */
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--aureos-gold-light), var(--aureos-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-blue {
+  background: linear-gradient(135deg, var(--aureos-blue-light), var(--aureos-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

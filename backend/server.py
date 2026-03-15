@@ -679,7 +679,7 @@ async def create_checkout(data: CheckoutRequest, request: Request, user: dict = 
 async def get_payment_status(session_id: str, user: dict = Depends(get_current_user)):
     try:
         api_key = os.environ.get('STRIPE_API_KEY')
-        host_url = "https://aureos-dashboard.preview.emergentagent.com"
+        host_url = "https://premium-fintech-13.preview.emergentagent.com"
         webhook_url = f"{host_url}/api/webhook/stripe"
         
         stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)

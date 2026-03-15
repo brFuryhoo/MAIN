@@ -9,12 +9,15 @@ import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import DashboardPage from "@/pages/DashboardPage";
+import NewAnalysisPage from "@/pages/NewAnalysisPage";
 import CopilotPage from "@/pages/CopilotPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import PricingPage from "@/pages/PricingPage";
 import SubscriptionSuccessPage from "@/pages/SubscriptionSuccessPage";
 import TutorialPage from "@/pages/TutorialPage";
 import SettingsPage from "@/pages/SettingsPage";
+import SignalsPage from "@/pages/SignalsPage";
+import PortfolioPage from "@/pages/PortfolioPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -106,8 +109,13 @@ const ProtectedRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="text-gold animate-pulse">Loading...</div>
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#CFAE46] to-[#A8893A] flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="text-black font-bold text-xl">A</span>
+          </div>
+          <p className="text-aureos-gold animate-pulse">Loading Aureos AI...</p>
+        </div>
       </div>
     );
   }
@@ -122,58 +130,40 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <div className="App min-h-screen bg-[#050505]">
+      <div className="App min-h-screen bg-[#0D0D0D]">
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/tutorial" element={<TutorialPage />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/copilot" 
-              element={
-                <ProtectedRoute>
-                  <CopilotPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/analytics" 
-              element={
-                <ProtectedRoute>
-                  <AnalyticsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute>
-                  <SettingsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/subscription/success" 
-              element={
-                <ProtectedRoute>
-                  <SubscriptionSuccessPage />
-                </ProtectedRoute>
-              } 
-            />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/analysis" element={<ProtectedRoute><NewAnalysisPage /></ProtectedRoute>} />
+            <Route path="/copilot" element={<ProtectedRoute><CopilotPage /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/signals" element={<ProtectedRoute><SignalsPage /></ProtectedRoute>} />
+            <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
+            <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
+            
+            {/* Catch all */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
-        <Toaster position="top-right" />
+        <Toaster 
+          position="top-right" 
+          toastOptions={{
+            style: {
+              background: '#161718',
+              border: '1px solid rgba(207, 174, 70, 0.2)',
+              color: '#F2F2F2',
+            },
+          }}
+        />
       </div>
     </AuthProvider>
   );

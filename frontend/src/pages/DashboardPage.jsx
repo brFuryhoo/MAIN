@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, API } from '@/App';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import AureosLayout from '@/components/layout/DashboardLayout';
+import VoiceCopilotWindow from '@/components/voice/VoiceCopilotWindow';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
   TrendingDown, 
+  Zap,
+  BarChart2,
+  Wallet,
   ArrowUpRight,
   ArrowDownRight,
-  Plus,
-  X,
   RefreshCw,
-  Eye,
-  Bitcoin,
+  Activity,
+  Users,
+  Bot,
+  Target,
+  Clock,
   DollarSign,
-  BarChart2
+  Bitcoin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import axios from 'axios';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
 
 const DashboardPage = () => {
   const { user, token } = useAuth();
@@ -33,107 +33,43 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [marketData, setMarketData] = useState({ stocks: [], crypto: [], forex: [] });
   const [overview, setOverview] = useState(null);
-  const [watchlist, setWatchlist] = useState([]);
   const [portfolio, setPortfolio] = useState({ positions: [], total_value: 0, total_pnl: 0 });
-  const [selectedAsset, setSelectedAsset] = useState(null);
-  const [chartData, setChartData] = useState([]);
-  const [addWatchlistOpen, setAddWatchlistOpen] = useState(false);
-  const [newWatchlistItem, setNewWatchlistItem] = useState({ symbol: '', asset_type: 'stock', name: '' });
+  const [recentSignals, setRecentSignals] = useState([]);
 
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
     fetchAllData();
+    loadRecentSignals();
   }, []);
 
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [stocksRes, cryptoRes, forexRes, overviewRes, watchlistRes, portfolioRes] = await Promise.all([
+      const [stocksRes, cryptoRes, overviewRes, portfolioRes] = await Promise.all([
         axios.get(`${API}/market/stocks`),
         axios.get(`${API}/market/crypto`),
-        axios.get(`${API}/market/forex`),
         axios.get(`${API}/market/overview`),
-        axios.get(`${API}/watchlist`, { headers }),
         axios.get(`${API}/portfolio`, { headers })
       ]);
       
       setMarketData({
         stocks: stocksRes.data.stocks,
         crypto: cryptoRes.data.crypto,
-        forex: forexRes.data.forex
+        forex: []
       });
       setOverview(overviewRes.data);
-      setWatchlist(watchlistRes.data.watchlist);
       setPortfolio(portfolioRes.data);
-      
-      // Select first stock for chart
-      if (stocksRes.data.stocks.length > 0) {
-        handleSelectAsset(stocksRes.data.stocks[0].symbol, 'stock');
-      }
     } catch (error) {
-      console.error('Failed to fetch data:', error);
       toast.error('Failed to load market data');
     }
     setLoading(false);
   };
 
-  const handleSelectAsset = async (symbol, type) => {
-    try {
-      let response;
-      if (type === 'stock') {
-        response = await axios.get(`${API}/market/stocks/${symbol}`);
-      } else if (type === 'crypto') {
-        response = await axios.get(`${API}/market/crypto/${symbol}`);
-      }
-      
-      if (response?.data?.chart_data) {
-        setSelectedAsset({ 
-          symbol, 
-          type, 
-          ...response.data,
-          price: response.data.price || response.data.current_price 
-        });
-        setChartData(response.data.chart_data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch asset details');
-    }
-  };
-
-  const handleAddToWatchlist = async () => {
-    if (!newWatchlistItem.symbol) {
-      toast.error('Please enter a symbol');
-      return;
-    }
-    
-    try {
-      await axios.post(`${API}/watchlist/add`, {
-        symbol: newWatchlistItem.symbol.toUpperCase(),
-        asset_type: newWatchlistItem.asset_type,
-        name: newWatchlistItem.name || newWatchlistItem.symbol.toUpperCase()
-      }, { headers });
-      
-      toast.success('Added to watchlist');
-      setAddWatchlistOpen(false);
-      setNewWatchlistItem({ symbol: '', asset_type: 'stock', name: '' });
-      
-      // Refresh watchlist
-      const res = await axios.get(`${API}/watchlist`, { headers });
-      setWatchlist(res.data.watchlist);
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to add to watchlist');
-    }
-  };
-
-  const handleRemoveFromWatchlist = async (symbol) => {
-    try {
-      await axios.delete(`${API}/watchlist/${symbol}`, { headers });
-      toast.success('Removed from watchlist');
-      const res = await axios.get(`${API}/watchlist`, { headers });
-      setWatchlist(res.data.watchlist);
-    } catch (error) {
-      toast.error('Failed to remove from watchlist');
+  const loadRecentSignals = () => {
+    const saved = localStorage.getItem('aureos_recent_analyses');
+    if (saved) {
+      setRecentSignals(JSON.parse(saved).slice(0, 4));
     }
   };
 
@@ -150,441 +86,403 @@ const DashboardPage = () => {
     return `${sign}${change.toFixed(2)}%`;
   };
 
+  // Generate mock chart data
+  const generateChartData = () => {
+    const data = [];
+    let value = 10000;
+    for (let i = 0; i < 30; i++) {
+      value *= (1 + (Math.random() - 0.48) * 0.02);
+      data.push({
+        date: new Date(Date.now() - (30 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        value: Math.round(value)
+      });
+    }
+    return data;
+  };
+
+  const chartData = generateChartData();
+
   if (loading) {
     return (
-      <DashboardLayout>
+      <AureosLayout>
         <div className="flex items-center justify-center h-[60vh]">
-          <RefreshCw className="animate-spin text-[#D4AF37]" size={32} />
+          <div className="text-center">
+            <RefreshCw className="animate-spin text-aureos-gold mx-auto mb-4" size={40} />
+            <p className="text-[#888]">Loading dashboard...</p>
+          </div>
         </div>
-      </DashboardLayout>
+      </AureosLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6" data-testid="dashboard-page">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <AureosLayout>
+      <div className="space-y-8" data-testid="dashboard-page">
+        {/* Welcome Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="font-['Space_Grotesk'] text-2xl md:text-3xl font-bold">
-              Welcome back, {user?.full_name?.split(' ')[0]}
-            </h1>
-            <p className="text-[#888] mt-1">Market Overview</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={fetchAllData}
-              className="border-[#333] hover:border-[#D4AF37]"
-              data-testid="refresh-data-btn"
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold font-['Poppins']"
             >
-              <RefreshCw size={16} className="mr-2" />
-              Refresh
-            </Button>
-            <Button 
-              onClick={() => navigate('/copilot')}
-              className="bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none"
-              data-testid="open-copilot-btn"
-            >
-              Ask AI Copilot
-            </Button>
+              Welcome back, <span className="text-gradient-gold">{user?.full_name?.split(' ')[0]}</span>
+            </motion.h1>
+            <p className="text-[#888] mt-1">Here's your trading intelligence overview</p>
           </div>
+          <Button 
+            onClick={() => navigate('/analysis')}
+            className="aureos-btn-gold"
+            data-testid="start-analysis-btn"
+          >
+            <Zap size={18} className="mr-2" />
+            New Analysis
+          </Button>
         </div>
 
-        {/* Market Indices */}
-        {overview && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {overview.indices.map((index, i) => (
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { 
+              label: 'Portfolio Value', 
+              value: formatPrice(portfolio.total_value || 12500),
+              change: portfolio.total_pnl_percent || 5.2,
+              icon: Wallet,
+              color: '#CFAE46'
+            },
+            { 
+              label: 'Total P&L', 
+              value: formatPrice(portfolio.total_pnl || 650),
+              change: portfolio.total_pnl_percent || 5.2,
+              icon: TrendingUp,
+              color: '#00E676'
+            },
+            { 
+              label: 'Win Rate', 
+              value: '67%',
+              change: 3.5,
+              icon: Target,
+              color: '#00B4FF'
+            },
+            { 
+              label: 'Analyses Today', 
+              value: recentSignals.length.toString(),
+              change: null,
+              icon: Activity,
+              color: '#9C27B0'
+            },
+          ].map((stat, index) => {
+            const Icon = stat.icon;
+            return (
               <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <Card className="bg-[#0F0F0F] border-[#1A1A1A] hover:border-[#D4AF37]/30 transition-colors">
-                  <CardContent className="p-4">
-                    <p className="text-xs text-[#888] uppercase tracking-wider">{index.name}</p>
-                    <p className="font-['JetBrains_Mono'] text-xl font-semibold mt-1">
-                      {index.value.toLocaleString()}
-                    </p>
-                    <div className={`flex items-center mt-1 ${index.change_percent >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                      {index.change_percent >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                      <span className="text-sm ml-1">{formatChange(index.change_percent)}</span>
+                <div className="aureos-card p-5 h-full">
+                  <div className="flex items-start justify-between mb-3">
+                    <div 
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${stat.color}15` }}
+                    >
+                      <Icon size={20} style={{ color: stat.color }} />
                     </div>
-                  </CardContent>
-                </Card>
+                    {stat.change !== null && (
+                      <span className={`text-xs font-semibold flex items-center gap-1 ${
+                        stat.change >= 0 ? 'text-[#00E676]' : 'text-[#FF5252]'
+                      }`}>
+                        {stat.change >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                        {Math.abs(stat.change)}%
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#888] uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: stat.color }}>
+                    {stat.value}
+                  </p>
+                </div>
               </motion.div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Chart Section */}
-          <div className="lg:col-span-8">
-            <Card className="bg-[#0F0F0F] border-[#1A1A1A]">
-              <CardHeader className="border-b border-[#1A1A1A] pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="font-['Space_Grotesk'] text-lg">
-                      {selectedAsset?.symbol || 'Select Asset'}
-                    </CardTitle>
-                    {selectedAsset && (
-                      <p className="text-sm text-[#888] mt-1">
-                        {selectedAsset.name}
-                      </p>
-                    )}
-                  </div>
-                  {selectedAsset && (
-                    <div className="text-right">
-                      <p className="font-['JetBrains_Mono'] text-2xl font-bold">
-                        {formatPrice(selectedAsset.price)}
-                      </p>
-                      <p className={`text-sm ${selectedAsset.change_percent >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                        {formatChange(selectedAsset.change_percent || selectedAsset.change_24h)}
-                      </p>
-                    </div>
-                  )}
+          {/* Portfolio Chart */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-8"
+          >
+            <div className="aureos-card p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-semibold">Portfolio Performance</h2>
+                  <p className="text-sm text-[#888]">Last 30 days</p>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="h-[300px] p-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                      <defs>
-                        <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis 
-                        dataKey="timestamp" 
-                        tick={{ fill: '#888', fontSize: 10 }}
-                        tickFormatter={(val) => new Date(val).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        axisLine={{ stroke: '#262626' }}
-                        tickLine={false}
-                      />
-                      <YAxis 
-                        tick={{ fill: '#888', fontSize: 10 }}
-                        domain={['dataMin - 1', 'dataMax + 1']}
-                        axisLine={{ stroke: '#262626' }}
-                        tickLine={false}
-                        tickFormatter={(val) => `$${val.toFixed(0)}`}
-                      />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#0F0F0F', 
-                          border: '1px solid #262626',
-                          borderRadius: '0'
-                        }}
-                        labelFormatter={(val) => new Date(val).toLocaleString()}
-                        formatter={(val) => [`$${val.toFixed(2)}`, 'Price']}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="close" 
-                        stroke="#D4AF37" 
-                        strokeWidth={2}
-                        fill="url(#colorPrice)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div className="flex gap-2">
+                  {['1D', '1W', '1M', '3M'].map((period) => (
+                    <button
+                      key={period}
+                      className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
+                        period === '1M' 
+                          ? 'bg-[#CFAE46]/20 text-aureos-gold' 
+                          : 'text-[#888] hover:bg-white/5'
+                      }`}
+                    >
+                      {period}
+                    </button>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#CFAE46" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#CFAE46" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fill: '#888', fontSize: 10 }}
+                      axisLine={{ stroke: '#262626' }}
+                      tickLine={false}
+                    />
+                    <YAxis 
+                      tick={{ fill: '#888', fontSize: 10 }}
+                      axisLine={{ stroke: '#262626' }}
+                      tickLine={false}
+                      tickFormatter={(val) => `$${(val/1000).toFixed(1)}k`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#161718', 
+                        border: '1px solid rgba(207,174,70,0.2)',
+                        borderRadius: '12px'
+                      }}
+                      formatter={(val) => [`$${val.toLocaleString()}`, 'Value']}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="#CFAE46" 
+                      strokeWidth={2}
+                      fill="url(#goldGradient)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </motion.div>
 
-            {/* Market Tabs */}
-            <Card className="bg-[#0F0F0F] border-[#1A1A1A] mt-6">
-              <Tabs defaultValue="stocks">
-                <CardHeader className="border-b border-[#1A1A1A] pb-0">
-                  <TabsList className="bg-transparent border-b-0">
-                    <TabsTrigger 
-                      value="stocks" 
-                      className="data-[state=active]:bg-transparent data-[state=active]:text-[#D4AF37] data-[state=active]:border-b-2 data-[state=active]:border-[#D4AF37] rounded-none"
+          {/* AI Signals */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-4"
+          >
+            <div className="aureos-card p-6 h-full">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Zap className="text-aureos-gold" size={18} />
+                  Recent Signals
+                </h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/signals')}
+                  className="text-aureos-gold hover:bg-[#CFAE46]/10"
+                >
+                  View All
+                </Button>
+              </div>
+              
+              {recentSignals.length > 0 ? (
+                <div className="space-y-3">
+                  {recentSignals.map((signal, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`p-4 rounded-xl border ${
+                        signal.signal.direction === 'BUY' 
+                          ? 'bg-[#00E676]/5 border-[#00E676]/30' 
+                          : 'bg-[#FF5252]/5 border-[#FF5252]/30'
+                      }`}
                     >
-                      <DollarSign size={16} className="mr-2" />
-                      Stocks
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="crypto"
-                      className="data-[state=active]:bg-transparent data-[state=active]:text-[#D4AF37] data-[state=active]:border-b-2 data-[state=active]:border-[#D4AF37] rounded-none"
-                    >
-                      <Bitcoin size={16} className="mr-2" />
-                      Crypto
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="forex"
-                      className="data-[state=active]:bg-transparent data-[state=active]:text-[#D4AF37] data-[state=active]:border-b-2 data-[state=active]:border-[#D4AF37] rounded-none"
-                    >
-                      <BarChart2 size={16} className="mr-2" />
-                      Forex
-                    </TabsTrigger>
-                  </TabsList>
-                </CardHeader>
-                
-                <CardContent className="p-0">
-                  <TabsContent value="stocks" className="m-0">
-                    <ScrollArea className="h-[300px]">
-                      <div className="divide-y divide-[#1A1A1A]">
-                        {marketData.stocks.map((stock, i) => (
-                          <div 
-                            key={i}
-                            onClick={() => handleSelectAsset(stock.symbol, 'stock')}
-                            className="flex items-center justify-between p-4 hover:bg-[#1A1A1A]/50 cursor-pointer transition-colors"
-                            data-testid={`stock-row-${stock.symbol}`}
-                          >
-                            <div>
-                              <p className="font-semibold">{stock.symbol}</p>
-                              <p className="text-xs text-[#888]">{stock.name}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-['JetBrains_Mono']">{formatPrice(stock.price)}</p>
-                              <p className={`text-sm ${stock.change_percent >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                                {formatChange(stock.change_percent)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                  
-                  <TabsContent value="crypto" className="m-0">
-                    <ScrollArea className="h-[300px]">
-                      <div className="divide-y divide-[#1A1A1A]">
-                        {marketData.crypto.map((coin, i) => (
-                          <div 
-                            key={i}
-                            onClick={() => handleSelectAsset(coin.id, 'crypto')}
-                            className="flex items-center justify-between p-4 hover:bg-[#1A1A1A]/50 cursor-pointer transition-colors"
-                            data-testid={`crypto-row-${coin.id}`}
-                          >
-                            <div>
-                              <p className="font-semibold">{coin.symbol}</p>
-                              <p className="text-xs text-[#888]">{coin.name}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-['JetBrains_Mono']">{formatPrice(coin.price)}</p>
-                              <p className={`text-sm ${coin.change_24h >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                                {formatChange(coin.change_24h)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                  
-                  <TabsContent value="forex" className="m-0">
-                    <ScrollArea className="h-[300px]">
-                      <div className="divide-y divide-[#1A1A1A]">
-                        {marketData.forex.map((pair, i) => (
-                          <div 
-                            key={i}
-                            className="flex items-center justify-between p-4 hover:bg-[#1A1A1A]/50 cursor-pointer transition-colors"
-                            data-testid={`forex-row-${pair.pair}`}
-                          >
-                            <div>
-                              <p className="font-semibold">{pair.pair}</p>
-                              <p className="text-xs text-[#888]">{pair.name}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-['JetBrains_Mono']">{pair.price.toFixed(4)}</p>
-                              <p className={`text-sm ${pair.change_percent >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                                {formatChange(pair.change_percent)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                </CardContent>
-              </Tabs>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Portfolio Summary */}
-            <Card className="bg-[#0F0F0F] border-[#1A1A1A]">
-              <CardHeader className="border-b border-[#1A1A1A]">
-                <CardTitle className="font-['Space_Grotesk'] text-lg">Portfolio</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="text-center py-4">
-                  <p className="text-xs text-[#888] uppercase tracking-wider">Total Value</p>
-                  <p className="font-['JetBrains_Mono'] text-3xl font-bold mt-2">
-                    {formatPrice(portfolio.total_value)}
-                  </p>
-                  <p className={`text-sm mt-1 ${portfolio.total_pnl >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                    {portfolio.total_pnl >= 0 ? '+' : ''}{formatPrice(portfolio.total_pnl)} ({portfolio.total_pnl_percent?.toFixed(2)}%)
-                  </p>
-                </div>
-                
-                {portfolio.positions.length > 0 ? (
-                  <div className="space-y-3 mt-4">
-                    {portfolio.positions.slice(0, 4).map((pos, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm">
-                        <span>{pos.symbol}</span>
-                        <span className={pos.pnl >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}>
-                          {formatChange(pos.pnl_percent)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-[#888] text-sm mt-4">No positions yet</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Watchlist */}
-            <Card className="bg-[#0F0F0F] border-[#1A1A1A]">
-              <CardHeader className="border-b border-[#1A1A1A] flex flex-row items-center justify-between">
-                <CardTitle className="font-['Space_Grotesk'] text-lg">Watchlist</CardTitle>
-                <Dialog open={addWatchlistOpen} onOpenChange={setAddWatchlistOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" data-testid="add-watchlist-btn">
-                      <Plus size={16} />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-[#0F0F0F] border-[#1A1A1A]">
-                    <DialogHeader>
-                      <DialogTitle>Add to Watchlist</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 mt-4">
-                      <div>
-                        <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Symbol</label>
-                        <Input
-                          value={newWatchlistItem.symbol}
-                          onChange={(e) => setNewWatchlistItem({...newWatchlistItem, symbol: e.target.value.toUpperCase()})}
-                          placeholder="e.g., AAPL"
-                          className="bg-[#0A0A0A] border-[#333] rounded-none"
-                          data-testid="watchlist-symbol-input"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Type</label>
-                        <Select 
-                          value={newWatchlistItem.asset_type} 
-                          onValueChange={(val) => setNewWatchlistItem({...newWatchlistItem, asset_type: val})}
-                        >
-                          <SelectTrigger className="bg-[#0A0A0A] border-[#333] rounded-none" data-testid="watchlist-type-select">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="stock">Stock</SelectItem>
-                            <SelectItem value="crypto">Crypto</SelectItem>
-                            <SelectItem value="forex">Forex</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Name (Optional)</label>
-                        <Input
-                          value={newWatchlistItem.name}
-                          onChange={(e) => setNewWatchlistItem({...newWatchlistItem, name: e.target.value})}
-                          placeholder="e.g., Apple Inc."
-                          className="bg-[#0A0A0A] border-[#333] rounded-none"
-                          data-testid="watchlist-name-input"
-                        />
-                      </div>
-                      <Button 
-                        onClick={handleAddToWatchlist}
-                        className="w-full bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none"
-                        data-testid="confirm-add-watchlist-btn"
-                      >
-                        Add to Watchlist
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[250px]">
-                  {watchlist.length > 0 ? (
-                    <div className="divide-y divide-[#1A1A1A]">
-                      {watchlist.map((item, i) => (
-                        <div 
-                          key={i}
-                          className="flex items-center justify-between p-4 group"
-                        >
-                          <div 
-                            className="flex-1 cursor-pointer"
-                            onClick={() => handleSelectAsset(item.symbol, item.asset_type)}
-                          >
-                            <p className="font-semibold">{item.symbol}</p>
-                            <p className="text-xs text-[#888]">{item.name}</p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <p className="font-['JetBrains_Mono'] text-sm">{formatPrice(item.price)}</p>
-                              <p className={`text-xs ${item.change_percent >= 0 ? 'text-[#00E096]' : 'text-[#FF3B30]'}`}>
-                                {formatChange(item.change_percent)}
-                              </p>
-                            </div>
-                            <button 
-                              onClick={() => handleRemoveFromWatchlist(item.symbol)}
-                              className="opacity-0 group-hover:opacity-100 text-[#888] hover:text-[#FF3B30] transition-opacity"
-                              data-testid={`remove-watchlist-${item.symbol}-btn`}
-                            >
-                              <X size={14} />
-                            </button>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {signal.signal.direction === 'BUY' 
+                            ? <TrendingUp className="text-[#00E676]" size={20} />
+                            : <TrendingDown className="text-[#FF5252]" size={20} />
+                          }
+                          <div>
+                            <p className="font-semibold">{signal.asset.symbol}</p>
+                            <p className="text-xs text-[#888]">{signal.timeframe}</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                      <Eye className="text-[#888] mb-3" size={24} />
-                      <p className="text-sm text-[#888]">Your watchlist is empty</p>
-                      <p className="text-xs text-[#888] mt-1">Add assets to track them here</p>
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                        <div className="text-right">
+                          <p className={`font-bold ${
+                            signal.signal.direction === 'BUY' ? 'text-[#00E676]' : 'text-[#FF5252]'
+                          }`}>
+                            {signal.signal.direction}
+                          </p>
+                          <p className="text-xs text-[#888]">
+                            {signal.signal.buyProbability > 50 
+                              ? signal.signal.buyProbability 
+                              : signal.signal.sellProbability}% conf
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Bot className="mx-auto mb-3 text-[#888]" size={40} />
+                  <p className="text-[#888]">No signals yet</p>
+                  <Button 
+                    onClick={() => navigate('/analysis')}
+                    className="mt-4 aureos-btn-blue"
+                  >
+                    Start Analysis
+                  </Button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
 
-            {/* Market Sentiment */}
-            {overview && (
-              <Card className="bg-[#0F0F0F] border-[#1A1A1A]">
-                <CardHeader className="border-b border-[#1A1A1A]">
-                  <CardTitle className="font-['Space_Grotesk'] text-lg">Market Sentiment</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-[#888]">Fear & Greed Index</span>
-                    <span className="font-['JetBrains_Mono'] font-bold text-[#D4AF37]">
-                      {overview.fear_greed_index}
-                    </span>
+        {/* Market Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Top Stocks */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="aureos-card p-6"
+          >
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <DollarSign className="text-[#00B4FF]" size={18} />
+              Top Stocks
+            </h3>
+            <div className="space-y-3">
+              {marketData.stocks.slice(0, 4).map((stock, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer">
+                  <div>
+                    <p className="font-semibold">{stock.symbol}</p>
+                    <p className="text-xs text-[#888]">{stock.name?.substring(0, 15)}</p>
                   </div>
-                  <div className="h-2 bg-gradient-to-r from-[#FF3B30] via-[#FFD700] to-[#00E096] rounded-full">
-                    <div 
-                      className="h-full w-2 bg-white rounded-full relative"
-                      style={{ marginLeft: `${overview.fear_greed_index}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2 text-xs text-[#888]">
-                    <span>Extreme Fear</span>
-                    <span>Extreme Greed</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-[#0A0A0A] border border-[#1A1A1A]">
-                    <p className="text-xs text-[#888] uppercase tracking-wider mb-1">Current Sentiment</p>
-                    <p className={`font-semibold capitalize ${
-                      overview.market_sentiment === 'bullish' ? 'text-[#00E096]' : 
-                      overview.market_sentiment === 'bearish' ? 'text-[#FF3B30]' : 'text-[#888]'
-                    }`}>
-                      {overview.market_sentiment}
+                  <div className="text-right">
+                    <p className="font-mono">{formatPrice(stock.price)}</p>
+                    <p className={`text-xs ${stock.change_percent >= 0 ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
+                      {formatChange(stock.change_percent)}
                     </p>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Top Crypto */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="aureos-card p-6"
+          >
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Bitcoin className="text-aureos-gold" size={18} />
+              Top Crypto
+            </h3>
+            <div className="space-y-3">
+              {marketData.crypto.slice(0, 4).map((coin, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer">
+                  <div>
+                    <p className="font-semibold">{coin.symbol}</p>
+                    <p className="text-xs text-[#888]">{coin.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono">{formatPrice(coin.price)}</p>
+                    <p className={`text-xs ${coin.change_24h >= 0 ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
+                      {formatChange(coin.change_24h)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Market Indices */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="aureos-card p-6"
+          >
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <BarChart2 className="text-[#9C27B0]" size={18} />
+              Market Indices
+            </h3>
+            <div className="space-y-3">
+              {overview?.indices?.slice(0, 4).map((index, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                  <div>
+                    <p className="font-semibold">{index.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono">{index.value.toLocaleString()}</p>
+                    <p className={`text-xs ${index.change_percent >= 0 ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
+                      {formatChange(index.change_percent)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="aureos-glass p-6"
+        >
+          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'New Analysis', icon: Zap, path: '/analysis', color: '#CFAE46' },
+              { label: 'AI Copilot', icon: Bot, path: '/copilot', color: '#00B4FF' },
+              { label: 'View Portfolio', icon: Wallet, path: '/portfolio', color: '#00E676' },
+              { label: 'AI Signals', icon: TrendingUp, path: '/signals', color: '#9C27B0' },
+            ].map((action) => {
+              const Icon = action.icon;
+              return (
+                <Button
+                  key={action.label}
+                  onClick={() => navigate(action.path)}
+                  className="h-auto py-6 flex flex-col items-center gap-3 bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/20"
+                >
+                  <Icon size={24} style={{ color: action.color }} />
+                  <span>{action.label}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Voice Copilot */}
+        <VoiceCopilotWindow 
+          token={token}
+          onAnalysisRequest={(asset) => navigate('/analysis')}
+        />
       </div>
-    </DashboardLayout>
+    </AureosLayout>
   );
 };
 
