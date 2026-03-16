@@ -1,7 +1,7 @@
 # Aureos AI - Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is an advanced AI-driven financial intelligence platform operated by JARVIS (Central Intelligence Core). The platform aims to democratize institutional-grade market analysis for everyday traders, covering EVERY asset available globally.
+Aureos AI is an advanced AI-driven financial intelligence platform operated by JARVIS (Central Intelligence Core). The platform aims to democratize institutional-grade market analysis for everyday traders, covering EVERY asset available globally. JARVIS solves the financial problem of the planet through autonomous quantitative intelligence.
 
 ## Architecture
 - **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Lightweight Charts v5
@@ -10,102 +10,95 @@ Aureos AI is an advanced AI-driven financial intelligence platform operated by J
 - **Auth:** JWT
 - **Payments:** Stripe (3-tier subscription)
 - **AI:** GPT-5.2 via Emergent LLM key (JARVIS Copilot)
-- **Data Providers:**
-  - **CoinGecko** — Crypto (primary, free)
-  - **Twelve Data** — Stocks, Forex, Commodities, ETFs globally (primary)
-  - **Polygon.io** — US Stocks historical candles (secondary)
-  - **Alpha Vantage** — Stocks, Forex (fallback)
-  - **Generated candles** — Fallback when real candles < 50
+- **Data Providers:** CoinGecko, Twelve Data, Polygon.io, Alpha Vantage + smart fallback
 
 ## Backend Module Architecture
 ```
 /app/backend/
-├── server.py                       # Main FastAPI app, auth, stripe, voice
+├── server.py
 ├── routes/
-│   ├── analysis.py                 # POST /api/analysis/start (11 steps), GET /api/analysis/history
-│   ├── assets.py                   # GET /api/assets/search (global multi-provider)
-│   ├── jarvis.py                   # POST /api/jarvis/chat, POST /api/jarvis/explain-report
-│   └── watchlist.py                # GET/POST /api/watchlist/* (CRUD + scan + alerts)
+│   ├── analysis.py        # 11-step pipeline + history (enriched for quant)
+│   ├── assets.py          # Global multi-provider search
+│   ├── jarvis.py          # JARVIS AI copilot
+│   ├── watchlist.py       # Watchlist CRUD + scan + alerts
+│   └── quant_lab.py       # Autonomous Quant Lab (8 endpoints)
 └── services/
-    ├── market_data.py              # Unified Market Data Adapter
-    ├── technical_engine.py         # RSI, MACD, MAs, BBands, ATR, S/R
-    ├── market_structure.py         # HH/HL/LH/LL, consolidation, breakout
-    ├── liquidity_mapper.py         # Volume clusters, volatility zones
-    ├── monte_carlo.py              # 5000 simulation Monte Carlo
-    ├── risk_engine.py              # VaR, drawdown, position sizing
-    ├── causality_engine.py         # Market explanation engine
-    ├── probability_engine.py       # Combined BUY/SELL/HOLD signals
-    ├── report_generator.py         # Executive report generation
-    ├── regime_detector.py          # Market regime classification
-    └── manipulation_detector.py    # Manipulation pattern detection
+    ├── market_data.py, technical_engine.py, market_structure.py
+    ├── liquidity_mapper.py, monte_carlo.py, risk_engine.py
+    ├── causality_engine.py, probability_engine.py, report_generator.py
+    ├── regime_detector.py, manipulation_detector.py
+    └── quant_lab.py       # Quant engine: backtest, optimizer, patterns
 ```
 
-## Phases Completed
+## Completed Phases
 
 ### Phase 1 - Foundation (Complete)
-- JWT Authentication, Stripe subscriptions, premium dark/gold UI, MongoDB
+- JWT Auth, Stripe subscriptions, premium dark/gold UI, MongoDB
 
 ### Phase 2 - Analysis Pipeline (Complete)
-- 9-Step analysis pipeline, Global Asset Selector, Charts, Executive Report
+- 11-step analysis engine, Global Asset Selector, Charts, Executive Report
 
-### Phase 3 P0 - JARVIS Intelligence Layer (Complete)
-- JARVIS AI Copilot (GPT-5.2), Analysis History (MongoDB), Regime Detection, Manipulation Detection
-- Pipeline upgraded to 11 steps
+### Phase 3 - JARVIS Intelligence Layer (Complete)
+- AI Copilot (GPT-5.2), Analysis History, Regime Detection, Manipulation Detection
 
 ### Phase 4 - Global Market Data (Complete)
-- Twelve Data, Polygon.io, Alpha Vantage integrations
-- Multi-provider parallel search, Global exchange coverage
-- Smart candle fallback, In-memory cache
+- Twelve Data, Polygon.io, Alpha Vantage, CoinGecko integrations
 
-### Phase 5 - Watchlist Automation (Complete - March 16, 2026)
-- Full CRUD: Add, remove, list watchlist assets
-- JARVIS Scan: Automated analysis of all watchlist assets
-- Signal change & price move alerts with severity levels
-- Legacy duplicate routes cleaned from server.py
-- Testing: 100% pass rate (13/13 backend, all frontend flows)
+### Phase 5 - Watchlist Automation (Complete)
+- Full CRUD, JARVIS Scan, Signal alerts, Frontend page
 
-### Bug Fixes (March 16, 2026)
-- Fixed Select Asset dropdown invisible: overflow:hidden clipping + transparent glass background
+### Phase 6 - Autonomous Quant Lab / AI Quantica (Complete - March 16, 2026)
+- **Backend Service** (`services/quant_lab.py`):
+  - 11 indicator registry (RSI, MACD, SMA, Bollinger, Volume, Structure, Monte Carlo, Risk, Regime, Liquidity, ATR)
+  - Signal extractor: normalized [-1, 1] signals from analysis data
+  - Backtester: evaluates weighted signals against historical outcomes
+  - Evolutionary optimizer: 300-iteration weight mutation strategy
+  - Pattern discovery: pairwise indicator combination analysis
+  - Performance tracker: signal distribution, regime stats, model metrics
+- **API Routes** (`routes/quant_lab.py`): 8 endpoints
+  - GET /api/quant/indicators, /performance, /rankings, /patterns, /experiments
+  - POST /api/quant/backtest, /optimize, /reset-weights
+- **Frontend** (`pages/QuantLabPage.jsx`): 5-tab dashboard
+  - Overview: stat cards, signal distribution, model weights with color-coded bars
+  - Rankings: indicators sorted by accuracy with category badges
+  - Backtest: run simulation, view accuracy/win_rate/sharpe/trades
+  - Patterns: discover high-probability indicator combinations
+  - Log: experiment history + IP-protected decision logs
+- **Integration**: Analysis pipeline enriched with quant fields for history
+- **Testing**: 100% pass rate (35/35 backend, all frontend flows)
+- **DB Collections**: quant_experiments, quant_decision_logs, quant_weights
 
 ## Key API Endpoints
-- `POST /api/auth/register` / `POST /api/auth/login` - Authentication
-- `GET /api/assets/search?q=` - Global multi-provider asset search
-- `POST /api/analysis/start` - 11-step analysis pipeline
-- `GET /api/analysis/history` - User's analysis history
-- `POST /api/jarvis/chat` - JARVIS conversational intelligence
-- `POST /api/jarvis/explain-report` - Report explanation
-- `GET /api/watchlist/` - Get user's watchlist with enriched data
-- `POST /api/watchlist/add` - Add asset to watchlist
-- `POST /api/watchlist/remove` - Remove asset from watchlist
-- `POST /api/watchlist/scan` - JARVIS scan all watchlist assets
-- `POST /api/watchlist/alerts/mark-read` - Mark alerts as read
-- `POST /api/stripe/create-checkout-session` - Stripe checkout
+- Auth: POST /api/auth/register, /api/auth/login
+- Assets: GET /api/assets/search?q=
+- Analysis: POST /api/analysis/start, GET /api/analysis/history
+- JARVIS: POST /api/jarvis/chat, /api/jarvis/explain-report
+- Watchlist: GET/POST /api/watchlist/*, /api/watchlist/scan, /alerts/mark-read
+- Quant Lab: GET /api/quant/indicators, /performance, /rankings, /patterns, /experiments
+- Quant Lab: POST /api/quant/backtest, /optimize, /reset-weights
+- Stripe: POST /api/stripe/create-checkout-session
 
 ## DB Collections
-- **users**, **subscriptions**, **analysis_history**, **jarvis_conversations**
-- **watchlist**, **watchlist_alerts**
+users, subscriptions, analysis_history, jarvis_conversations,
+watchlist, watchlist_alerts, quant_experiments, quant_decision_logs, quant_weights
 
 ## Prioritized Backlog
 
 ### P1 (Next)
-- Autonomous Market Scanner - Background scan for high-probability opportunities
-- WebSocket Real-Time Updates - Live data streaming to dashboard
+- Autonomous Market Scanner - Background service scanning for opportunities
+- WebSocket Real-Time Updates - Live data push to dashboard
 
 ### P2
 - Global Market Intelligence Map - Visual capital flows, liquidity zones
-- Autonomous Quant Lab - Self-improving indicator discovery
-- Voice Interface - Whisper STT + TTS for JARVIS narration
+- Voice Interface (Whisper STT + TTS) for JARVIS
 - PDF Export for executive reports
 
 ### Future
-- Multi-agent AI system (Technical/Quant/Macro/Sentiment/Liquidity agents)
-- On-chain data (Glassnode, CryptoQuant), Macro data (FRED, World Bank)
-- Historical backtesting, Paper trading, Google OAuth
-- Market Intelligence Graph (cross-asset correlation)
+- Multi-agent AI system (Technical/Quant/Macro/Sentiment agents)
+- On-chain data (Glassnode), Macro data (FRED, World Bank)
+- Historical backtesting with real price validation
+- Paper trading, Google OAuth
 - Kafka/Redis/TimescaleDB scaling
 
 ## Test Credentials
 - Email: test@aureos.com / Password: Test1234!
-
-## Provider API Keys (in backend/.env)
-- TWELVE_DATA_KEY, POLYGON_KEY, ALPHA_VANTAGE_KEY, EMERGENT_LLM_KEY
