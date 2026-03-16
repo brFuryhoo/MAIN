@@ -21,7 +21,9 @@ import {
   Eye,
   Brain,
   Radar,
-  Globe
+  Globe,
+  Gauge,
+  Banknote
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,12 +33,12 @@ const navItems = [
   { path: '/analysis', label: 'New Analysis', icon: Zap },
   { path: '/scanner', label: 'Scanner', icon: Radar },
   { path: '/intelligence', label: 'Intel Map', icon: Globe },
+  { path: '/sentiment', label: 'Sentiment', icon: Gauge },
   { path: '/watchlist', label: 'Watchlist', icon: Eye },
   { path: '/quant-lab', label: 'Quant Lab', icon: Brain },
-  { path: '/signals', label: 'AI Signals', icon: TrendingUp },
+  { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
   { path: '/portfolio', label: 'Portfolio', icon: Wallet },
   { path: '/copilot', label: 'AI Copilot', icon: Bot },
-  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 

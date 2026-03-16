@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -22,6 +22,8 @@ import WatchlistPage from "@/pages/WatchlistPage";
 import QuantLabPage from "@/pages/QuantLabPage";
 import ScannerPage from "@/pages/ScannerPage";
 import IntelMapPage from "@/pages/IntelMapPage";
+import SentimentPage from "@/pages/SentimentPage";
+import PaperTradingPage from "@/pages/PaperTradingPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -44,6 +46,12 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
+      // CRITICAL: If returning from OAuth callback, skip the /me check.
+      // AuthCallback will exchange the session_id and establish the session first.
+      if (window.location.hash?.includes('session_id=')) {
+        setLoading(false);
+        return;
+      }
       const storedToken = localStorage.getItem('aureos_token');
       if (storedToken) {
         try {
@@ -100,8 +108,28 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = () => {
+    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    const redirectUrl = window.location.origin + '/dashboard';
+    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  };
+
+  const handleGoogleCallback = async (sessionId) => {
+    try {
+      const response = await axios.post(`${API}/auth/google-session`, { session_id: sessionId });
+      const { access_token, user: userData } = response.data;
+      localStorage.setItem('aureos_token', access_token);
+      setToken(access_token);
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('Google auth failed:', error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, refreshUser, loginWithGoogle, handleGoogleCallback }}>
       {children}
     </AuthContext.Provider>
   );
@@ -131,36 +159,82 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Auth Callback for Google OAuth
+const AuthCallback = () => {
+  const { handleGoogleCallback } = useAuth();
+  const navigate = useNavigate();
+  const hasProcessed = React.useRef(false);
+
+  useEffect(() => {
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
+    const hash = window.location.hash;
+    const sessionId = new URLSearchParams(hash.substring(1)).get('session_id');
+    if (sessionId) {
+      handleGoogleCallback(sessionId)
+        .then(() => { window.location.hash = ''; navigate('/dashboard', { replace: true }); })
+        .catch(() => navigate('/login', { replace: true }));
+    } else {
+      navigate('/login', { replace: true });
+    }
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#CFAE46] to-[#A8893A] flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <span className="text-black font-bold text-xl">A</span>
+        </div>
+        <p className="text-aureos-gold animate-pulse">Authenticating with Google...</p>
+      </div>
+    </div>
+  );
+};
+
+function AppRouter() {
+  const location = useLocation();
+  // Check URL fragment for session_id (synchronous - prevents race conditions)
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/tutorial" element={<TutorialPage />} />
+      
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/analysis" element={<ProtectedRoute><NewAnalysisPage /></ProtectedRoute>} />
+      <Route path="/copilot" element={<ProtectedRoute><CopilotPage /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/signals" element={<ProtectedRoute><SignalsPage /></ProtectedRoute>} />
+      <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
+      <Route path="/quant-lab" element={<ProtectedRoute><QuantLabPage /></ProtectedRoute>} />
+      <Route path="/scanner" element={<ProtectedRoute><ScannerPage /></ProtectedRoute>} />
+      <Route path="/intelligence" element={<ProtectedRoute><IntelMapPage /></ProtectedRoute>} />
+      <Route path="/sentiment" element={<ProtectedRoute><SentimentPage /></ProtectedRoute>} />
+      <Route path="/paper-trading" element={<ProtectedRoute><PaperTradingPage /></ProtectedRoute>} />
+      <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
+      <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
+      
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <div className="App min-h-screen bg-[#0D0D0D]">
         <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/tutorial" element={<TutorialPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/analysis" element={<ProtectedRoute><NewAnalysisPage /></ProtectedRoute>} />
-            <Route path="/copilot" element={<ProtectedRoute><CopilotPage /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="/signals" element={<ProtectedRoute><SignalsPage /></ProtectedRoute>} />
-            <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
-            <Route path="/quant-lab" element={<ProtectedRoute><QuantLabPage /></ProtectedRoute>} />
-            <Route path="/scanner" element={<ProtectedRoute><ScannerPage /></ProtectedRoute>} />
-            <Route path="/intelligence" element={<ProtectedRoute><IntelMapPage /></ProtectedRoute>} />
-            <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
-            <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
-            
-            {/* Catch all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AppRouter />
         </BrowserRouter>
         <Toaster 
           position="top-right" 

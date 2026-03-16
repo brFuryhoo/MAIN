@@ -238,6 +238,68 @@ async def request_password_reset(data: PasswordReset):
         })
     return {"message": "If email exists, reset link will be sent"}
 
+@api_router.post("/auth/google-session")
+async def google_oauth_session(request: Request):
+    """Exchange Emergent OAuth session_id for JWT token."""
+    import aiohttp
+    body = await request.json()
+    session_id = body.get("session_id")
+    if not session_id:
+        raise HTTPException(status_code=400, detail="Missing session_id")
+
+    # REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": session_id},
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as resp:
+                if resp.status != 200:
+                    raise HTTPException(status_code=401, detail="Invalid session")
+                google_data = await resp.json()
+
+        email = google_data.get("email")
+        name = google_data.get("name", "")
+        picture = google_data.get("picture", "")
+
+        # Find or create user
+        existing = await db.users.find_one({"email": email}, {"_id": 0})
+        if existing:
+            user_id = existing["id"]
+            # Update name/picture if needed
+            await db.users.update_one({"email": email}, {"$set": {"picture": picture, "full_name": name or existing.get("full_name", "")}})
+        else:
+            user_id = str(uuid.uuid4())
+            user_doc = {
+                "id": user_id,
+                "email": email,
+                "password_hash": "",
+                "full_name": name,
+                "picture": picture,
+                "subscription_plan": "free",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "auth_provider": "google",
+            }
+            await db.users.insert_one(user_doc)
+
+        token = create_token(user_id, email)
+        return {
+            "access_token": token,
+            "user": {
+                "id": user_id,
+                "email": email,
+                "full_name": name,
+                "picture": picture,
+                "subscription_plan": existing.get("subscription_plan", "free") if existing else "free",
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Google OAuth error: {e}")
+        raise HTTPException(status_code=500, detail="OAuth error")
+
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(user: dict = Depends(get_current_user)):
     return UserResponse(
@@ -1038,6 +1100,9 @@ from routes.quant_lab import router as quant_lab_router
 from routes.scanner import router as scanner_router
 from routes.intelligence_map import router as intel_map_router
 from routes.pdf_export import router as pdf_export_router
+from routes.multi_agent import router as multi_agent_router
+from routes.news_sentiment import router as news_router
+from routes.paper_trading import router as paper_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1046,6 +1111,9 @@ app.include_router(quant_lab_router)
 app.include_router(scanner_router)
 app.include_router(intel_map_router)
 app.include_router(pdf_export_router)
+app.include_router(multi_agent_router)
+app.include_router(news_router)
+app.include_router(paper_router)
 
 app.add_middleware(
     CORSMiddleware,
