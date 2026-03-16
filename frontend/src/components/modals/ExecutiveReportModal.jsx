@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, TrendingUp, TrendingDown, Target, Shield, BarChart2,
-  Brain, Layers, Dices, Download, Share2, Activity, AlertTriangle, Gauge
+  Brain, Layers, Dices, Download, Share2, Activity, AlertTriangle, Gauge, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import axios from 'axios';
+import { API } from '@/App';
 
-const ExecutiveReportModal = ({ isOpen, onClose, report }) => {
+const ExecutiveReportModal = ({ isOpen, onClose, report, fullAnalysis }) => {
+  const [exporting, setExporting] = useState(false);
   if (!isOpen || !report) return null;
 
   const sig = report.signal_summary || {};
@@ -292,8 +296,28 @@ const ExecutiveReportModal = ({ isOpen, onClose, report }) => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" className="border-[#CFAE46]/50 text-aureos-gold hover:bg-[#CFAE46]/10">
-                  <Download size={16} className="mr-2" />Export PDF
+                <Button variant="outline" size="sm" className="border-[#CFAE46]/50 text-aureos-gold hover:bg-[#CFAE46]/10"
+                  disabled={exporting}
+                  data-testid="export-pdf-btn"
+                  onClick={async () => {
+                    if (!fullAnalysis) { toast.error('No analysis data for export'); return; }
+                    setExporting(true);
+                    try {
+                      const resp = await axios.post(`${API}/export/pdf`, {
+                        analysis_data: fullAnalysis,
+                      }, { responseType: 'blob', timeout: 30000 });
+                      const url = window.URL.createObjectURL(new Blob([resp.data], { type: 'application/pdf' }));
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `Aureos_Report_${(fullAnalysis.symbol || 'report').toUpperCase()}.pdf`;
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      toast.success('PDF exported successfully!');
+                    } catch { toast.error('PDF export failed'); }
+                    finally { setExporting(false); }
+                  }}>
+                  {exporting ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Download size={16} className="mr-2" />}
+                  Export PDF
                 </Button>
                 <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors" data-testid="close-report-btn">
                   <X size={20} />

@@ -21,6 +21,7 @@ import PortfolioPage from "@/pages/PortfolioPage";
 import WatchlistPage from "@/pages/WatchlistPage";
 import QuantLabPage from "@/pages/QuantLabPage";
 import ScannerPage from "@/pages/ScannerPage";
+import IntelMapPage from "@/pages/IntelMapPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -153,6 +154,7 @@ function App() {
             <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
             <Route path="/quant-lab" element={<ProtectedRoute><QuantLabPage /></ProtectedRoute>} />
             <Route path="/scanner" element={<ProtectedRoute><ScannerPage /></ProtectedRoute>} />
+            <Route path="/intelligence" element={<ProtectedRoute><IntelMapPage /></ProtectedRoute>} />
             <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
             <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
             

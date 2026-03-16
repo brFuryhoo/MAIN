@@ -269,6 +269,7 @@ const NewAnalysisPage = () => {
           isOpen={showReport}
           onClose={() => setShowReport(false)}
           report={report}
+          fullAnalysis={analysisResult}
         />
       </div>
 

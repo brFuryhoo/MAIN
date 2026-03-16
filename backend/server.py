@@ -1036,12 +1036,16 @@ from routes.jarvis import router as jarvis_router
 from routes.watchlist import router as watchlist_router
 from routes.quant_lab import router as quant_lab_router
 from routes.scanner import router as scanner_router
+from routes.intelligence_map import router as intel_map_router
+from routes.pdf_export import router as pdf_export_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
 app.include_router(watchlist_router)
 app.include_router(quant_lab_router)
 app.include_router(scanner_router)
+app.include_router(intel_map_router)
+app.include_router(pdf_export_router)
 
 app.add_middleware(
     CORSMiddleware,

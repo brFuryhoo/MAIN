@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Brain, Sparkles, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Brain, Sparkles, Minimize2, Mic, Volume2, MicOff } from 'lucide-react';
 import axios from 'axios';
 import { API, useAuth } from '@/App';
 
@@ -14,7 +14,10 @@ const JarvisCopilot = ({ analysisContext = null }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -63,6 +66,41 @@ const JarvisCopilot = ({ analysisContext = null }) => {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      setInput(text);
+      setIsListening(false);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  const speakText = (text) => {
+    if (isSpeaking) { window.speechSynthesis.cancel(); setIsSpeaking(false); return; }
+    const clean = text.replace(/[*#_`]/g, '').substring(0, 500);
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.rate = 0.95;
+    utterance.pitch = 0.9;
+    utterance.onend = () => setIsSpeaking(false);
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
   };
 
   const quickActions = [
@@ -145,6 +183,13 @@ const JarvisCopilot = ({ analysisContext = null }) => {
                             </div>
                           )}
                           <div className="whitespace-pre-wrap text-xs">{msg.content}</div>
+                          {msg.role === 'assistant' && !msg.error && (
+                            <button onClick={() => speakText(msg.content)}
+                              className="mt-2 text-[10px] text-[#888] hover:text-aureos-gold flex items-center gap-1 transition-colors"
+                              data-testid="jarvis-speak-btn">
+                              <Volume2 size={10} />{isSpeaking ? 'Stop' : 'Listen'}
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -176,12 +221,18 @@ const JarvisCopilot = ({ analysisContext = null }) => {
                   {/* Input */}
                   <div className="p-3 border-t border-white/10">
                     <div className="flex gap-2">
+                      <button onClick={toggleListening}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                          isListening ? 'bg-[#FF5252]/20 animate-pulse' : 'bg-white/5 hover:bg-white/10'
+                        }`} data-testid="jarvis-mic-btn" title={isListening ? 'Stop listening' : 'Voice input'}>
+                        {isListening ? <MicOff size={16} className="text-[#FF5252]" /> : <Mic size={16} className="text-[#888]" />}
+                      </button>
                       <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Ask JARVIS anything..."
+                        placeholder={isListening ? 'Listening...' : 'Ask JARVIS anything...'}
                         className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#CFAE46]/50 placeholder:text-[#666]"
                         disabled={isLoading}
                         data-testid="jarvis-chat-input"
