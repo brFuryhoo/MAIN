@@ -56,16 +56,16 @@ Aureos AI is an advanced AI-driven financial intelligence platform operated by J
 - Twelve Data, Polygon.io, Alpha Vantage integrations
 - Multi-provider parallel search, Global exchange coverage
 - Smart candle fallback, In-memory cache
-- Testing: 100% pass rate
 
 ### Phase 5 - Watchlist Automation (Complete - March 16, 2026)
 - Full CRUD: Add, remove, list watchlist assets
 - JARVIS Scan: Automated analysis of all watchlist assets
 - Signal change & price move alerts with severity levels
-- Duplicate prevention, empty state handling
-- Frontend: Search & add panel, scan button, alert banners, remove on hover
 - Legacy duplicate routes cleaned from server.py
 - Testing: 100% pass rate (13/13 backend, all frontend flows)
+
+### Bug Fixes (March 16, 2026)
+- Fixed Select Asset dropdown invisible: overflow:hidden clipping + transparent glass background
 
 ## Key API Endpoints
 - `POST /api/auth/register` / `POST /api/auth/login` - Authentication

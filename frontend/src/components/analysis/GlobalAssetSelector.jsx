@@ -138,7 +138,8 @@ const GlobalAssetSelector = ({ onAssetSelect, selectedAsset }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 right-0 mt-2 aureos-glass overflow-hidden z-50">
+            className="absolute top-full left-0 right-0 mt-2 overflow-hidden z-50 rounded-xl border border-[#CFAE46]/20 shadow-lg shadow-black/50"
+            style={{ background: 'linear-gradient(145deg, rgba(30, 31, 32, 0.98), rgba(22, 23, 24, 0.98))', backdropFilter: 'blur(20px)' }}>
             <div className="p-2">
               <p className="text-xs text-[#888] uppercase tracking-wider px-3 py-2">
                 {query.length > 0 ? 'Search Results' : 'Popular Assets'}
