@@ -6,10 +6,11 @@ import AnalysisPipeline from '@/components/pipeline/AnalysisPipeline';
 import ProbabilityEngine from '@/components/probability/ProbabilityEngine';
 import ExecutiveReportModal from '@/components/modals/ExecutiveReportModal';
 import AssetChart from '@/components/charts/AssetChart';
+import JarvisCopilot from '@/components/jarvis/JarvisCopilot';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Play, FileText, RotateCcw, Clock,
-  TrendingUp, TrendingDown, ChevronRight
+  TrendingUp, TrendingDown, ChevronRight, Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -270,6 +271,9 @@ const NewAnalysisPage = () => {
           report={report}
         />
       </div>
+
+      {/* JARVIS Copilot - Floating */}
+      <JarvisCopilot analysisContext={analysisResult ? { report: analysisResult.report } : null} />
     </AureosLayout>
   );
 };

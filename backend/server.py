@@ -1082,8 +1082,10 @@ app.include_router(api_router)
 # Include modular analysis and asset routers
 from routes.analysis import router as analysis_router
 from routes.assets import router as assets_router
+from routes.jarvis import router as jarvis_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
+app.include_router(jarvis_router)
 
 app.add_middleware(
     CORSMiddleware,

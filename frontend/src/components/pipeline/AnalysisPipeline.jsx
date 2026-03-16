@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Database, BarChart2, Layers, Droplets, Dices,
   Shield, Brain, Target, FileText,
-  Check, Loader2
+  Check, Loader2, Activity, AlertTriangle
 } from 'lucide-react';
 
 const ANALYSIS_STEPS = [
@@ -16,6 +16,8 @@ const ANALYSIS_STEPS = [
   { id: 7, key: 'causality', name: 'Market Causality', icon: Brain, description: 'Explaining why price is moving' },
   { id: 8, key: 'probability', name: 'Probability Engine', icon: Target, description: 'Combining all signals into scenario probabilities' },
   { id: 9, key: 'executive_report', name: 'Executive Report', icon: FileText, description: 'Generating institutional-grade market report' },
+  { id: 10, key: 'regime_detection', name: 'Regime Detection', icon: Activity, description: 'Bull/bear/sideways classification & volatility regime' },
+  { id: 11, key: 'manipulation_detection', name: 'Manipulation Scan', icon: AlertTriangle, description: 'Liquidity sweeps, stop hunts, volume anomalies' },
 ];
 
 const AnalysisPipeline = ({ isRunning, analysisResult, onStepProgress }) => {
@@ -155,7 +157,7 @@ const AnalysisPipeline = ({ isRunning, analysisResult, onStepProgress }) => {
             <Check className="text-[#00E676]" size={32} />
           </div>
           <h3 className="text-xl font-bold text-[#00E676]">Analysis Complete</h3>
-          <p className="text-sm text-[#888] mt-2">All 9 analysis modules processed successfully</p>
+          <p className="text-sm text-[#888] mt-2">All 11 analysis modules processed successfully</p>
         </motion.div>
       )}
     </div>
@@ -182,6 +184,10 @@ function _extractPreview(key, data) {
       return [['signal', data.signal?.direction], ['conf', `${data.signal?.confidence}%`]];
     case 'executive_report':
       return [['status', 'generated']];
+    case 'regime_detection':
+      return [['regime', data.trend_regime?.type?.replace(/_/g, ' ')], ['phase', data.market_phase?.phase]];
+    case 'manipulation_detection':
+      return [['score', data.manipulation_score], ['risk', data.risk_level]];
     default:
       return [];
   }

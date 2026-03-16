@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, API } from '@/App';
 import AureosLayout from '@/components/layout/DashboardLayout';
-import VoiceCopilotWindow from '@/components/voice/VoiceCopilotWindow';
+import JarvisCopilot from '@/components/jarvis/JarvisCopilot';
 import { motion } from 'framer-motion';
 import { 
   TrendingUp, 
@@ -477,10 +477,7 @@ const DashboardPage = () => {
         </motion.div>
 
         {/* Voice Copilot */}
-        <VoiceCopilotWindow 
-          token={token}
-          onAnalysisRequest={(asset) => navigate('/analysis')}
-        />
+        <JarvisCopilot />
       </div>
     </AureosLayout>
   );

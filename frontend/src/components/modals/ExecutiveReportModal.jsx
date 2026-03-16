@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, TrendingUp, TrendingDown, Target, Shield, BarChart2,
-  Brain, Layers, Dices, Download, Share2, Activity
+  Brain, Layers, Dices, Download, Share2, Activity, AlertTriangle, Gauge
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -18,6 +18,8 @@ const ExecutiveReportModal = ({ isOpen, onClose, report }) => {
   const struct = report.market_structure || {};
   const liq = report.liquidity_analysis || {};
   const action = report.action_plan || {};
+  const regime = report.regime || {};
+  const manipulation = report.manipulation || {};
   const asset = report.asset || {};
 
   const sections = [
@@ -212,6 +214,55 @@ const ExecutiveReportModal = ({ isOpen, onClose, report }) => {
               <p key={i} className="text-xs text-[#888] py-1 pl-3 border-l-2 border-[#FF5252]/30">{r}</p>
             ))}
           </div>
+        </div>
+      )
+    },
+    {
+      title: 'Market Regime',
+      icon: Gauge,
+      color: '#FF9800',
+      content: (
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-[#888]">Trend Regime</span>
+            <span className={`font-bold capitalize ${regime.trend_regime?.type?.includes('bull') ? 'text-[#00E676]' : regime.trend_regime?.type?.includes('bear') ? 'text-[#FF5252]' : 'text-[#888]'}`}>
+              {regime.trend_regime?.type?.replace(/_/g, ' ') || 'N/A'}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[#888]">Volatility</span>
+            <span className="font-bold capitalize">{regime.volatility_regime?.type || 'N/A'}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[#888]">Market Phase</span>
+            <span className="font-bold capitalize text-aureos-gold">{regime.market_phase?.phase || 'N/A'}</span>
+          </div>
+          <p className="text-xs text-[#888] leading-relaxed">{regime.market_phase?.description}</p>
+          <p className="text-sm text-[#ccc] leading-relaxed mt-2">{regime.regime_summary}</p>
+        </div>
+      )
+    },
+    {
+      title: 'Manipulation Detection',
+      icon: AlertTriangle,
+      color: manipulation.risk_level === 'high' ? '#FF5252' : manipulation.risk_level === 'moderate' ? '#FF9800' : '#00E676',
+      content: (
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-[#888]">Manipulation Score</span>
+            <span className={`text-lg font-bold ${manipulation.risk_level === 'high' ? 'text-[#FF5252]' : manipulation.risk_level === 'moderate' ? 'text-[#FF9800]' : 'text-[#00E676]'}`}>
+              {manipulation.score}/100 ({manipulation.risk_level})
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[#888]">Events Detected</span>
+            <span className="font-bold">{manipulation.events_detected}</span>
+          </div>
+          {manipulation.warnings?.map((w, i) => (
+            <p key={i} className={`text-xs py-2 px-3 rounded-lg ${manipulation.risk_level === 'high' ? 'bg-[#FF5252]/10 text-[#FF5252]' : manipulation.risk_level === 'moderate' ? 'bg-[#FF9800]/10 text-[#FF9800]' : 'bg-white/5 text-[#888]'}`}>
+              {w}
+            </p>
+          ))}
         </div>
       )
     },
