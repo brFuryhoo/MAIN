@@ -20,13 +20,14 @@ Aureos AI is an advanced AI-driven financial intelligence platform operated by J
 ## Backend Module Architecture
 ```
 /app/backend/
-├── server.py                       # Main FastAPI app, auth, stripe
+├── server.py                       # Main FastAPI app, auth, stripe, voice
 ├── routes/
 │   ├── analysis.py                 # POST /api/analysis/start (11 steps), GET /api/analysis/history
 │   ├── assets.py                   # GET /api/assets/search (global multi-provider)
-│   └── jarvis.py                   # POST /api/jarvis/chat, POST /api/jarvis/explain-report
+│   ├── jarvis.py                   # POST /api/jarvis/chat, POST /api/jarvis/explain-report
+│   └── watchlist.py                # GET/POST /api/watchlist/* (CRUD + scan + alerts)
 └── services/
-    ├── market_data.py              # Unified Market Data Adapter (CoinGecko + Twelve Data + Polygon + Alpha Vantage + Mock)
+    ├── market_data.py              # Unified Market Data Adapter
     ├── technical_engine.py         # RSI, MACD, MAs, BBands, ATR, S/R
     ├── market_structure.py         # HH/HL/LH/LL, consolidation, breakout
     ├── liquidity_mapper.py         # Volume clusters, volatility zones
@@ -44,22 +45,27 @@ Aureos AI is an advanced AI-driven financial intelligence platform operated by J
 ### Phase 1 - Foundation (Complete)
 - JWT Authentication, Stripe subscriptions, premium dark/gold UI, MongoDB
 
-### Phase 2 - Analysis Pipeline (Complete - March 16, 2026)
+### Phase 2 - Analysis Pipeline (Complete)
 - 9-Step analysis pipeline, Global Asset Selector, Charts, Executive Report
 
-### Phase 3 P0 - JARVIS Intelligence Layer (Complete - March 16, 2026)
+### Phase 3 P0 - JARVIS Intelligence Layer (Complete)
 - JARVIS AI Copilot (GPT-5.2), Analysis History (MongoDB), Regime Detection, Manipulation Detection
 - Pipeline upgraded to 11 steps
 
-### Phase 4 - Global Market Data (Complete - March 16, 2026)
-- **Twelve Data integration** — Real prices for stocks (AAPL $250, TSLA $391, etc.), forex (EUR/USD), commodities from ALL global exchanges
-- **Polygon.io integration** — US stock historical candle data
-- **Alpha Vantage integration** — Fallback provider
-- **Multi-provider parallel search** — Search returns results from Twelve Data + CoinGecko + Polygon simultaneously
-- **Global exchange coverage** — NYSE, NASDAQ, JPX (Japan), KRX (Korea), LSE (London), ASX (Australia), SET (Thailand), XETRA, and more
-- **Smart candle fallback** — Generates supplementary candle data when real candles < 50 for quality analysis
-- **In-memory cache** — Search (5min), Price (2min), Candles (10min) to manage rate limits
-- Testing: 100% pass rate (12/12 backend, all frontend flows)
+### Phase 4 - Global Market Data (Complete)
+- Twelve Data, Polygon.io, Alpha Vantage integrations
+- Multi-provider parallel search, Global exchange coverage
+- Smart candle fallback, In-memory cache
+- Testing: 100% pass rate
+
+### Phase 5 - Watchlist Automation (Complete - March 16, 2026)
+- Full CRUD: Add, remove, list watchlist assets
+- JARVIS Scan: Automated analysis of all watchlist assets
+- Signal change & price move alerts with severity levels
+- Duplicate prevention, empty state handling
+- Frontend: Search & add panel, scan button, alert banners, remove on hover
+- Legacy duplicate routes cleaned from server.py
+- Testing: 100% pass rate (13/13 backend, all frontend flows)
 
 ## Key API Endpoints
 - `POST /api/auth/register` / `POST /api/auth/login` - Authentication
@@ -68,15 +74,20 @@ Aureos AI is an advanced AI-driven financial intelligence platform operated by J
 - `GET /api/analysis/history` - User's analysis history
 - `POST /api/jarvis/chat` - JARVIS conversational intelligence
 - `POST /api/jarvis/explain-report` - Report explanation
+- `GET /api/watchlist/` - Get user's watchlist with enriched data
+- `POST /api/watchlist/add` - Add asset to watchlist
+- `POST /api/watchlist/remove` - Remove asset from watchlist
+- `POST /api/watchlist/scan` - JARVIS scan all watchlist assets
+- `POST /api/watchlist/alerts/mark-read` - Mark alerts as read
 - `POST /api/stripe/create-checkout-session` - Stripe checkout
 
 ## DB Collections
 - **users**, **subscriptions**, **analysis_history**, **jarvis_conversations**
+- **watchlist**, **watchlist_alerts**
 
 ## Prioritized Backlog
 
 ### P1 (Next)
-- Watchlist Automation - Save assets, auto-monitor for signal changes, notifications
 - Autonomous Market Scanner - Background scan for high-probability opportunities
 - WebSocket Real-Time Updates - Live data streaming to dashboard
 
@@ -94,7 +105,7 @@ Aureos AI is an advanced AI-driven financial intelligence platform operated by J
 - Kafka/Redis/TimescaleDB scaling
 
 ## Test Credentials
-- Email: demo@aureos.com / Password: Demo1234!
+- Email: test@aureos.com / Password: Test1234!
 
 ## Provider API Keys (in backend/.env)
 - TWELVE_DATA_KEY, POLYGON_KEY, ALPHA_VANTAGE_KEY, EMERGENT_LLM_KEY
