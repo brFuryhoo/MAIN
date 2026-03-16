@@ -116,7 +116,7 @@ const NewAnalysisPage = () => {
         {/* Asset Selection Phase */}
         {!isRunning && !analysisResult && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <div className="aureos-card p-6 !overflow-visible">
+            <div className="aureos-card p-6 !overflow-visible relative z-50">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Zap className="text-aureos-gold" size={20} />Select Asset
               </h2>
