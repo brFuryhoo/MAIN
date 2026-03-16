@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Header, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -1035,11 +1035,13 @@ from routes.assets import router as assets_router
 from routes.jarvis import router as jarvis_router
 from routes.watchlist import router as watchlist_router
 from routes.quant_lab import router as quant_lab_router
+from routes.scanner import router as scanner_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
 app.include_router(watchlist_router)
 app.include_router(quant_lab_router)
+app.include_router(scanner_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -1052,3 +1054,66 @@ app.add_middleware(
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+# ==================== WEBSOCKET REAL-TIME ====================
+
+class ConnectionManager:
+    """Manages WebSocket connections for real-time updates."""
+    def __init__(self):
+        self.active: Dict[str, List[WebSocket]] = {}
+
+    async def connect(self, websocket: WebSocket, channel: str = "general"):
+        await websocket.accept()
+        if channel not in self.active:
+            self.active[channel] = []
+        self.active[channel].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, channel: str = "general"):
+        if channel in self.active:
+            self.active[channel] = [ws for ws in self.active[channel] if ws != websocket]
+
+    async def broadcast(self, channel: str, data: dict):
+        if channel in self.active:
+            disconnected = []
+            for ws in self.active[channel]:
+                try:
+                    await ws.send_json(data)
+                except Exception:
+                    disconnected.append(ws)
+            for ws in disconnected:
+                self.active[channel] = [w for w in self.active[channel] if w != ws]
+
+    @property
+    def connection_count(self):
+        return sum(len(v) for v in self.active.values())
+
+
+ws_manager = ConnectionManager()
+
+
+@app.websocket("/ws/{channel}")
+async def websocket_endpoint(websocket: WebSocket, channel: str):
+    await ws_manager.connect(websocket, channel)
+    try:
+        while True:
+            data = await websocket.receive_json()
+            action = data.get("action")
+
+            if action == "ping":
+                await websocket.send_json({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()})
+
+            elif action == "subscribe":
+                sub_channel = data.get("channel", channel)
+                await ws_manager.connect(websocket, sub_channel)
+                await websocket.send_json({"type": "subscribed", "channel": sub_channel})
+
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket, channel)
+    except Exception:
+        ws_manager.disconnect(websocket, channel)
+
+
+@app.get("/api/ws/status")
+async def ws_status():
+    return {"active_connections": ws_manager.connection_count, "channels": list(ws_manager.active.keys())}

@@ -19,7 +19,8 @@ import {
   Search,
   Crown,
   Eye,
-  Brain
+  Brain,
+  Radar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/analysis', label: 'New Analysis', icon: Zap },
+  { path: '/scanner', label: 'Scanner', icon: Radar },
   { path: '/watchlist', label: 'Watchlist', icon: Eye },
   { path: '/quant-lab', label: 'Quant Lab', icon: Brain },
   { path: '/signals', label: 'AI Signals', icon: TrendingUp },

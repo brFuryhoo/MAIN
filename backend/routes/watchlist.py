@@ -217,6 +217,9 @@ async def scan_watchlist(request: Request):
                     "regime": regime.get("market_phase", {}).get("phase", "unknown"),
                     "change_percent": asset_data.get("change_percent", 0),
                     "previous_signal": previous_signal,
+                    "rsi": technical.get("rsi", 50),
+                    "risk_score": risk.get("risk_score", 50),
+                    "win_probability": mc.get("win_probability", 50),
                 }
                 scan_results.append(scan_result)
 
@@ -234,6 +237,40 @@ async def scan_watchlist(request: Request):
                     }
                     await db.watchlist_alerts.insert_one(alert)
                     alerts_generated += 1
+
+                # Quant pattern alignment alert
+                try:
+                    from services.quant_lab import extract_indicator_signals
+                    flat_data = {
+                        "rsi": technical.get("rsi", 50),
+                        "macd": technical.get("macd", {}),
+                        "moving_averages": technical.get("moving_averages", {}),
+                        "bollinger_bands": technical.get("bollinger_bands", {}),
+                        "volume_trend": technical.get("volume_trend", "stable"),
+                        "atr_percent": technical.get("atr_percent", 2),
+                        "structure_bias": structure.get("bias", "neutral"),
+                        "monte_carlo_win_prob": mc.get("win_probability", 50),
+                        "risk_score": risk.get("risk_score", 50),
+                        "regime_phase": regime.get("market_phase", {}).get("phase", "unknown"),
+                        "liquidity_signal": 0,
+                    }
+                    signals = extract_indicator_signals(flat_data)
+                    aligned = sum(1 for v in signals.values() if abs(v) > 0.3)
+                    if aligned >= 7 and current_signal != "HOLD":
+                        alert = {
+                            "user_id": user_id,
+                            "symbol": item["symbol"],
+                            "type": "quant_alignment",
+                            "title": f"{item['symbol']}: {aligned}/11 indicators aligned ({current_signal})",
+                            "message": f"JARVIS Quant Lab detected {aligned}/11 indicators aligned for {item['symbol']} toward {current_signal} with {current_confidence}% confidence.",
+                            "severity": "high",
+                            "read": False,
+                            "created_at": datetime.now(timezone.utc).isoformat(),
+                        }
+                        await db.watchlist_alerts.insert_one(alert)
+                        alerts_generated += 1
+                except Exception as qe:
+                    logger.warning(f"Quant alignment check failed: {qe}")
 
                 # Check for price move alert
                 if item.get("alert_on_price_move") and item.get("last_price"):
