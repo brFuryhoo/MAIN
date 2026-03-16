@@ -1,114 +1,116 @@
 # Aureos AI - Product Requirements Document
 
-## Project Overview
-**Product Name:** Aureos AI  
-**Tagline:** "Clarity in every trade"  
-**Version:** 1.0.0 MVP (Voice-Enabled)  
-**Last Updated:** 2026-03-14
-
 ## Original Problem Statement
-Develop a complete fintech brand and product ecosystem called "Aureos AI" - a next-generation Australian trading intelligence platform that merges advanced AI analytics, real-time market data, and a conversational copilot for traders and investors with full voice interaction.
+Aureos AI is an advanced AI-driven financial intelligence platform. The project includes:
+- **UI/UX:** Premium, futuristic, minimalistic design (Deep Black, Aureos Gold, Cyber Blue, Soft Grey)
+- **Global Free-Asset Selector:** Universal search for any asset type (stock, crypto, commodity, forex, index)
+- **9-Step Analysis Pipeline:** Institutional-grade analysis workflow with animated progress
+- **Analysis Engines:** Technical Analysis, Market Structure, Liquidity Mapping, Monte Carlo, Risk, Causality, Probability
+- **Executive Report Modal:** Detailed premium-styled report with all analysis results
+- **Voice + Chat Copilot:** Floating window with voice commands (Whisper), narration (OpenAI TTS)
+- **Dashboard:** Premium redesigned pages (Home, Analysis, Signals, Portfolio, Settings)
 
-## User Personas
-1. **Retail Traders** - Individual investors seeking AI-powered insights
-2. **Day Traders** - Active traders needing real-time analysis
-3. **Portfolio Managers** - Professionals tracking multiple assets
-4. **Beginner Investors** - Users learning through voice-guided tutorials
-
-## Tech Stack
-- **Frontend:** React 19 + Tailwind CSS + Shadcn/UI + Framer Motion
-- **Backend:** FastAPI (Python)
+## Architecture
+- **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Lightweight Charts v5
+- **Backend:** FastAPI (Python), modular services architecture
 - **Database:** MongoDB
-- **AI Chat:** OpenAI GPT-5.2 via emergentintegrations
-- **Voice TTS:** OpenAI TTS (tts-1, onyx voice)
-- **Voice STT:** OpenAI Whisper (whisper-1)
-- **Payments:** Stripe (test mode)
-- **Auth:** JWT-based authentication
+- **Auth:** JWT
+- **Payments:** Stripe (3-tier subscription)
+- **AI:** OpenAI GPT-5.2, Whisper (STT), TTS-1 (planned/partial)
+- **Data:** CoinGecko (crypto, live), Mock layer (stocks, forex, commodities, indices)
 
-## What's Been Implemented (MVP - 2026-03-14)
+## Backend Module Architecture
+```
+/app/backend/
+├── server.py                  # Main FastAPI app, auth, stripe, copilot
+├── routes/
+│   ├── analysis.py            # POST /api/analysis/start
+│   └── assets.py              # GET /api/assets/search
+└── services/
+    ├── market_data.py          # Market Data Adapter (CoinGecko + Mock)
+    ├── technical_engine.py     # RSI, MACD, MAs, BBands, ATR, Support/Resistance
+    ├── market_structure.py     # HH/HL/LH/LL, consolidation, breakout detection
+    ├── liquidity_mapper.py     # Volume clusters, volatility zones, liquidity pools
+    ├── monte_carlo.py          # 5000 simulation Monte Carlo
+    ├── risk_engine.py          # VaR, drawdown, position sizing, risk scoring
+    ├── causality_engine.py     # Market explanation engine
+    ├── probability_engine.py   # Combined signal probabilities (BUY/SELL/HOLD)
+    └── report_generator.py     # Executive report generation
+```
 
-### Core Features
-- [x] Landing Page with hero, features, pricing, testimonials, contact
-- [x] JWT Authentication (register, login, logout)
-- [x] Market Dashboard (stocks, crypto, forex tabs with charts)
-- [x] AI Copilot Chat with GPT-5.2 trade analysis
-- [x] Portfolio & Watchlist management
-- [x] Analytics (risk score, performance charts, heatmap)
-- [x] Tutorial/Learning Hub (5-step onboarding)
-- [x] Subscription System with Stripe checkout
+## What's Been Implemented
 
-### Voice Integration (NEW)
-- [x] Text-to-Speech (TTS) - OpenAI tts-1 with onyx voice
-- [x] Speech-to-Text (STT) - OpenAI Whisper transcription
-- [x] Voice Copilot - Full voice conversation flow
-- [x] Auto-narrate toggle for AI responses
-- [x] Microphone recording in browser
-- [x] Audio playback for responses
+### Phase 1 - Foundation (Complete)
+- JWT Authentication (Login/Register)
+- Stripe 3-tier subscription integration
+- Basic dashboard and landing page with premium Aureos theme
+- MongoDB integration
 
-### Pricing Tiers (Updated)
-- Essential: $39/month (5 features)
-- Pro: $99/month (7 features)
-- Elite: $239/month (8 features)
+### Phase 2 - Full Analysis Pipeline (Complete - March 16, 2026)
+- **9-Step Analysis Pipeline Backend:**
+  1. Market Data Aggregation (CoinGecko + mock)
+  2. Technical Analysis Engine (RSI, MACD, MAs, BBands, ATR, S/R)
+  3. Market Structure Detection (swing points, HH/HL/LH/LL, breakouts)
+  4. Liquidity Mapping (volume clusters, volatility zones, liquidity pools)
+  5. Quantitative Scenario Modeling (5000 Monte Carlo simulations)
+  6. Risk Modeling Engine (VaR, drawdown, position sizing, Kelly criterion)
+  7. Market Causality Engine (explains WHY price moves)
+  8. Probability Engine (combined BUY/SELL/HOLD signal with confidence)
+  9. Executive Market Report Generator
+- **Frontend Integration:**
+  - GlobalAssetSelector connected to /api/assets/search (CoinGecko live search)
+  - AnalysisPipeline with animated 9-step progress visualization
+  - ProbabilityEngine with scenario probability bars
+  - ExecutiveReportModal with 8 sections (Signal, Action Plan, Technical, Structure, Monte Carlo, Risk, Causality, Signals/Risks)
+  - Lightweight Charts v5 integration (candlestick + volume + support/resistance lines)
+- **Testing:** 100% pass rate (14/14 backend, all frontend flows)
 
-## API Endpoints
+## Key API Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - JWT login
+- `GET /api/assets/search?q=` - Global asset search
+- `POST /api/analysis/start` - 9-step analysis pipeline
+- `POST /api/stripe/create-checkout-session` - Stripe checkout
+- `POST /api/copilot` - AI copilot chat
+- `POST /api/voice/stt` - Speech to text
+- `POST /api/voice/tts` - Text to speech
 
-### Voice Endpoints (NEW)
-- `POST /api/voice/text-to-speech` - Convert text to speech
-- `POST /api/voice/speech-to-text` - Convert audio to text
-- `POST /api/voice/copilot-voice` - Full voice interaction
-- `GET /api/voice/settings` - Get voice settings
-- `POST /api/voice/settings` - Update voice settings
+## DB Schema
+- **users**: `{email, hashed_password, full_name, created_at}`
+- **subscriptions**: `{user_id, stripe_customer_id, plan, status}`
 
-### Existing Endpoints
-- Auth: `/api/auth/register`, `/api/auth/login`, `/api/auth/me`
-- Market: `/api/market/stocks`, `/api/market/crypto`, `/api/market/forex`
-- Copilot: `/api/copilot/chat`, `/api/copilot/history`
-- Portfolio: `/api/portfolio`, `/api/watchlist`
-- Analytics: `/api/analytics/risk-score`, `/api/analytics/performance`
-- Subscription: `/api/subscription/plans`, `/api/subscription/checkout`
+## Prioritized Backlog
 
-## 30-Day Evolution Plan
+### P0 (Next)
+- Save analysis results to MongoDB (analysis_history collection)
+- Wire AI Copilot (GPT-5.2) to explain analysis results and answer trading questions
 
-### Week 1: Beta Testing
-- Limited beta (3-5 testers)
-- Monitor GPT-5.2 and voice latency
-- Track Stripe transactions
-- Collect UX feedback
+### P1
+- Integrate real data providers (Alpha Vantage for stocks, NewsAPI for sentiment)
+- WebSocket layer for real-time data updates
+- Voice copilot with Whisper STT + TTS narration of reports
+- Signals page with live tracking of analyzed assets
 
-### Week 2: Live Data
-- Alpha Vantage API (stocks/forex)
-- CoinGecko API (crypto)
-- WebSocket for real-time updates
-- Email verification & password reset
+### P2
+- PDF export for executive reports
+- Portfolio page with analysis history
+- Historical backtesting
+- Paper trading mode with virtual currency
+- Google OAuth
 
-### Week 3: Feature Expansion
-- Paper Trading mode
-- Wake-word activation ("Aureos, analyze...")
-- Voice portfolio summaries
-- Price alerts & notifications
+### Future (Multi-Agent AI Evolution)
+- Technical Analyst Agent
+- Quantitative Modeling Agent
+- Macro Intelligence Agent
+- Sentiment Analysis Agent
+- Liquidity Detection Agent
+- Market Intelligence Graph (cross-asset correlation mapping)
 
-### Week 4: Production Launch
-- Full production deployment
-- Live Stripe payments
-- Marketing campaign (Australia)
-- Infrastructure scaling
-
-## Security Implementation
-- [x] bcrypt password hashing
-- [x] JWT with 24h expiration
-- [x] CORS middleware
-- [x] Pydantic input validation
-- [x] MongoDB _id exclusion
-- [x] Environment variables for secrets
-
-## Deployment Status
-- **Status:** APPROVED FOR PRODUCTION
-- **Health Score:** 100%
-- **Security Score:** 100%
-- **Voice Integration:** Operational
-- **URL:** https://premium-fintech-13.preview.emergentagent.com
+## Test Credentials
+- Email: demo@aureos.com
+- Password: Demo1234!
 
 ## Notes
-- Market data uses mock data (live API integration in Week 2)
-- Stripe in test mode (test card: 4242 4242 4242 4242)
-- Voice requires microphone permission in browser
+- Stocks, forex, commodities, indices use MOCK data (designed for easy plug-in of real providers)
+- Only crypto uses real CoinGecko API data
+- Lightweight Charts v5 requires CandlestickSeries/HistogramSeries class imports
