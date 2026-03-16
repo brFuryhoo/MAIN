@@ -23,12 +23,14 @@ const ASSET_COLORS = {
 const POPULAR_ASSETS = [
   { symbol: 'BTC', name: 'Bitcoin', type: 'crypto', coingecko_id: 'bitcoin' },
   { symbol: 'ETH', name: 'Ethereum', type: 'crypto', coingecko_id: 'ethereum' },
-  { symbol: 'SOL', name: 'Solana', type: 'crypto', coingecko_id: 'solana' },
   { symbol: 'AAPL', name: 'Apple Inc.', type: 'stock' },
-  { symbol: 'XAUUSD', name: 'Gold', type: 'commodity' },
-  { symbol: 'EURUSD', name: 'EUR/USD', type: 'forex' },
-  { symbol: 'SPY', name: 'S&P 500 ETF', type: 'index' },
   { symbol: 'NVDA', name: 'NVIDIA Corp.', type: 'stock' },
+  { symbol: 'EUR/USD', name: 'Euro / US Dollar', type: 'forex' },
+  { symbol: 'GOLD', name: 'Gold ETF', type: 'stock' },
+  { symbol: 'SPY', name: 'S&P 500 ETF', type: 'stock' },
+  { symbol: 'SOL', name: 'Solana', type: 'crypto', coingecko_id: 'solana' },
+  { symbol: 'TSLA', name: 'Tesla Inc.', type: 'stock' },
+  { symbol: 'MSFT', name: 'Microsoft Corp.', type: 'stock' },
 ];
 
 const GlobalAssetSelector = ({ onAssetSelect, selectedAsset }) => {
@@ -73,6 +75,8 @@ const GlobalAssetSelector = ({ onAssetSelect, selectedAsset }) => {
       coingecko_id: asset.coingecko_id || null,
       price: asset.price || null,
       change_percent: asset.change_percent || null,
+      exchange: asset.exchange || null,
+      provider: asset.provider || null,
     };
     setQuery(asset.symbol);
     setIsOpen(false);
@@ -116,7 +120,7 @@ const GlobalAssetSelector = ({ onAssetSelect, selectedAsset }) => {
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search any asset: BTC, AAPL, XAUUSD, EURUSD..."
+          placeholder="Search any global asset: AAPL, BTC, EUR/USD, Toyota, Samsung..."
           className="aureos-input pl-12 pr-4 py-4 text-lg"
           data-testid="asset-search-input"
         />
@@ -154,7 +158,7 @@ const GlobalAssetSelector = ({ onAssetSelect, selectedAsset }) => {
                       </div>
                       <div className="flex-1 text-left">
                         <p className="font-semibold group-hover:text-aureos-gold transition-colors">{asset.symbol}</p>
-                        <p className="text-xs text-[#888]">{asset.name}</p>
+                        <p className="text-xs text-[#888]">{asset.name}{asset.exchange ? ` · ${asset.exchange}` : ''}</p>
                       </div>
                       {asset.price && (
                         <span className="text-sm font-mono text-[#888]">${typeof asset.price === 'number' ? asset.price.toLocaleString() : asset.price}</span>
