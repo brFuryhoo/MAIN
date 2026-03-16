@@ -1074,10 +1074,16 @@ async def update_voice_settings(settings: VoiceSettings, user: dict = Depends(ge
 
 @api_router.get("/")
 async def root():
-    return {"message": "Aureos AI API", "version": "1.0.0", "status": "operational"}
+    return {"message": "Aureos AI API", "version": "2.0.0", "status": "operational"}
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# Include modular analysis and asset routers
+from routes.analysis import router as analysis_router
+from routes.assets import router as assets_router
+app.include_router(analysis_router)
+app.include_router(assets_router)
 
 app.add_middleware(
     CORSMiddleware,
