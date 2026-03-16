@@ -1,96 +1,85 @@
 # Aureos AI - Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is the global financial intelligence platform created by Aureos Corporation, founded by Fabricio Teodoroves. JARVIS (Central Intelligence Core) democratizes institutional-grade market analysis for every asset globally.
+Aureos AI is the global financial intelligence platform created by Aureos Corporation, founded by Fabricio Teodoroves. JARVIS democratizes institutional-grade market analysis for every asset globally.
 
 ## Architecture
 - **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Lightweight Charts v5
-- **Backend:** FastAPI (Python), modular services architecture
-- **Database:** MongoDB | **Auth:** JWT | **Payments:** Stripe
-- **AI:** GPT-5.2 via Emergent LLM key (JARVIS Copilot)
-- **Data:** CoinGecko, Twelve Data, Polygon.io, Alpha Vantage + smart fallback
-- **Real-Time:** WebSocket | **Voice:** Web Speech API (STT/TTS) | **PDF:** fpdf2
+- **Backend:** FastAPI (Python), modular services
+- **Database:** MongoDB | **Auth:** JWT + Google OAuth (Emergent) | **Payments:** Stripe
+- **AI:** GPT-5.2 via Emergent LLM key (JARVIS + 4 Specialized Agents)
+- **Data:** CoinGecko, Twelve Data, Polygon.io, Alpha Vantage, Fear&Greed API
+- **Real-Time:** WebSocket | **Voice:** Web Speech API | **PDF:** fpdf2
 
 ## Backend Architecture
 ```
 /app/backend/
-├── server.py              # FastAPI app, auth, stripe, voice TTS/STT, WebSocket
+├── server.py              # Auth (JWT + Google OAuth), Stripe, Voice, WebSocket
 ├── routes/
-│   ├── analysis.py        # 11-step pipeline + history
-│   ├── assets.py          # Global multi-provider search
-│   ├── jarvis.py          # JARVIS AI copilot
-│   ├── watchlist.py       # Watchlist CRUD + scan + quant alerts
-│   ├── quant_lab.py       # Autonomous Quant Lab (8 endpoints)
-│   ├── scanner.py         # Market Scanner (4 endpoints)
+│   ├── analysis.py        # 11-step pipeline
+│   ├── assets.py          # Global search
+│   ├── jarvis.py          # JARVIS copilot
+│   ├── watchlist.py       # Watchlist + quant alerts
+│   ├── quant_lab.py       # Quant Lab (8 endpoints)
+│   ├── scanner.py         # Market Scanner
 │   ├── intelligence_map.py # Global Intelligence Map
-│   └── pdf_export.py      # PDF executive report generator
+│   ├── pdf_export.py      # PDF reports
+│   ├── multi_agent.py     # 4 Agents + JARVIS synthesis
+│   ├── news_sentiment.py  # Fear/Greed, trending, global market
+│   └── paper_trading.py   # Virtual portfolio simulation
 └── services/
     ├── market_data.py, technical_engine.py, market_structure.py
     ├── liquidity_mapper.py, monte_carlo.py, risk_engine.py
     ├── causality_engine.py, probability_engine.py, report_generator.py
     ├── regime_detector.py, manipulation_detector.py
-    ├── quant_lab.py        # Backtest, optimizer, pattern discovery
-    └── market_scanner.py   # Opportunity classifier
+    ├── quant_lab.py, market_scanner.py
 ```
 
-## Completed Phases
+## Completed Phases (All 100% Tested)
 
-### Phase 1-4: Foundation → Global Data (Complete)
-### Phase 5: Watchlist Automation (Complete)
-### Phase 6: Autonomous Quant Lab (Complete - March 16)
-### Phase 7: Scanner + WebSocket + Quant-Watchlist (Complete - March 16)
+### Phase 1-4: Foundation → Global Data
+### Phase 5: Watchlist Automation
+### Phase 6: Autonomous Quant Lab
+### Phase 7: Scanner + WebSocket + Quant-Watchlist
+### Phase 8: Intelligence Map + Voice + PDF Export
 
-### Phase 8: Intelligence Map + Voice + PDF (Complete - March 16, 2026)
-- **Global Market Intelligence Map:**
-  - 11 assets across 5 sectors (crypto, tech, auto, forex, commodity)
-  - Cross-asset Pearson correlations with strength classification
-  - Capital flow detection (inflow/outflow/neutral by sector)
-  - Heat map with momentum scores, regime labels, RSI
-  - Frontend: Heat map grid, capital flow cards, correlation bars
-- **Enhanced Voice Interface:**
-  - Mic button (Web Speech Recognition API) for voice input in JARVIS
-  - Speaker button (Web Speech Synthesis) for TTS on all JARVIS messages
-  - Visual feedback: pulsing mic when listening, "Listening..." placeholder
-  - Backend TTS/STT endpoints already available at /api/voice/*
-- **PDF Executive Report Export:**
-  - Professional multi-page PDF with Aureos branding
-  - Cover page, Signal Summary, Technical Analysis, Monte Carlo, Risk, Regime, Manipulation
-  - Download button in Executive Report modal
-  - Disclaimer footer
-- **Testing:** 100% pass rate (10/10 backend, all frontend flows)
+### Phase 9: Multi-Agent + Sentiment + Paper Trading + Google OAuth (March 16, 2026)
+- **Multi-Agent AI System:** 4 specialized agents (Technical, Quant, Macro, Sentiment) + JARVIS synthesis via GPT-5.2
+- **News Sentiment:** Fear & Greed Index (7-day history), CoinGecko trending, global crypto market data, market mood interpretation
+- **Paper Trading:** Virtual $100K portfolio, BUY/SELL execution, P&L tracking, close trades, reset, trade history, win rate
+- **Google OAuth:** Emergent-managed Google social login with "Continue with Google" button, session exchange
+- **Testing:** 100% pass rate (18/18 backend, all frontend flows)
 
-## Key API Endpoints
-- Auth: POST /api/auth/register, /login
-- Assets: GET /api/assets/search?q=
-- Analysis: POST /api/analysis/start, GET /api/analysis/history
-- JARVIS: POST /api/jarvis/chat, /explain-report
-- Watchlist: GET/POST /api/watchlist/*, /scan, /alerts/mark-read
-- Quant: GET/POST /api/quant/* (indicators, performance, rankings, backtest, optimize, patterns, experiments, reset-weights)
-- Scanner: GET /api/scanner/universe, POST /api/scanner/scan, GET /api/scanner/opportunities, /history
-- Intelligence: GET /api/intelligence/map
-- Export: POST /api/export/pdf
-- Voice: POST /api/voice/text-to-speech, /speech-to-text, /copilot-voice
-- WebSocket: WS /ws/{channel}, GET /api/ws/status
+## All API Endpoints
+- Auth: /api/auth/register, /login, /me, /google-session
+- Assets: /api/assets/search
+- Analysis: /api/analysis/start, /history
+- JARVIS: /api/jarvis/chat, /explain-report
+- Watchlist: /api/watchlist/*, /scan, /alerts/mark-read
+- Quant: /api/quant/* (8 endpoints)
+- Scanner: /api/scanner/universe, /scan, /opportunities, /history
+- Intelligence: /api/intelligence/map
+- Export: /api/export/pdf
+- Multi-Agent: /api/agents/analyze, /history
+- News: /api/news/sentiment
+- Paper: /api/paper/portfolio, /trade, /close, /reset
+- Voice: /api/voice/text-to-speech, /speech-to-text
+- WebSocket: /ws/{channel}, /api/ws/status
+- Stripe: /api/stripe/*
 
 ## DB Collections
 users, subscriptions, analysis_history, jarvis_conversations,
 watchlist, watchlist_alerts, quant_experiments, quant_decision_logs,
-quant_weights, scanner_history
-
-## Prioritized Backlog
-
-### Future
-- Multi-agent AI system (Technical/Quant/Macro/Sentiment agents)
-- On-chain data (Glassnode), Macro data (FRED, World Bank)
-- Historical backtesting with real price validation
-- Paper trading, Google OAuth
-- Kafka/Redis/TimescaleDB scaling
-- News sentiment analysis
-
-## Test Credentials
-- Email: test@aureos.com / Password: Test1234!
+quant_weights, scanner_history, agent_analyses, paper_portfolios, paper_trades
 
 ## Official Documents
 - /app/Aureos_Vision_Statement.md
-- /app/Aureos_NDA_Template.md
 - /app/Aureos_Corporate_Manifesto.md
+- /app/Aureos_NDA_Template.md
+
+## Remaining Backlog
+- Kafka/Redis/TimescaleDB scaling (infrastructure)
+- On-chain data (Glassnode - requires API key)
+- Macro data (FRED - requires API key)
+- Advanced backtesting with real historical price validation
+- News scraping from financial news sources
