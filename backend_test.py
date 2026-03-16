@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 class AureosAPITester:
-    def __init__(self, base_url="https://premium-fintech-13.preview.emergentagent.com"):
+    def __init__(self, base_url="https://market-pulse-1064.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

@@ -679,7 +679,7 @@ async def create_checkout(data: CheckoutRequest, request: Request, user: dict = 
 async def get_payment_status(session_id: str, user: dict = Depends(get_current_user)):
     try:
         api_key = os.environ.get('STRIPE_API_KEY')
-        host_url = "https://premium-fintech-13.preview.emergentagent.com"
+        host_url = "https://market-pulse-1064.preview.emergentagent.com"
         webhook_url = f"{host_url}/api/webhook/stripe"
         
         stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
@@ -1083,9 +1083,11 @@ app.include_router(api_router)
 from routes.analysis import router as analysis_router
 from routes.assets import router as assets_router
 from routes.jarvis import router as jarvis_router
+from routes.watchlist import router as watchlist_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
+app.include_router(watchlist_router)
 
 app.add_middleware(
     CORSMiddleware,

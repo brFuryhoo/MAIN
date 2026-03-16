@@ -18,6 +18,7 @@ import TutorialPage from "@/pages/TutorialPage";
 import SettingsPage from "@/pages/SettingsPage";
 import SignalsPage from "@/pages/SignalsPage";
 import PortfolioPage from "@/pages/PortfolioPage";
+import WatchlistPage from "@/pages/WatchlistPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -147,6 +148,7 @@ function App() {
             <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/signals" element={<ProtectedRoute><SignalsPage /></ProtectedRoute>} />
+            <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
             <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
             <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
             

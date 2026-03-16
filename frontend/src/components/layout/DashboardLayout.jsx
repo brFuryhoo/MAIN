@@ -17,7 +17,8 @@ import {
   History,
   Bell,
   Search,
-  Crown
+  Crown,
+  Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/analysis', label: 'New Analysis', icon: Zap },
+  { path: '/watchlist', label: 'Watchlist', icon: Eye },
   { path: '/signals', label: 'AI Signals', icon: TrendingUp },
   { path: '/portfolio', label: 'Portfolio', icon: Wallet },
   { path: '/copilot', label: 'AI Copilot', icon: Bot },
