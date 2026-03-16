@@ -184,6 +184,17 @@ async def start_analysis(req: AnalysisRequest, request: Request = None):
                 "regime": report.get("regime", {}),
                 "manipulation_score": manipulation["manipulation_score"],
                 "timestamp": timestamp,
+                # Quant Lab enrichment fields
+                "rsi": technical.get("rsi", 50),
+                "macd": technical.get("macd", {}),
+                "moving_averages": technical.get("moving_averages", {}),
+                "bollinger_bands": technical.get("bollinger_bands", {}),
+                "volume_trend": technical.get("volume_trend", "stable"),
+                "atr_percent": technical.get("atr_percent", 2),
+                "structure_bias": structure.get("bias", "neutral"),
+                "monte_carlo_win_prob": mc_result.get("win_probability", 50),
+                "risk_score": risk.get("risk_score", 50),
+                "liquidity_signal": 0.6 if liquidity.get("near_support") else (-0.6 if liquidity.get("near_resistance") else 0),
             }
             await db.analysis_history.insert_one(history_doc)
         except Exception as e:

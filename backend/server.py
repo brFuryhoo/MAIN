@@ -1034,10 +1034,12 @@ from routes.analysis import router as analysis_router
 from routes.assets import router as assets_router
 from routes.jarvis import router as jarvis_router
 from routes.watchlist import router as watchlist_router
+from routes.quant_lab import router as quant_lab_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
 app.include_router(watchlist_router)
+app.include_router(quant_lab_router)
 
 app.add_middleware(
     CORSMiddleware,
