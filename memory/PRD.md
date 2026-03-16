@@ -1,14 +1,7 @@
 # Aureos AI - Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is an advanced AI-driven financial intelligence platform. The project includes:
-- **UI/UX:** Premium, futuristic, minimalistic design (Deep Black, Aureos Gold, Cyber Blue, Soft Grey)
-- **Global Free-Asset Selector:** Universal search for any asset type (stock, crypto, commodity, forex, index)
-- **9-Step Analysis Pipeline:** Institutional-grade analysis workflow with animated progress
-- **Analysis Engines:** Technical Analysis, Market Structure, Liquidity Mapping, Monte Carlo, Risk, Causality, Probability
-- **Executive Report Modal:** Detailed premium-styled report with all analysis results
-- **Voice + Chat Copilot:** Floating window with voice commands (Whisper), narration (OpenAI TTS)
-- **Dashboard:** Premium redesigned pages (Home, Analysis, Signals, Portfolio, Settings)
+Aureos AI is an advanced AI-driven financial intelligence platform operated by JARVIS (Central Intelligence Core). The platform aims to democratize institutional-grade market analysis for everyday traders.
 
 ## Architecture
 - **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Lightweight Charts v5
@@ -16,26 +9,29 @@ Aureos AI is an advanced AI-driven financial intelligence platform. The project 
 - **Database:** MongoDB
 - **Auth:** JWT
 - **Payments:** Stripe (3-tier subscription)
-- **AI:** OpenAI GPT-5.2, Whisper (STT), TTS-1 (planned/partial)
+- **AI:** GPT-5.2 via Emergent LLM key (JARVIS Copilot)
 - **Data:** CoinGecko (crypto, live), Mock layer (stocks, forex, commodities, indices)
 
 ## Backend Module Architecture
 ```
 /app/backend/
-├── server.py                  # Main FastAPI app, auth, stripe, copilot
+├── server.py                       # Main FastAPI app, auth, stripe
 ├── routes/
-│   ├── analysis.py            # POST /api/analysis/start
-│   └── assets.py              # GET /api/assets/search
+│   ├── analysis.py                 # POST /api/analysis/start (11 steps), GET /api/analysis/history
+│   ├── assets.py                   # GET /api/assets/search
+│   └── jarvis.py                   # POST /api/jarvis/chat, POST /api/jarvis/explain-report
 └── services/
-    ├── market_data.py          # Market Data Adapter (CoinGecko + Mock)
-    ├── technical_engine.py     # RSI, MACD, MAs, BBands, ATR, Support/Resistance
-    ├── market_structure.py     # HH/HL/LH/LL, consolidation, breakout detection
-    ├── liquidity_mapper.py     # Volume clusters, volatility zones, liquidity pools
-    ├── monte_carlo.py          # 5000 simulation Monte Carlo
-    ├── risk_engine.py          # VaR, drawdown, position sizing, risk scoring
-    ├── causality_engine.py     # Market explanation engine
-    ├── probability_engine.py   # Combined signal probabilities (BUY/SELL/HOLD)
-    └── report_generator.py     # Executive report generation
+    ├── market_data.py              # Market Data Adapter (CoinGecko + Mock)
+    ├── technical_engine.py         # RSI, MACD, MAs, BBands, ATR, S/R
+    ├── market_structure.py         # HH/HL/LH/LL, consolidation, breakout
+    ├── liquidity_mapper.py         # Volume clusters, volatility zones
+    ├── monte_carlo.py              # 5000 simulation Monte Carlo
+    ├── risk_engine.py              # VaR, drawdown, position sizing
+    ├── causality_engine.py         # Market explanation engine
+    ├── probability_engine.py       # Combined BUY/SELL/HOLD signals
+    ├── report_generator.py         # Executive report generation
+    ├── regime_detector.py          # Market regime classification
+    └── manipulation_detector.py    # Manipulation pattern detection
 ```
 
 ## What's Been Implemented
@@ -43,67 +39,64 @@ Aureos AI is an advanced AI-driven financial intelligence platform. The project 
 ### Phase 1 - Foundation (Complete)
 - JWT Authentication (Login/Register)
 - Stripe 3-tier subscription integration
-- Basic dashboard and landing page with premium Aureos theme
+- Premium dashboard with Aureos dark/gold theme
 - MongoDB integration
 
-### Phase 2 - Full Analysis Pipeline (Complete - March 16, 2026)
-- **9-Step Analysis Pipeline Backend:**
-  1. Market Data Aggregation (CoinGecko + mock)
-  2. Technical Analysis Engine (RSI, MACD, MAs, BBands, ATR, S/R)
-  3. Market Structure Detection (swing points, HH/HL/LH/LL, breakouts)
-  4. Liquidity Mapping (volume clusters, volatility zones, liquidity pools)
-  5. Quantitative Scenario Modeling (5000 Monte Carlo simulations)
-  6. Risk Modeling Engine (VaR, drawdown, position sizing, Kelly criterion)
-  7. Market Causality Engine (explains WHY price moves)
-  8. Probability Engine (combined BUY/SELL/HOLD signal with confidence)
-  9. Executive Market Report Generator
-- **Frontend Integration:**
-  - GlobalAssetSelector connected to /api/assets/search (CoinGecko live search)
-  - AnalysisPipeline with animated 9-step progress visualization
-  - ProbabilityEngine with scenario probability bars
-  - ExecutiveReportModal with 8 sections (Signal, Action Plan, Technical, Structure, Monte Carlo, Risk, Causality, Signals/Risks)
-  - Lightweight Charts v5 integration (candlestick + volume + support/resistance lines)
-- **Testing:** 100% pass rate (14/14 backend, all frontend flows)
+### Phase 2 - Analysis Pipeline (Complete - March 16, 2026)
+- 9-Step analysis pipeline (Market Data, Technical, Structure, Liquidity, Monte Carlo, Risk, Causality, Probability, Executive Report)
+- Global Asset Selector (CoinGecko live + mock data)
+- Lightweight Charts v5 (candlestick + volume + support/resistance)
+- Executive Report Modal
+- Testing: 100% pass rate (14/14)
+
+### Phase 3 P0 - JARVIS Intelligence Layer (Complete - March 16, 2026)
+- **JARVIS AI Copilot** - GPT-5.2 via Emergent LLM key, context-aware chat, report explanation
+- **Analysis History** - All analyses saved to MongoDB `analysis_history` collection
+- **Market Regime Detection** - Bull/bear/sideways classification, volatility regimes (calm/normal/elevated/extreme), market phases (accumulation/markup/distribution/etc.), regime stability scoring
+- **Manipulation Detection** - Liquidity sweeps, stop-loss hunts, volume anomalies, false breakouts/volatility traps, manipulation risk scoring (0-100)
+- **Enhanced Pipeline** - Now 11 steps (original 9 + regime + manipulation)
+- **Enhanced Executive Report** - Includes Market Regime and Manipulation Detection sections
+- **JARVIS Conversations** - Stored in MongoDB `jarvis_conversations` collection
+- Testing: 100% pass rate (15/15 backend, all frontend flows)
 
 ## Key API Endpoints
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - JWT login
 - `GET /api/assets/search?q=` - Global asset search
-- `POST /api/analysis/start` - 9-step analysis pipeline
+- `POST /api/analysis/start` - 11-step analysis pipeline
+- `GET /api/analysis/history` - User's analysis history
+- `POST /api/jarvis/chat` - JARVIS conversational intelligence
+- `POST /api/jarvis/explain-report` - Report explanation
+- `GET /api/jarvis/history` - Conversation history
 - `POST /api/stripe/create-checkout-session` - Stripe checkout
-- `POST /api/copilot` - AI copilot chat
-- `POST /api/voice/stt` - Speech to text
-- `POST /api/voice/tts` - Text to speech
 
-## DB Schema
+## DB Collections
 - **users**: `{email, hashed_password, full_name, created_at}`
 - **subscriptions**: `{user_id, stripe_customer_id, plan, status}`
+- **analysis_history**: `{analysis_id, user_id, symbol, name, asset_type, timeframe, price, signal, regime, manipulation_score, timestamp}`
+- **jarvis_conversations**: `{session_id, user_id, role, content, timestamp}`
 
 ## Prioritized Backlog
 
-### P0 (Next)
-- Save analysis results to MongoDB (analysis_history collection)
-- Wire AI Copilot (GPT-5.2) to explain analysis results and answer trading questions
-
-### P1
-- Integrate real data providers (Alpha Vantage for stocks, NewsAPI for sentiment)
-- WebSocket layer for real-time data updates
-- Voice copilot with Whisper STT + TTS narration of reports
-- Signals page with live tracking of analyzed assets
+### P1 (Next)
+- **Watchlist Automation** - Users save assets, JARVIS monitors for signal changes, push notifications
+- **Autonomous Market Scanner** - Background scan for breakouts, reversals, momentum across all assets
+- **WebSocket Real-Time Updates** - Live data feed to dashboard
 
 ### P2
-- PDF export for executive reports
-- Portfolio page with analysis history
-- Historical backtesting
-- Paper trading mode with virtual currency
-- Google OAuth
+- **Global Market Intelligence Map** - Visual capital flows, liquidity zones, correlation shifts
+- **Autonomous Quant Lab** - Self-improving indicator discovery
+- **Voice Interface** - Whisper STT + TTS for JARVIS narration
+- **PDF Export** for executive reports
 
-### Future (Multi-Agent AI Evolution)
-- Technical Analyst Agent
-- Quantitative Modeling Agent
-- Macro Intelligence Agent
-- Sentiment Analysis Agent
-- Liquidity Detection Agent
+### Future
+- Multi-agent system (Technical/Quant/Macro/Sentiment/Liquidity agents)
+- On-chain data (Glassnode, CryptoQuant)
+- Macro data (FRED, World Bank)
+- Alpha Vantage / NewsAPI integration
+- Historical backtesting
+- Paper trading mode
+- Google OAuth
 - Market Intelligence Graph (cross-asset correlation mapping)
 
 ## Test Credentials
@@ -111,6 +104,6 @@ Aureos AI is an advanced AI-driven financial intelligence platform. The project 
 - Password: Demo1234!
 
 ## Notes
-- Stocks, forex, commodities, indices use MOCK data (designed for easy plug-in of real providers)
-- Only crypto uses real CoinGecko API data
-- Lightweight Charts v5 requires CandlestickSeries/HistogramSeries class imports
+- Stocks/forex/commodities/indices use MOCK data (designed for easy plug-in of real providers)
+- Only crypto uses real CoinGecko API
+- JARVIS uses real GPT-5.2 via Emergent LLM key
