@@ -63,7 +63,7 @@ async def get_watchlist(request: Request):
         user_id = _extract_user_id(request)
 
         items = await db.watchlist.find(
-            {"user_id": user_id}, {"_id": 0}
+            {"user_id": user_id}, {"_id": 0, "user_id": 0}
         ).sort("added_at", -1).to_list(50)
 
         # Enrich with latest analysis data
@@ -85,7 +85,7 @@ async def get_watchlist(request: Request):
 
         # Also get alerts
         alerts = await db.watchlist_alerts.find(
-            {"user_id": user_id, "read": False}, {"_id": 0}
+            {"user_id": user_id, "read": False}, {"_id": 0, "user_id": 0}
         ).sort("created_at", -1).limit(20).to_list(20)
 
         return {

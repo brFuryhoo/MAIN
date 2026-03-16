@@ -77,11 +77,6 @@ class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
 
-class WatchlistItem(BaseModel):
-    symbol: str
-    asset_type: str  # stock, crypto, forex
-    name: str
-
 class PortfolioPosition(BaseModel):
     symbol: str
     asset_type: str
@@ -569,52 +564,7 @@ async def remove_position(symbol: str, user: dict = Depends(get_current_user)):
     await db.users.update_one({"id": user["id"]}, {"$set": {"portfolio": portfolio}})
     return {"message": "Position removed", "portfolio": portfolio}
 
-# ==================== WATCHLIST ENDPOINTS ====================
-
-@api_router.get("/watchlist")
-async def get_watchlist(user: dict = Depends(get_current_user)):
-    watchlist = user.get("watchlist", [])
-    enriched = []
-    
-    for item in watchlist:
-        symbol = item["symbol"]
-        stock = MOCK_STOCKS.get(symbol)
-        crypto = MOCK_CRYPTO.get(symbol.lower())
-        
-        if stock:
-            enriched.append({**item, "price": stock["price"], "change_percent": stock["change_percent"]})
-        elif crypto:
-            enriched.append({**item, "price": crypto["price"], "change_percent": crypto["change_24h"]})
-        else:
-            enriched.append(item)
-    
-    return {"watchlist": enriched}
-
-@api_router.post("/watchlist/add")
-async def add_to_watchlist(item: WatchlistItem, user: dict = Depends(get_current_user)):
-    watchlist = user.get("watchlist", [])
-    
-    # Check limits based on subscription
-    plan = user.get("subscription_plan", "free")
-    limits = {"free": 5, "essential": 10, "pro": 50, "elite": 1000}
-    
-    if len(watchlist) >= limits.get(plan, 5):
-        raise HTTPException(status_code=400, detail=f"Watchlist limit reached for {plan} plan")
-    
-    # Check if already exists
-    if any(w["symbol"] == item.symbol for w in watchlist):
-        raise HTTPException(status_code=400, detail="Already in watchlist")
-    
-    watchlist.append(item.model_dump())
-    await db.users.update_one({"id": user["id"]}, {"$set": {"watchlist": watchlist}})
-    return {"message": "Added to watchlist", "watchlist": watchlist}
-
-@api_router.delete("/watchlist/{symbol}")
-async def remove_from_watchlist(symbol: str, user: dict = Depends(get_current_user)):
-    watchlist = user.get("watchlist", [])
-    watchlist = [w for w in watchlist if w["symbol"].upper() != symbol.upper()]
-    await db.users.update_one({"id": user["id"]}, {"$set": {"watchlist": watchlist}})
-    return {"message": "Removed from watchlist", "watchlist": watchlist}
+# ==================== WATCHLIST ENDPOINTS (handled by routes/watchlist.py) ====================
 
 # ==================== SUBSCRIPTION ENDPOINTS ====================
 
