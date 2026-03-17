@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, API } from '@/App';
 import AureosLayout from '@/components/layout/DashboardLayout';
 import JarvisCopilot from '@/components/jarvis/JarvisCopilot';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, TrendingDown, Zap, BarChart2, Wallet,
   ArrowUpRight, ArrowDownRight, RefreshCw, Activity,
   Bot, Target, Globe, Shield, AlertTriangle,
   ChevronRight, Flame, Eye, Brain, Radar,
-  Clock, Newspaper, MessageSquare
+  Clock, Newspaper, MessageSquare, Volume2, VolumeX,
+  Play, Pause, Radio, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -31,10 +32,57 @@ const DashboardPage = () => {
   const [highlights, setHighlights] = useState([]);
   const [events, setEvents] = useState([]);
   const [portfolio, setPortfolio] = useState({ positions: [], total_value: 0, total_pnl: 0 });
+  const [voiceBriefing, setVoiceBriefing] = useState({ loading: false, ready: false, playing: false, dismissed: false, progress: 0 });
+  const voiceAudioRef = useRef(null);
 
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   useEffect(() => { fetchAll(); }, []);
+
+  // Auto-load daily voice briefing on mount
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const lastBriefing = localStorage.getItem('aureos_last_voice_briefing');
+    if (lastBriefing === today) return; // Already played today
+    loadVoiceBriefing();
+  }, []);
+
+  const loadVoiceBriefing = async () => {
+    setVoiceBriefing(v => ({ ...v, loading: true }));
+    try {
+      const resp = await axios.get(`${API}/voice/daily-briefing-audio`, { responseType: 'blob', timeout: 90000 });
+      const audioUrl = URL.createObjectURL(new Blob([resp.data], { type: 'audio/mpeg' }));
+      if (voiceAudioRef.current) {
+        voiceAudioRef.current.src = audioUrl;
+        voiceAudioRef.current.onended = () => setVoiceBriefing(v => ({ ...v, playing: false }));
+        voiceAudioRef.current.ontimeupdate = () => {
+          if (voiceAudioRef.current?.duration) {
+            setVoiceBriefing(v => ({ ...v, progress: (voiceAudioRef.current.currentTime / voiceAudioRef.current.duration) * 100 }));
+          }
+        };
+      }
+      setVoiceBriefing(v => ({ ...v, loading: false, ready: true }));
+      localStorage.setItem('aureos_last_voice_briefing', new Date().toDateString());
+    } catch {
+      setVoiceBriefing(v => ({ ...v, loading: false }));
+    }
+  };
+
+  const toggleVoiceBriefing = () => {
+    if (!voiceAudioRef.current) return;
+    if (voiceBriefing.playing) {
+      voiceAudioRef.current.pause();
+      setVoiceBriefing(v => ({ ...v, playing: false }));
+    } else {
+      voiceAudioRef.current.play();
+      setVoiceBriefing(v => ({ ...v, playing: true }));
+    }
+  };
+
+  const dismissVoiceBriefing = () => {
+    if (voiceAudioRef.current) voiceAudioRef.current.pause();
+    setVoiceBriefing(v => ({ ...v, dismissed: true, playing: false }));
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -106,6 +154,75 @@ const DashboardPage = () => {
   return (
     <AureosLayout>
       <div className="space-y-6" data-testid="dashboard-page">
+
+        {/* Hidden audio element for voice briefing */}
+        <audio ref={voiceAudioRef} className="hidden" />
+
+        {/* ── DAILY VOICE BRIEFING BANNER ── */}
+        <AnimatePresence>
+          {!voiceBriefing.dismissed && (voiceBriefing.loading || voiceBriefing.ready) && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              className="rounded-xl overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, rgba(0,180,255,0.08), rgba(207,174,70,0.05))' }}
+              data-testid="voice-briefing-banner"
+            >
+              <div className="px-5 py-3 flex items-center gap-4 border border-[#00B4FF]/20 rounded-xl relative">
+                {/* Animated waveform icon */}
+                <div className="w-10 h-10 rounded-full bg-[#00B4FF]/15 flex items-center justify-center flex-shrink-0">
+                  {voiceBriefing.loading ? (
+                    <RefreshCw size={18} className="text-[#00B4FF] animate-spin" />
+                  ) : voiceBriefing.playing ? (
+                    <Volume2 size={18} className="text-[#00B4FF] animate-pulse" />
+                  ) : (
+                    <Radio size={18} className="text-[#00B4FF]" />
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[#00B4FF] flex items-center gap-2">
+                    JARVIS Daily Voice Briefing
+                    <span className="text-[9px] bg-[#00B4FF]/15 text-[#00B4FF] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">
+                      {voiceBriefing.loading ? 'Generating...' : voiceBriefing.playing ? 'Live' : 'Ready'}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-[#888] mt-0.5">
+                    {voiceBriefing.loading
+                      ? 'JARVIS is preparing your personalized morning market briefing...'
+                      : 'Your 60-second market intelligence briefing is ready'}
+                  </p>
+                  {/* Progress bar */}
+                  {voiceBriefing.ready && (
+                    <div className="mt-2 h-1 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full bg-[#00B4FF]"
+                        style={{ width: `${voiceBriefing.progress}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {voiceBriefing.ready && (
+                    <Button onClick={toggleVoiceBriefing} size="sm"
+                      className="bg-[#00B4FF]/20 hover:bg-[#00B4FF]/30 text-[#00B4FF] border border-[#00B4FF]/30 px-4"
+                      data-testid="voice-briefing-play-btn"
+                    >
+                      {voiceBriefing.playing ? <Pause size={14} className="mr-1.5" /> : <Play size={14} className="mr-1.5" />}
+                      {voiceBriefing.playing ? 'Pause' : 'Play'}
+                    </Button>
+                  )}
+                  <button onClick={dismissVoiceBriefing} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors" data-testid="voice-briefing-dismiss-btn">
+                    <X size={14} className="text-[#666]" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── SENTIMENT BANNER ── */}
         {briefing?.sentiment && (

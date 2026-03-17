@@ -980,6 +980,74 @@ async def narrate_report(data: NarrateReportRequest):
         raise HTTPException(status_code=500, detail=f"Narration error: {str(e)}")
 
 
+@api_router.get("/voice/daily-briefing-audio")
+async def daily_briefing_audio():
+    """Auto-generated daily voice briefing — JARVIS narrates the market overnight summary. Returns audio/mpeg."""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Voice service not configured")
+
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        from routes.intelligence import get_market_pulse, get_performance_highlights, GEOPOLITICAL_REGIONS, GLOBAL_EVENTS
+
+        pulse = get_market_pulse()
+        highlights = get_performance_highlights()[:5]
+        high_risk = [r for r in GEOPOLITICAL_REGIONS if r["risk_score"] > 50]
+        critical_events = [e for e in GLOBAL_EVENTS if e["severity"] in ("critical", "high")][:4]
+
+        market_ctx = ", ".join([f"{p['symbol']} at {p['value']:.0f} ({'+' if p['change']>0 else ''}{p['change']:.1f}%)" for p in pulse[:6]])
+        risk_ctx = ", ".join([f"{r['name']} risk {r['risk_score']}" for r in high_risk[:4]])
+        events_ctx = " | ".join([f"{e['title']}" for e in critical_events])
+        top_ctx = ", ".join([f"{h['asset']} +{h['performance']:.0f}%" for h in highlights])
+
+        prompt = f"""You are JARVIS, the AI intelligence core of Aureos AI. Record a 60-second morning voice briefing for an investor.
+
+Current markets: {market_ctx}
+High-risk regions: {risk_ctx}
+Critical events: {events_ctx}
+Top performers: {top_ctx}
+
+Rules:
+- Speak naturally and confidently, like a senior analyst at Goldman Sachs delivering a morning note
+- Start with "Good morning. This is JARVIS, your Aureos AI intelligence briefing for today."
+- Cover: overnight market moves, key geopolitical risks, top opportunities, and a one-sentence outlook
+- Keep it under 180 words for ~60 seconds of speech
+- Use specific numbers and tickers
+- End with "Stay sharp. JARVIS out."
+- Do NOT use markdown, bullets, or special characters — this is a voice script"""
+
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"daily_voice_{datetime.now().strftime('%Y%m%d%H')}",
+            system_message="You are JARVIS, a professional financial AI. Write natural voice scripts only."
+        ).with_model("openai", "gpt-5.2")
+
+        script = await chat.send_message(UserMessage(text=prompt))
+        script = script[:3000]
+
+        tts = OpenAITextToSpeech(api_key=api_key)
+        audio_bytes = await tts.generate_speech(
+            text=script,
+            model="tts-1",
+            voice="onyx",
+            speed=1.0,
+            response_format="mp3"
+        )
+
+        from fastapi.responses import Response as RawResponse
+        return RawResponse(
+            content=audio_bytes,
+            media_type="audio/mpeg",
+            headers={"Content-Disposition": "inline; filename=jarvis_daily_briefing.mp3"}
+        )
+
+    except Exception as e:
+        logger.error(f"Daily voice briefing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Voice briefing error: {str(e)}")
+
+
+
 @api_router.post("/voice/speech-to-text")
 async def speech_to_text(
     audio: UploadFile = File(...),
