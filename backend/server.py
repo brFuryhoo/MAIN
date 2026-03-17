@@ -718,7 +718,7 @@ async def create_checkout(data: CheckoutRequest, request: Request, user: dict = 
 async def get_payment_status(session_id: str, user: dict = Depends(get_current_user)):
     try:
         api_key = os.environ.get('STRIPE_API_KEY')
-        host_url = "https://aureos-ai.preview.emergentagent.com"
+        host_url = "https://fintech-powerhouse.preview.emergentagent.com"
         webhook_url = f"{host_url}/api/webhook/stripe"
         
         stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
@@ -1244,6 +1244,7 @@ from routes.scanner import router as scanner_router
 from routes.intelligence_map import router as intel_map_router
 from routes.intelligence import router as intelligence_router
 from routes.quantica import router as quantica_router
+from routes.autonomous import router as autonomous_router
 from routes.pdf_export import router as pdf_export_router
 from routes.multi_agent import router as multi_agent_router
 from routes.news_sentiment import router as news_router

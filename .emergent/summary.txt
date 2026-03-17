@@ -1,158 +1,183 @@
 <analysis>**original_problem_statement:**
-The user, Fabricio Teodoroves, envisioned Aureos AI, a sophisticated fintech platform powered by an AI core named JARVIS. The goal was to build an institutional-grade market analysis tool with a premium UI/UX.
+The user, Fabricio Teodoroves, wants to build Aureos AI, an institutional-grade fintech platform powered by an AI core named JARVIS. The initial vision has been fully implemented. The user's new goal is to evolve the platform into the most powerful project ever made, making it a unique and superior AI Quantica platform. This includes surpassing specific competitors (like Cyber MoneyLab), ensuring data accuracy across all assets, and expanding the platform's capabilities with innovative features targeting global markets.
 
-The core product requirements included:
-- **Global Data Integration:** Sourcing real-time/historical data for all asset classes from providers like CoinGecko, Twelve Data, Polygon.io, and Alpha Vantage.
-- **Institutional Analysis Pipeline:** An 11-step backend workflow including Technical Analysis, Monte Carlo Simulation, and Market Regime/Manipulation Detection.
-- **Executive AI Copilot (JARVIS):** An AI assistant (GPT-5.2) for explaining reports.
-- **Autonomous Systems:** Features like Watchlist Automation, Market Scanner, and an Autonomous Quant Lab (AI Quantica) to find opportunities and refine models.
-- **Premium UI/UX:** A complete frontend rebuild with a professional, futuristic aesthetic and interactive charts.
-- **Full Feature Suite:** Implementation of features like Paper Trading, Historical Backtesting, News Sentiment analysis, PDF report exporting, and a multi-agent AI system.
-- **Authentication:** Both JWT-based and Google Social Login.
-- **Legal & IP Protection:** Generation of official documents like NDAs, a Corporate Manifesto, and a Vision Statement.
+PRODUCT REQUIREMENTS:
+-   **Data Accuracy & Expansion:** Fix incorrect price data (e.g., Gold) and expand the asset universe to be as comprehensive as possible, covering all global asset classes.
+-   **Dashboard Command Center:** A complete overhaul of the UI to be a powerful, data-rich command center.
+-   **Enhanced Intelligence:** Implement a refined global intelligence map, narrated reports (TTS), and automatic daily voice briefings.
+-   **Launch Readiness:** Add production-grade features like SEO, API rate-limiting, and structured error logging.
+-   **Unique Differentiators:** Implement multiple batches of unique features including an AI Portfolio Optimizer, Fear & Greed Index, Market Anomaly Detection, AI Trading Signals, a Live Market Radar, and a Global Market Overview.
+-   **Macro & Alternative Data:** Integrate a Macroeconomic Dashboard, AI-powered newsfeeds, a cross-asset correlator, social sentiment analysis, a global regulatory tracker, and supply chain intelligence.
 
 **User's preferred language**: Portuguese
 
 **what currently exists?**
-The application is a feature-complete, full-stack platform that has realized the user's entire vision.
-- **Backend (FastAPI):** A robust, modular backend orchestrates an 11-step analysis pipeline, a multi-agent AI system, an autonomous quant lab for backtesting and model optimization, a market scanner, paper trading, news sentiment analysis, and PDF exporting. It integrates multiple real-time data providers and uses WebSockets for real-time updates. Authentication supports both JWT and Google OAuth.
-- **Frontend (React):** A highly polished and premium frontend provides a comprehensive user experience. It includes a dashboard layout with dedicated, fully functional pages for every major feature: Analysis, Watchlist, Quant Lab, Market Scanner, Intelligence Map, Backtesting, and Paper Trading. The JARVIS AI copilot is integrated as a floating component with full voice (STT/TTS) capabilities.
+The application is an advanced, feature-rich, full-stack platform. The initial product roadmap is complete. In this session, the platform underwent a massive transformation to align with the user's most powerful vision. Key existing features include:
+-   **Backend (FastAPI):** A robust backend with real-time data integration (Alpha Vantage, Twelve Data), an 11-step analysis pipeline, a multi-agent AI system, a quant lab, a market scanner, paper trading, and JWT/Google Auth. It now includes API rate-limiting and structured JSON logging.
+-   **Frontend (React):** A completely redesigned premium UI. It features a new Command Center dashboard displaying a global market overview, a Fear & Greed index, and real-time asset prices. It includes new pages for a Market Radar and Weekly Digest, an enhanced portfolio page with an AI optimizer, and a refined Intelligence Terminal world map. JARVIS copilot is fully integrated with TTS for report narration and an automatic daily voice briefing.
 
 **Last working item**:
-    - Last item agent was working: The agent's last action was providing the user with a roadmap for future work and advising on a non-code-related DNS configuration issue for their custom domain. The last coding work involved implementing a massive batch of 7 features from the product backlog, which was fully completed and tested.
-    - Status: NONE
-    - Agent Testing Done: Y
-    - Which testing method agent to use? NA
-    - User Testing Done: Y
+    - Last item agent was working: The user approved a new, massive batch of features to make the platform globally unique, including a Macroeconomic Dashboard, AI Newsfeed, Cross-Asset Correlator, Social Sentiment Analysis, Regulatory Tracker, and Supply Chain Intelligence. The agent had just received approval to proceed with implementation.
+    - Status: NOT STARTED
+    - Agent Testing Done: N
+    - Which testing method agent to use? both
+    - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  Issue 1: User is unable to link their custom domain. (Priority: P0)
+  Issue 1:  Data Accuracy for Gold and other assets (Priority: P0)
+  Issue 2:  Expand Asset Coverage (Priority: P1)
   
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: The user tried the auto linking by ionos feature from their domain provider, which did not work. They are seeing a Linking is pending. Recheck the DNS records message.
+     - Attempted fixes: The agent integrated real-time data from Twelve Data but noted the price for Gold (XAU/USD) was abnormally high (around ,017). The user explicitly flagged this as incorrect. The issue seems to be with the data source's unit (e.g., price per 10oz batch vs. per troy ounce).
      - Next debug checklist: 
-        1. Advise the user to check their hosting provider (e.g., Emergent) for the correct CNAME or A record values required for their custom domain.
-        2. Instruct the user to manually add/verify these records in their IONOS DNS management panel.
-        3. Explain that DNS propagation can take several hours and suggest using a tool like  to monitor the status.
-     - Why fix this issue and what will be achieved with the fix? This is the final step required for the user to launch their application on a production domain.
-     - Status:  BLOCKED
+        1. Investigate the Twelve Data API documentation for the  symbol to understand the exact unit of measurement.
+        2. Find an alternative, reliable data source for precious metals if the unit cannot be easily converted.
+        3. Implement a normalization layer in  to ensure all prices are displayed in standard units (e.g., Gold per troy ounce).
+        4. Verify prices for other assets to ensure their accuracy.
+     - Why fix this issue and what will be achieved with the fix? This is critical for user trust and the platform's credibility as a financial tool.
+     - Status:  NOT STARTED
      - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? NA
-     - Blocked on other issue: User action required in their DNS provider's settings.
+     - Should Test frontend/backend/both after fix? backend
+     - Blocked on other issue: None
+  - Issue 2: 
+     - Attempted fixes: The agent added a Global Market Overview but the list of assets users can search for and analyze is still limited. The user requested access to the maximum possible.
+     - Next debug checklist: 
+        1. Research APIs (from Twelve Data, Polygon) that provide a comprehensive list of tradable symbols across stocks, ETFs, forex, and commodities.
+        2. Implement a backend service to fetch and cache this master list of assets.
+        3. Modify the frontend's asset selection components (e.g., search bars, dropdowns) to use this dynamic list instead of a hardcoded one.
+     - Why fix this issue and what will be achieved with the fix? This will fulfill a core user request to make the platform truly global and comprehensive.
+     - Status:  NOT STARTED
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? both
+     - Blocked on other issue: None
 
 **In progress Task List**:
-None. All planned development tasks from the roadmap have been completed.
+None.
 
 **Upcoming and Future Tasks**
-The entire initial roadmap was completed. The agent proposed the following next steps:
-
- Upcoming Tasks (P0 - Launch Prep):
--   **(P0) SEO & Meta Tags:** Implement Open Graph, Twitter cards, and other meta tags for better search engine visibility.
--   **(P0) API Rate Limiting:** Protect backend APIs from abuse.
--   **(P0) Error Monitoring:** Implement structured logging for production environments.
+ Upcoming Tasks:
+-   **(P0) Implement FULL POWER MÁXIMO Feature Batch:**
+    1.  **Macroeconomic Dashboard:** A new page for global economic indicators (GDP, inflation, interest rates).
+    2.  **AI-Powered Newsfeed:** A new page with real-time, categorized, and AI-summarized financial news.
+    3.  **Cross-Asset Correlator:** A new tool to visualize correlations between different assets (e.g., BTC vs. Gold).
+    4.  **Social Sentiment Analysis:** Integrate Twitter/Reddit sentiment for key assets.
+    5.  **Global Regulatory Tracker:** A dashboard widget or page to monitor financial regulations.
+    6.  **Supply Chain Intelligence:** A specialized view for tracking key commodity supply chains.
 
  Future Tasks:
--   **(P1) Advanced Data Integration:** Integrate On-chain data (Glassnode) and Macroeconomic data (FRED). Both require user-provided API keys.
--   **(P2) Product Enhancements:** Build a Founder Dashboard for user metrics, implement advanced backtesting with more metrics (Sharpe ratio, drawdown), and add email alerts.
--   **(P3) Infrastructure Scaling:** Evolve the architecture by introducing Redis for caching, Kafka for event streaming, and TimescaleDB for time-series data storage.
+-   **(P2) Product Enhancements:** Build a Founder Dashboard for user metrics and implement advanced backtesting with more metrics (Sharpe ratio, drawdown).
+-   **(P3) Infrastructure Scaling:** Introduce Redis for caching, Kafka for event streaming, and TimescaleDB for time-series data storage.
 -   **(P4) Business Differentiation:** Create a Telegram/Discord bot for JARVIS alerts and explore offering a public API as a new revenue stream.
 
 **Completed work in this session**
-This session saw a massive expansion of the platform, with the completion of the entire product roadmap.
-- **Bug Fixes:** Resolved critical UI bugs where the Select Asset dropdown was invisible due to CSS  and  issues.
-- **Watchlist Automation (P0):** Completed and tested the full CRUD functionality for user watchlists.
-- **Autonomous Quant Lab (AI Quantica):** Implemented a complete quantitative engine with a backtester, evolutionary model optimizer, pattern discovery, and a 5-tab frontend dashboard.
-- **Autonomous Market Scanner:** Built a background service and UI to scan markets for trading opportunities.
-- **WebSocket Real-Time Updates:** Integrated WebSockets for pushing live data to the frontend.
-- **Global Market Intelligence Map:** Developed a UI to visualize market data and capital flows.
-- **Enhanced Voice Interface:** Added full text-to-speech (TTS) and speech-to-text (STT) capabilities to the JARVIS Copilot.
-- **PDF Report Export:** Added functionality to export executive analysis reports as PDF documents.
-- **P3 Backlog Completion:**
-    - **Multi-Agent AI System:** Laid the foundation for specialized AI agents.
-    - **News Sentiment Analysis:** Integrated a service for analyzing financial news.
-    - **Paper Trading:** Implemented a virtual trading account with a 00k starting balance.
-    - **Google OAuth:** Integrated Google Social Login alongside the existing JWT system.
-- **Official Documentation:** Created and saved the  and .
+- **Real Market Data Integration:** Replaced all mock data with live data from Twelve Data & Alpha Vantage, creating .
+- **Dashboard Overhaul (Command Center):** Created  with new widgets for Global Market Overview and a Fear & Greed Index.
+- **Report Narration (TTS):** Implemented a feature to narrate executive reports via a new  endpoint and UI controls in .
+- **Automatic Daily Voice Briefing:** JARVIS now automatically narrates a daily summary on dashboard load, using a new  endpoint.
+- **Full Power Feature Batch 1:**
+    - Created backend routes in .
+    - Built new frontend pages: , .
+    - Added an AI Portfolio Optimizer to .
+- **Global Intelligence Terminal:** Massively improved the world map UI with a detailed SVG component in .
+- **Production Readiness (P0 Tasks):**
+    - **SEO:** Implemented meta tags using .
+    - **API Rate Limiting:** Added  to protect expensive backend endpoints.
+    - **Structured Logging:** Implemented JSON logging for better monitoring.
+- **Testing:** All completed features passed 100% in automated tests via the testing agent.
 
 **Earlier issues found/mentioned but not fixed**
-   - None. All issues identified during the session were resolved.
+   - **Issue 1: Gold Price Accuracy.** The user reported an incorrect Gold price. The agent identified the likely cause (data source unit mismatch) but did not implement a fix. This is now the highest priority pending issue.
+   - **Issue 2: Comprehensive Asset Coverage.** The user requested access to the maximum possible number of assets. This has not been systematically addressed.
 
 **Known issue recurrence from previous fork**
-  - None.
+  - None
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend:** React, Vite, Tailwind CSS, Framer Motion, Shadcn UI, Lightweight Charts, React Router
--   **Backend:** FastAPI (Python), Pydantic, WebSockets, ReportLab
--   **Database:** MongoDB
--   **Authentication:** JWT (custom) & Google OAuth
--   **AI & Data:** OpenAI (via ), Multi-provider data aggregation
--   **Deployment:** The user is currently working on setting up a custom domain.
+-   **Frontend:** React, Vite, Tailwind CSS, Shadcn UI, Framer Motion, Recharts, .
+-   **Backend:** FastAPI (Python), Pydantic, WebSockets,  (rate limiting), .
+-   **Database:** MongoDB.
+-   **Authentication:** JWT (custom) & Google OAuth.
+-   **AI & Data:** OpenAI (via ), Twelve Data, Alpha Vantage for real-time market data.
 
 **key DB schema**
   - **users**: 
   - **analysis_history**: 
   - **watchlist**: 
-  - **quant_experiments**: 
-  - **quant_decision_logs**: 
-  - **market_scan_history**: 
   - **paper_trades**: 
 
 **changes in tech stack**
-  - **Backend:** Added  for PDFs and native usage: websockets [--version | <uri>].
-  - **Integration:** Added Google OAuth via .
+  - **Backend:** Added  for rate limiting and  for structured logging.
+  - **Frontend:** Added  for SEO.
 
 **All files of reference**
--   : Heavily modified to include all new feature routers and the WebSocket manager.
--   : Contains new routers for , , , , etc.
--   : Contains new pages like , , .
--   : Modified to handle the Google OAuth flow.
--   : Enhanced with microphone and speaker controls.
--   , : Official project documents.
+-   : Critical new file that handles all real-time market data fetching.
+-   : Heavily modified to add new routers, rate limiting, and structured logging.
+-   : New file containing a suite of unique feature endpoints.
+-   : New file for TTS narration and briefings.
+-   : The new main dashboard component.
+-   : The new detailed SVG map component.
+-   : Updated with all new page routes.
+-   : Updated with new navigation links.
+-   : Updated with  placeholder.
+
+**Areas that need refactoring**:
+- The  file was created by restoring a previous version and appending new code. It should be refactored to cleanly integrate the new real-data functions and properly handle the fallback to mock data without legacy code conflicts.
+
+**key api endpoints**
+-   : (GET) Returns real-time prices for key assets.
+-   : (GET) Returns total market cap data for different asset classes.
+-   : (POST) Generates and returns an MP3 audio narration of a report.
+-   : (GET) Generates and returns an MP3 of the daily market summary.
+-   : A suite of new endpoints for features like , , , etc.
 
 **Critical Info for New Agent**
-- The project is in an exceptionally advanced and stable state. The user's entire feature roadmap has been implemented and successfully tested.
-- **The immediate user need is not development but support.** The user is blocked by a DNS configuration issue for their custom domain. Your first priority should be to guide them through solving this external problem.
-- Development work is complete for now. If the user wishes to continue, the next phase involves infrastructure improvements (SEO, Rate Limiting) and integrating advanced data sources (On-chain, Macro), which will require new API keys from the user.
-- Always respond in **Portuguese**.
+-   **User's Vision:** The user's goal is to create the most powerful quant platform ever. They are highly receptive to proactive suggestions for unique, ambitious features.
+-   **PRIORITY #1: Data Accuracy.** Before implementing any new features, you MUST resolve the data accuracy issue, especially the Gold price. User trust is paramount.
+-   **Language:** Always respond in **Portuguese**.
+-   **External APIs:** The app is now heavily dependent on Twelve Data and Alpha Vantage. Be mindful of rate limits, which have been hit during development. The  implementation helps, but you should still code defensively.
+-   **Next Task:** The immediate development task is to implement the large FULL POWER MÁXIMO batch of features that the user has already approved.
 
 **documents and test reports created in this job**
-  -  (Updated throughout)
-  - Multiple test reports in , with the latest runs showing 100% pass rates across all features.
-  - 
-  - 
+  -  (Updated)
+  - Multiple test reports in , with the latest confirming all completed features are 100% functional.
 
 **Last 10 User Messages and any pending HUMAN messages** 
-10.  - User approves the plan to implement the P1 backlog (Scanner, WS, Enhancement).
-9.   - User approves saving the Vision Statement.
-8.   - User approves the plan to implement the P2 backlog.
-7.   - User approves proceeding after the manifesto was saved.
-6.   - User approves the plan to implement the P3 backlog.
-5.   - User asking for a final status update.
-4.   - User confirms satisfaction and states their next goal is to set up their domain.
-3.   - User asks for the future roadmap.
-2.   - User describes their current DNS problem.
-1.   - User asks if the session will persist.
+10.  - User asks for more unique/innovative ideas for specific markets. (COMPLETED)
+9.  - User asks for all suggested features to be implemented and for more ideas. (COMPLETED)
+8.  - User approves the plan for the next big feature batch. (PENDING IMPLEMENTATION)
+7.  - User gives a strong directive to implement everything possible to make the platform the best. (COMPLETED)
+6.  - User approves the weekly digest and asks for more powerful ideas. (COMPLETED)
+5.  - User approves the plan to implement P0 launch prep tasks. (COMPLETED)
+4.  - User approves adding the automatic daily voice briefing. (COMPLETED)
+3.  - User requests narrated reports and a better world map. (COMPLETED)
+2.  - User approves adding social media integration and asks if reports can be narrated. (COMPLETED)
+1.  - User reports the critical issue of incorrect Gold price and requests expanded asset coverage. (PENDING FIX)
 
 **Project Health Check:**
-- **Functional:** The application is feature-complete and all modules have passed extensive automated testing.
-- **Mocked:** The smart fallback to generated data for analysis remains a core feature, not a bug.
+-   **Functional:** The application is feature-rich, and all implemented features have passed extensive automated testing.
+-   **Broken:** The price feed for Gold () is providing incorrect data that the user has identified. This is a critical bug.
+-   **Mocked:** The fallback to generated data still exists in  as a safeguard, but the primary path now uses real APIs.
 
 **3rd Party Integrations**
--   **OpenAI GPT-5.2** (Text Generation): Uses Emergent LLM Key.
--   **Stripe** (Payments): Requires User API Key.
+-   **OpenAI GPT models** (Text Generation): Uses Emergent LLM Key.
 -   **Twelve Data, Polygon.io, Alpha Vantage** (Market Data): Require User API Keys.
 -   **CoinGecko** (Market Data): Public API.
 -   **Google OAuth:** Uses Emergent-managed integration.
--   **NewsAPI:** Integrated for sentiment, requires a user-provided API key for production use.
+-   **NewsAPI:** Integrated for sentiment, requires a user-provided API key.
 
 **Testing status**
-  - Testing agent used after significant changes: YES. The testing agent was used extensively after every major feature batch, consistently reporting 100% pass rates for both backend and frontend flows.
+  - Testing agent used after significant changes: YES. The testing agent was used multiple times for large feature batches, with the latest runs showing 100% pass rates for both backend and frontend on all implemented functionality.
   - Test files created: []
   - Known regressions: None.
 
+**Credentials to test flow:**
+User: 
+Pass: 
+
 **What agent forgot to execute**
-Nothing. The agent successfully executed an extraordinarily ambitious roadmap, including all requested features, bug fixes, and documentation, and then proactively outlined a clear plan for future scaling.</analysis>
+-   The agent did not fix the incorrect Gold price reported by the user, despite acknowledging it. This must be the top priority.
+-   The agent did not create a systematic plan or implementation for expanding the asset universe, which was a direct user request.</analysis>
