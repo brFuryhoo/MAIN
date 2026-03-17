@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { WorldMap } from '@/components/maps/WorldMap';
 
 /* ══════════════════════════════════════════════════════════════════
    GLOBAL INTELLIGENCE TERMINAL — PHASE 2
@@ -142,7 +143,7 @@ const IntelMapPage = () => {
                 <Radio size={14} className="text-aureos-gold" /> Global Risk Map
               </h2>
               <div className="relative" style={{ minHeight: '380px' }}>
-                <WorldMapSVG regions={geoRisk?.regions || []} onRegionClick={setSelectedRegion} selectedRegion={selectedRegion} />
+                <WorldMap regions={geoRisk?.regions || []} onRegionClick={setSelectedRegion} selectedRegion={selectedRegion} />
               </div>
             </div>
           </div>
@@ -378,119 +379,11 @@ const IntelMapPage = () => {
   );
 };
 
-/* ── SVG WORLD MAP ── */
-const WorldMapSVG = ({ regions, onRegionClick, selectedRegion }) => {
-  // Simplified world map with region hotspots
-  const regionPositions = {
-    'middle_east': { x: 580, y: 195, r: 22 },
-    'russia_europe': { x: 540, y: 115, r: 28 },
-    'east_asia': { x: 720, y: 175, r: 24 },
-    'south_america': { x: 270, y: 295, r: 26 },
-    'north_america': { x: 180, y: 145, r: 28 },
-    'south_asia': { x: 650, y: 210, r: 20 },
-    'africa': { x: 510, y: 255, r: 26 },
-    'oceania': { x: 770, y: 310, r: 22 },
-  };
-
-  return (
-    <svg viewBox="0 0 900 400" className="w-full h-auto" style={{ minHeight: '320px' }}>
-      <defs>
-        <radialGradient id="mapBg" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stopColor="#161718" />
-          <stop offset="100%" stopColor="#0D0D0D" />
-        </radialGradient>
-        {regions.map(r => (
-          <radialGradient key={`glow-${r.id}`} id={`glow-${r.id}`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor={riskColor(r.risk_score)} stopOpacity="0.4" />
-            <stop offset="100%" stopColor={riskColor(r.risk_score)} stopOpacity="0" />
-          </radialGradient>
-        ))}
-      </defs>
-
-      <rect width="900" height="400" fill="url(#mapBg)" rx="12" />
-
-      {/* Grid lines */}
-      {[0,1,2,3,4,5,6,7,8].map(i => (
-        <line key={`vg-${i}`} x1={i*100+50} y1="30" x2={i*100+50} y2="370" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-      ))}
-      {[0,1,2,3].map(i => (
-        <line key={`hg-${i}`} x1="50" y1={i*100+50} x2="850" y2={i*100+50} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-      ))}
-
-      {/* Simplified continent outlines */}
-      {/* North America */}
-      <path d="M120,80 L200,60 L250,80 L270,120 L250,160 L230,200 L200,220 L170,210 L140,180 L110,150 L100,110 Z"
-        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      {/* South America */}
-      <path d="M230,230 L280,225 L310,250 L320,290 L300,340 L270,360 L240,350 L230,310 L235,280 Z"
-        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      {/* Europe */}
-      <path d="M440,70 L500,60 L540,80 L560,110 L540,130 L500,140 L460,130 L440,100 Z"
-        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      {/* Africa */}
-      <path d="M460,160 L530,150 L560,180 L570,230 L550,290 L520,320 L480,310 L460,280 L450,230 Z"
-        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      {/* Asia */}
-      <path d="M560,60 L650,50 L740,70 L780,110 L770,160 L730,200 L680,210 L630,200 L590,170 L570,130 L560,90 Z"
-        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      {/* Oceania */}
-      <path d="M730,270 L800,260 L830,290 L820,330 L780,340 L740,320 Z"
-        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-
-      {/* Region hotspots */}
-      {regions.map(r => {
-        const pos = regionPositions[r.id];
-        if (!pos) return null;
-        const isSelected = selectedRegion?.id === r.id;
-        const color = riskColor(r.risk_score);
-        return (
-          <g key={r.id} onClick={() => onRegionClick(r)} style={{ cursor: 'pointer' }}>
-            {/* Glow effect */}
-            <circle cx={pos.x} cy={pos.y} r={pos.r * 2} fill={`url(#glow-${r.id})`}>
-              <animate attributeName="r" values={`${pos.r*1.5};${pos.r*2.2};${pos.r*1.5}`} dur="3s" repeatCount="indefinite" />
-            </circle>
-            {/* Main circle */}
-            <circle cx={pos.x} cy={pos.y} r={pos.r * 0.6} fill={color + '30'} stroke={color} strokeWidth={isSelected ? 2 : 1}>
-              {r.risk_score > 60 && (
-                <animate attributeName="stroke-opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite" />
-              )}
-            </circle>
-            {/* Center dot */}
-            <circle cx={pos.x} cy={pos.y} r={3} fill={color} />
-            {/* Label */}
-            <text x={pos.x} y={pos.y - pos.r * 0.6 - 8} textAnchor="middle" fill={isSelected ? color : '#888'} fontSize="9" fontWeight="600" fontFamily="Inter">
-              {r.name.split('/')[0].trim().toUpperCase()}
-            </text>
-            {/* Score */}
-            <text x={pos.x} y={pos.y + 4} textAnchor="middle" fill={color} fontSize="11" fontWeight="700" fontFamily="JetBrains Mono">
-              {r.risk_score}
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Connection lines between high-risk regions */}
-      {regions.filter(r => r.risk_score > 60).map((r, i, arr) => {
-        if (i === 0) return null;
-        const pos1 = regionPositions[arr[i-1].id];
-        const pos2 = regionPositions[r.id];
-        if (!pos1 || !pos2) return null;
-        return (
-          <line key={`conn-${i}`} x1={pos1.x} y1={pos1.y} x2={pos2.x} y2={pos2.y}
-            stroke="rgba(255,82,82,0.15)" strokeWidth="0.5" strokeDasharray="4,4">
-            <animate attributeName="stroke-dashoffset" values="0;8" dur="2s" repeatCount="indefinite" />
-          </line>
-        );
-      })}
-    </svg>
-  );
-};
-
 /* ── HELPERS ── */
+const momentumColor = (m) => m > 15 ? '#00E676' : m < -15 ? '#FF5252' : '#888';
+
 const riskColor = (score) =>
   score > 80 ? '#FF5252' : score > 60 ? '#FF9800' : score > 40 ? '#CFAE46' : '#00E676';
-
-const momentumColor = (m) => m > 15 ? '#00E676' : m < -15 ? '#FF5252' : '#888';
 
 const SeverityBadge = ({ severity }) => {
   const colors = {

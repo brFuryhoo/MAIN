@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, TrendingUp, TrendingDown, Target, Shield, BarChart2,
-  Brain, Layers, Dices, Download, Share2, Activity, AlertTriangle, Gauge, Loader2
+  Brain, Layers, Dices, Download, Share2, Activity, AlertTriangle, Gauge, Loader2,
+  Volume2, VolumeX, Globe, Pause, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import axios from 'axios';
-import { API } from '@/App';
+import { API, useAuth } from '@/App';
 
 const ExecutiveReportModal = ({ isOpen, onClose, report, fullAnalysis }) => {
   const [exporting, setExporting] = useState(false);
+  const [narrating, setNarrating] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [narrationLang, setNarrationLang] = useState('en');
+  const audioRef = useRef(null);
+  const { token } = useAuth();
   if (!isOpen || !report) return null;
 
   const sig = report.signal_summary || {};
@@ -25,6 +31,90 @@ const ExecutiveReportModal = ({ isOpen, onClose, report, fullAnalysis }) => {
   const regime = report.regime || {};
   const manipulation = report.manipulation || {};
   const asset = report.asset || {};
+
+  const LANGUAGES = [
+    { code: 'en', label: 'English' },
+    { code: 'pt', label: 'Portugues' },
+    { code: 'es', label: 'Espanol' },
+    { code: 'fr', label: 'Francais' },
+    { code: 'de', label: 'Deutsch' },
+    { code: 'zh', label: 'Chinese' },
+    { code: 'ja', label: 'Japanese' },
+  ];
+
+  const buildNarrationScript = () => {
+    const langName = LANGUAGES.find(l => l.code === narrationLang)?.label || 'English';
+    const direction = sig.direction || 'NEUTRAL';
+    const confidence = sig.confidence || 0;
+    const support = ta.support || 'N/A';
+    const resistance = ta.resistance || 'N/A';
+    const riskScore = risk.risk_score || 'N/A';
+    const riskLevel = risk.risk_level || 'N/A';
+    const entryZone = action.entry_zone || 'N/A';
+    const stopLoss = action.stop_loss || 'N/A';
+    const target1 = action.target_1 || 'N/A';
+    const winProb = mc.win_probability || 'N/A';
+    const maxUp = mc.max_upside || 'N/A';
+    const maxDown = mc.max_downside || 'N/A';
+    const causality = caus.summary || '';
+    const regimeSummary = regime.regime_summary || '';
+    const manipScore = manipulation.score || 'N/A';
+
+    return `Narrate this executive market report in ${langName} language, in a professional institutional analyst tone. Speak clearly and naturally like a senior trader briefing their team.
+
+Asset: ${asset.symbol} (${asset.name}), Current Price: $${Number(asset.price).toLocaleString()}, Change: ${Number(asset.change_percent).toFixed(2)}%.
+
+Signal: ${direction} with ${confidence}% confidence. Strength: ${sig.strength}.
+Bullish probability: ${sig.bullish_probability}%, Bearish: ${sig.bearish_probability}%, Sideways: ${sig.sideways_probability}%.
+
+Technical Analysis: Support at $${support}, Resistance at $${resistance}. RSI: ${ta.rsi} (${ta.rsi_signal}). MACD: ${ta.macd?.crossover}. Trend: ${ta.trend}.
+
+Action Plan: ${action.recommendation}. Entry zone: ${entryZone}. Stop loss: ${stopLoss}. Target 1: ${target1}.
+
+Monte Carlo (${mc.simulations} simulations): Win probability ${winProb}%, Expected return ${mc.expected_return}%, Max upside +${maxUp}%, Max downside ${maxDown}%.
+
+Risk: Score ${riskScore}/100 (${riskLevel}). VaR 95%: ${risk.value_at_risk?.var_95}%. Max drawdown: ${risk.max_drawdown}%.
+
+Market causality: ${causality}
+
+Regime: ${regimeSummary}
+
+Manipulation detection score: ${manipScore}/100.
+
+End with a brief professional conclusion and risk disclaimer.`;
+  };
+
+  const handleNarrate = async () => {
+    setNarrating(true);
+    try {
+      const script = buildNarrationScript();
+      const resp = await axios.post(`${API}/voice/narrate-report`, {
+        text: script,
+        language: narrationLang,
+      }, {
+        responseType: 'blob',
+        timeout: 60000,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const audioUrl = URL.createObjectURL(new Blob([resp.data], { type: 'audio/mpeg' }));
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+      toast.success('JARVIS is narrating the report');
+    } catch (e) {
+      toast.error('Narration failed — check AI service');
+    }
+    setNarrating(false);
+  };
+
+  const togglePlayback = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) { audioRef.current.pause(); }
+    else { audioRef.current.play(); }
+    setIsPlaying(!isPlaying);
+  };
 
   const sections = [
     {
@@ -296,6 +386,29 @@ const ExecutiveReportModal = ({ isOpen, onClose, report, fullAnalysis }) => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                {/* Language selector */}
+                <select value={narrationLang} onChange={e => setNarrationLang(e.target.value)}
+                  className="bg-[#1a1a1a] border border-white/10 rounded-lg text-xs px-2 py-1.5 text-[#ccc] focus:border-[#CFAE46]/50 focus:outline-none"
+                  data-testid="narration-lang-select">
+                  {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                </select>
+
+                {/* Narrate button */}
+                <Button variant="outline" size="sm" className="border-[#00B4FF]/50 text-[#00B4FF] hover:bg-[#00B4FF]/10"
+                  disabled={narrating}
+                  data-testid="narrate-report-btn"
+                  onClick={handleNarrate}>
+                  {narrating ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Volume2 size={16} className="mr-2" />}
+                  {narrating ? 'Generating...' : 'Narrate'}
+                </Button>
+
+                {/* Playback control */}
+                {audioRef.current?.src && (
+                  <button onClick={togglePlayback} className="p-2 hover:bg-white/10 rounded-lg transition-colors" data-testid="playback-toggle-btn">
+                    {isPlaying ? <Pause size={16} className="text-[#00B4FF]" /> : <Play size={16} className="text-[#00B4FF]" />}
+                  </button>
+                )}
+
                 <Button variant="outline" size="sm" className="border-[#CFAE46]/50 text-aureos-gold hover:bg-[#CFAE46]/10"
                   disabled={exporting}
                   data-testid="export-pdf-btn"
@@ -355,6 +468,23 @@ const ExecutiveReportModal = ({ isOpen, onClose, report, fullAnalysis }) => {
                 and consult with a financial advisor before making investment decisions.
               </p>
             </div>
+
+            {/* Hidden audio player */}
+            <audio ref={audioRef} onEnded={() => setIsPlaying(false)} className="hidden" />
+
+            {/* Audio progress bar */}
+            {audioRef.current?.src && (
+              <div className="mt-4 p-3 rounded-lg bg-[#00B4FF]/5 border border-[#00B4FF]/20 flex items-center gap-3">
+                <button onClick={togglePlayback} className="p-2 rounded-full bg-[#00B4FF]/20 hover:bg-[#00B4FF]/30 transition-colors" data-testid="audio-play-btn">
+                  {isPlaying ? <Pause size={16} className="text-[#00B4FF]" /> : <Play size={16} className="text-[#00B4FF]" />}
+                </button>
+                <div className="flex-1">
+                  <p className="text-xs text-[#00B4FF] font-semibold">JARVIS Narration</p>
+                  <p className="text-[10px] text-[#888]">{LANGUAGES.find(l => l.code === narrationLang)?.label} &bull; {isPlaying ? 'Playing...' : 'Paused'}</p>
+                </div>
+                <Volume2 size={14} className={`${isPlaying ? 'text-[#00B4FF] animate-pulse' : 'text-[#555]'}`} />
+              </div>
+            )}
           </div>
         </motion.div>
       </motion.div>

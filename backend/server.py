@@ -934,6 +934,52 @@ async def text_to_speech(data: TTSRequest, user: dict = Depends(get_current_user
         logger.error(f"TTS error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Voice synthesis error: {str(e)}")
 
+
+class NarrateReportRequest(BaseModel):
+    text: str
+    language: str = "en"
+
+@api_router.post("/voice/narrate-report")
+async def narrate_report(data: NarrateReportRequest):
+    """Generate a natural-sounding AI narration of an executive report, in the chosen language. Returns audio/mpeg blob."""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Voice service not configured")
+        
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        lang_map = {"en": "English", "pt": "Portuguese", "es": "Spanish", "fr": "French", "de": "German", "zh": "Chinese", "ja": "Japanese"}
+        lang_name = lang_map.get(data.language, "English")
+        
+        # Step 1: Use AI to create a polished narration script in the target language
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"narrate_{datetime.now().strftime('%Y%m%d%H%M')}",
+            system_message=f"You are JARVIS, a professional financial AI narrator. Convert the following report data into a smooth, natural-sounding narration script IN {lang_name}. Keep it under 2500 characters. Speak as if you are a senior analyst delivering a voice briefing. Use clear pronunciation-friendly numbers and terms. Do not use markdown or special symbols."
+        ).with_model("openai", "gpt-5.2")
+        
+        narration_script = await chat.send_message(UserMessage(text=data.text[:4000]))
+        narration_script = narration_script[:4000]
+        
+        # Step 2: Convert to speech
+        tts = OpenAITextToSpeech(api_key=api_key)
+        audio_bytes = await tts.generate_speech(
+            text=narration_script,
+            model="tts-1",
+            voice="onyx",
+            speed=1.0,
+            response_format="mp3"
+        )
+        
+        from fastapi.responses import Response as RawResponse
+        return RawResponse(content=audio_bytes, media_type="audio/mpeg", headers={"Content-Disposition": "inline; filename=jarvis_narration.mp3"})
+        
+    except Exception as e:
+        logger.error(f"Report narration error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Narration error: {str(e)}")
+
+
 @api_router.post("/voice/speech-to-text")
 async def speech_to_text(
     audio: UploadFile = File(...),
