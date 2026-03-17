@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="33.176" timestamp="2026-03-17T10:25:28.185077+00:00" hostname="agent-env-b0204eba-0b9c-45bd-9ff3-df746371ae8f"><testcase classname="backend.tests.test_intelligence_phase10.TestIntelligenceEndpoints" name="test_market_pulse_returns_10_indicators" time="0.635" /><testcase classname="backend.tests.test_intelligence_phase10.TestIntelligenceEndpoints" name="test_geopolitical_risk_returns_regions" time="0.464" /><testcase classname="backend.tests.test_intelligence_phase10.TestIntelligenceEndpoints" name="test_events_feed_returns_categorized_events" time="0.421" /><testcase classname="backend.tests.test_intelligence_phase10.TestIntelligenceEndpoints" name="test_performance_highlights_returns_assets" time="0.530"><failure message="AssertionError: Highlights should be sorted by performance desc&#10;assert [197.24, 164....7, 86.34, ...] == [197.24, 164....4, 81.27, ...]&#10;  &#10;  At index 4 diff: 81.27 != 86.34&#10;  &#10;  Full diff:&#10;    [&#10;        197.24,&#10;        164.27,...&#10;  &#10;  ...Full output truncated (10 lines hidden), use '-vv' to show">backend/tests/test_intelligence_phase10.py:140: in test_performance_highlights_returns_assets
+    assert performances == sorted(performances, reverse=True), "Highlights should be sorted by performance desc"
+E   AssertionError: Highlights should be sorted by performance desc
+E   assert [197.24, 164....7, 86.34, ...] == [197.24, 164....4, 81.27, ...]
+E     
+E     At index 4 diff: 81.27 != 86.34
+E     
+E     Full diff:
+E       [
+E           197.24,
+E           164.27,...
+E     
+E     ...Full output truncated (10 lines hidden), use '-vv' to show</failure></testcase><testcase classname="backend.tests.test_intelligence_phase10.TestIntelligenceEndpoints" name="test_daily_briefing_returns_ai_content" time="13.560" /><testcase classname="backend.tests.test_intelligence_phase10.TestIntelligenceEndpoints" name="test_scenario_analysis_accepts_question" time="14.273" /><testcase classname="backend.tests.test_intelligence_phase10.TestAuthenticatedFlows" name="test_portfolio_with_auth" time="1.102" /><testcase classname="backend.tests.test_intelligence_phase10.TestAuthenticatedFlows" name="test_add_portfolio_position" time="1.619" /><testcase classname="backend.tests.test_intelligence_phase10.TestNavigationLabels" name="test_api_root" time="0.472" /></testsuite></testsuites>

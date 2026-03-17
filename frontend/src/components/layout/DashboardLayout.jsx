@@ -29,16 +29,16 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/analysis', label: 'New Analysis', icon: Zap },
-  { path: '/scanner', label: 'Scanner', icon: Radar },
-  { path: '/intelligence', label: 'Intel Map', icon: Globe },
-  { path: '/sentiment', label: 'Sentiment', icon: Gauge },
+  { path: '/dashboard', label: 'Command Center', icon: LayoutDashboard },
+  { path: '/intelligence', label: 'Intel Terminal', icon: Globe },
+  { path: '/analysis', label: 'Deep Analysis', icon: Zap },
+  { path: '/scanner', label: 'Market Scanner', icon: Radar },
+  { path: '/portfolio', label: 'My Portfolio', icon: Wallet },
   { path: '/watchlist', label: 'Watchlist', icon: Eye },
-  { path: '/quant-lab', label: 'Quant Lab', icon: Brain },
+  { path: '/quant-lab', label: 'AI Quantica Lab', icon: Brain },
+  { path: '/sentiment', label: 'Sentiment', icon: Gauge },
   { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
-  { path: '/portfolio', label: 'Portfolio', icon: Wallet },
-  { path: '/copilot', label: 'AI Copilot', icon: Bot },
+  { path: '/copilot', label: 'JARVIS Copilot', icon: Bot },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -97,7 +97,7 @@ export const AureosLayout = ({ children }) => {
                   AUREOS
                 </span>
                 <span className="text-aureos-gold font-bold text-xl">AI</span>
-                <p className="text-[10px] text-[#888] uppercase tracking-widest">Trading Intelligence</p>
+                <p className="text-[10px] text-[#888] uppercase tracking-widest">AI Quantica Intelligence</p>
               </div>
             </Link>
           </div>
