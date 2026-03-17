@@ -1,85 +1,97 @@
-# Aureos AI - Product Requirements Document
+# AUREOS AI — Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is the global financial intelligence platform created by Aureos Corporation, founded by Fabricio Teodoroves. JARVIS democratizes institutional-grade market analysis for every asset globally.
+Aureos AI is a sophisticated fintech platform powered by an AI core named "JARVIS". The goal is to build an institutional-grade market analysis tool with a premium UI/UX — inspired by Cyber MoneyLab but **MORE POWERFUL and UNIQUE** as "AI Quantica".
 
-## Architecture
-- **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Lightweight Charts v5
-- **Backend:** FastAPI (Python), modular services
-- **Database:** MongoDB | **Auth:** JWT + Google OAuth (Emergent) | **Payments:** Stripe
-- **AI:** GPT-5.2 via Emergent LLM key (JARVIS + 4 Specialized Agents)
-- **Data:** CoinGecko, Twelve Data, Polygon.io, Alpha Vantage, Fear&Greed API
-- **Real-Time:** WebSocket | **Voice:** Web Speech API | **PDF:** fpdf2
+## Core User Persona
+**Fabricio Teodoroves** — An investor who wants a 24/7 intelligent system that crosses news, speculations, geopolitical events, and market data across ALL asset classes (crypto, stocks, forex, commodities) globally, with all values in **USD**.
 
-## Backend Architecture
-```
-/app/backend/
-├── server.py              # Auth (JWT + Google OAuth), Stripe, Voice, WebSocket
-├── routes/
-│   ├── analysis.py        # 11-step pipeline
-│   ├── assets.py          # Global search
-│   ├── jarvis.py          # JARVIS copilot
-│   ├── watchlist.py       # Watchlist + quant alerts
-│   ├── quant_lab.py       # Quant Lab (8 endpoints)
-│   ├── scanner.py         # Market Scanner
-│   ├── intelligence_map.py # Global Intelligence Map
-│   ├── pdf_export.py      # PDF reports
-│   ├── multi_agent.py     # 4 Agents + JARVIS synthesis
-│   ├── news_sentiment.py  # Fear/Greed, trending, global market
-│   └── paper_trading.py   # Virtual portfolio simulation
-└── services/
-    ├── market_data.py, technical_engine.py, market_structure.py
-    ├── liquidity_mapper.py, monte_carlo.py, risk_engine.py
-    ├── causality_engine.py, probability_engine.py, report_generator.py
-    ├── regime_detector.py, manipulation_detector.py
-    ├── quant_lab.py, market_scanner.py
-```
+## What's Been Implemented
 
-## Completed Phases (All 100% Tested)
+### Phase 1 — Dashboard Command Center (COMPLETE ✅)
+- Personalized greeting with date/time
+- Portfolio overview with USD values and donut chart allocation
+- Market Pulse: 10 real-time indicators (S&P 500, NASDAQ, IBOVESPA, BTC/USD, ETH/USD, USD/BRL, GOLD, OIL, EUR/USD, DXY)
+- Intelligence of the Day: AI-generated daily briefing via GPT-5.2
+- OSINT Geopolitical Risk Monitor: 8 global regions with risk scores
+- Live Events Feed: Categorized events (geopolitics, macro, crypto, terrorism, etc.)
+- Performance Highlights: Top performing assets table
+- JARVIS Sentiment Banner: Dynamic market sentiment classification
+- Quick Actions grid
 
-### Phase 1-4: Foundation → Global Data
-### Phase 5: Watchlist Automation
-### Phase 6: Autonomous Quant Lab
-### Phase 7: Scanner + WebSocket + Quant-Watchlist
-### Phase 8: Intelligence Map + Voice + PDF Export
+### Phase 2 — Global Intelligence Terminal (COMPLETE ✅)
+- SVG World Map with animated risk hotspots for 8 regions
+- Region detail panel with events, risk score, and impacted assets
+- Intelligence Feed with category filter buttons (8 categories)
+- AI-powered Scenario Analysis: "What if..." questions answered by GPT-5.2
+- Deep Scan integration (from previous market intelligence map)
+- Sentiment indicator banner
 
-### Phase 9: Multi-Agent + Sentiment + Paper Trading + Google OAuth (March 16, 2026)
-- **Multi-Agent AI System:** 4 specialized agents (Technical, Quant, Macro, Sentiment) + JARVIS synthesis via GPT-5.2
-- **News Sentiment:** Fear & Greed Index (7-day history), CoinGecko trending, global crypto market data, market mood interpretation
-- **Paper Trading:** Virtual $100K portfolio, BUY/SELL execution, P&L tracking, close trades, reset, trade history, win rate
-- **Google OAuth:** Emergent-managed Google social login with "Continue with Google" button, session exchange
-- **Testing:** 100% pass rate (18/18 backend, all frontend flows)
+### Phase 3 — Premium Portfolio (COMPLETE ✅)
+- Portfolio Health Score ring (0-100) with SVG animation
+- Enhanced positions table with USD values
+- Allocation pie chart
+- Quick Stats: Win rate, best performer, risk score, positions count
+- Market Performance Highlights: Top 10 performers
+- Add position dialog with USD ticker support
 
-## All API Endpoints
-- Auth: /api/auth/register, /login, /me, /google-session
-- Assets: /api/assets/search
-- Analysis: /api/analysis/start, /history
-- JARVIS: /api/jarvis/chat, /explain-report
-- Watchlist: /api/watchlist/*, /scan, /alerts/mark-read
-- Quant: /api/quant/* (8 endpoints)
-- Scanner: /api/scanner/universe, /scan, /opportunities, /history
-- Intelligence: /api/intelligence/map
-- Export: /api/export/pdf
-- Multi-Agent: /api/agents/analyze, /history
-- News: /api/news/sentiment
-- Paper: /api/paper/portfolio, /trade, /close, /reset
-- Voice: /api/voice/text-to-speech, /speech-to-text
-- WebSocket: /ws/{channel}, /api/ws/status
-- Stripe: /api/stripe/*
+### Previously Completed Features
+- Full 11-step analysis pipeline
+- JARVIS AI Copilot (GPT-5.2) with voice (TTS/STT)
+- Autonomous Quant Lab (AI Quantica) with backtester
+- Market Scanner
+- Watchlist Automation
+- Paper Trading ($100K virtual)
+- News Sentiment Analysis
+- WebSocket Real-Time Updates
+- PDF Report Export
+- Multi-Agent AI System
+- Google OAuth + JWT Authentication
+- Stripe Payments
+- Premium UI/UX Design System
 
-## DB Collections
-users, subscriptions, analysis_history, jarvis_conversations,
-watchlist, watchlist_alerts, quant_experiments, quant_decision_logs,
-quant_weights, scanner_history, agent_analyses, paper_portfolios, paper_trades
+## Backend API Endpoints (Intelligence Engine)
+- `GET /api/intelligence/market-pulse` — 10 market indicators
+- `GET /api/intelligence/geopolitical-risk` — 8 regions with risk scores
+- `GET /api/intelligence/events-feed` — Categorized global events
+- `GET /api/intelligence/performance-highlights` — Top performing assets
+- `GET /api/intelligence/daily-briefing` — AI daily briefing (GPT-5.2)
+- `POST /api/intelligence/scenario-analysis` — AI scenario analysis (GPT-5.2)
 
-## Official Documents
-- /app/Aureos_Vision_Statement.md
-- /app/Aureos_Corporate_Manifesto.md
-- /app/Aureos_NDA_Template.md
+## Tech Stack
+- **Frontend:** React, Vite, Tailwind CSS, Framer Motion, Shadcn UI, Recharts, Lightweight Charts
+- **Backend:** FastAPI (Python), Pydantic, WebSockets, ReportLab
+- **Database:** MongoDB
+- **AI:** OpenAI GPT-5.2 (via emergentintegrations)
+- **Auth:** JWT + Google OAuth
+- **Payments:** Stripe
 
-## Remaining Backlog
-- Kafka/Redis/TimescaleDB scaling (infrastructure)
-- On-chain data (Glassnode - requires API key)
-- Macro data (FRED - requires API key)
-- Advanced backtesting with real historical price validation
-- News scraping from financial news sources
+## Testing Status
+- Iteration 10: 100% pass rate (Backend 9/9, Frontend all flows)
+
+## Prioritized Backlog
+
+### P0 — Launch Prep
+- [ ] SEO & Meta Tags (Open Graph, Twitter Cards)
+- [ ] API Rate Limiting
+- [ ] Error Monitoring / Structured Logging
+
+### P1 — Data Integration
+- [ ] Real-time data feeds from multiple providers (Twelve Data, Polygon.io, Alpha Vantage)
+- [ ] On-chain data (Glassnode) — requires user API key
+- [ ] Macroeconomic data (FRED) — requires user API key
+
+### P2 — Product Enhancements
+- [ ] Founder Dashboard (user metrics)
+- [ ] Advanced Backtesting (Sharpe ratio, drawdown)
+- [ ] Email alerts
+- [ ] Historical data charts
+
+### P3 — Infrastructure
+- [ ] Redis caching
+- [ ] Kafka event streaming
+- [ ] TimescaleDB for time-series
+
+### P4 — Business Differentiation
+- [ ] Telegram/Discord bot for JARVIS alerts
+- [ ] Public API as revenue stream
