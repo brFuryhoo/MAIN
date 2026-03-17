@@ -1243,6 +1243,7 @@ from routes.quant_lab import router as quant_lab_router
 from routes.scanner import router as scanner_router
 from routes.intelligence_map import router as intel_map_router
 from routes.intelligence import router as intelligence_router
+from routes.quantica import router as quantica_router
 from routes.pdf_export import router as pdf_export_router
 from routes.multi_agent import router as multi_agent_router
 from routes.news_sentiment import router as news_router
@@ -1255,6 +1256,7 @@ app.include_router(quant_lab_router)
 app.include_router(scanner_router)
 app.include_router(intel_map_router)
 app.include_router(intelligence_router)
+app.include_router(quantica_router)
 app.include_router(pdf_export_router)
 app.include_router(multi_agent_router)
 app.include_router(news_router)

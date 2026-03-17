@@ -23,7 +23,9 @@ import {
   Radar,
   Globe,
   Gauge,
-  Banknote
+  Banknote,
+  Activity,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,11 +33,13 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { path: '/dashboard', label: 'Command Center', icon: LayoutDashboard },
   { path: '/intelligence', label: 'Intel Terminal', icon: Globe },
+  { path: '/market-radar', label: 'AI Quantica Engine', icon: Activity },
   { path: '/analysis', label: 'Deep Analysis', icon: Zap },
   { path: '/scanner', label: 'Market Scanner', icon: Radar },
   { path: '/portfolio', label: 'My Portfolio', icon: Wallet },
   { path: '/watchlist', label: 'Watchlist', icon: Eye },
   { path: '/quant-lab', label: 'AI Quantica Lab', icon: Brain },
+  { path: '/weekly-digest', label: 'Weekly Digest', icon: BookOpen },
   { path: '/sentiment', label: 'Sentiment', icon: Gauge },
   { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
   { path: '/copilot', label: 'JARVIS Copilot', icon: Bot },

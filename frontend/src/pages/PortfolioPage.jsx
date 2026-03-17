@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   Wallet, TrendingUp, TrendingDown, Plus, Trash2, RefreshCw,
   PieChart, Download, History, Shield, Target, BarChart2,
-  ArrowUpRight, ArrowDownRight, Flame
+  ArrowUpRight, ArrowDownRight, Flame, Brain, Loader2, Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -27,6 +27,9 @@ const PortfolioPage = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newPosition, setNewPosition] = useState({ symbol: '', asset_type: 'stock', quantity: '', avg_price: '' });
   const [analysisHistory, setAnalysisHistory] = useState([]);
+  const [optimizing, setOptimizing] = useState(false);
+  const [optimization, setOptimization] = useState(null);
+  const [riskTolerance, setRiskTolerance] = useState('moderate');
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -76,6 +79,26 @@ const PortfolioPage = () => {
     } catch { toast.error('Failed to remove position'); }
   };
 
+  const handleOptimize = async () => {
+    setOptimizing(true);
+    setOptimization(null);
+    try {
+      const res = await axios.post(`${API}/quantica/optimize-portfolio`, {
+        positions: portfolio.positions.map(p => ({
+          symbol: p.symbol,
+          quantity: p.quantity,
+          avg_price: p.avg_price,
+          asset_type: p.asset_type,
+          current_value: p.current_value,
+        })),
+        risk_tolerance: riskTolerance,
+      }, { headers, timeout: 60000 });
+      setOptimization(res.data);
+      toast.success('Portfolio optimization complete');
+    } catch { toast.error('Optimization failed'); }
+    setOptimizing(false);
+  };
+
   const fmt = (v) => v == null ? '$0.00' : `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const fmtLarge = (v) => { if (v >= 1e6) return `$${(v/1e6).toFixed(2)}M`; if (v >= 1e3) return `$${(v/1e3).toFixed(1)}K`; return fmt(v); };
 
@@ -105,6 +128,10 @@ const PortfolioPage = () => {
             <p className="text-[#666] mt-1">Track investments, health score & performance</p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={handleOptimize} disabled={optimizing} className="bg-[#00B4FF]/20 hover:bg-[#00B4FF]/30 text-[#00B4FF] border border-[#00B4FF]/30" data-testid="optimize-portfolio-btn">
+              {optimizing ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Brain size={16} className="mr-2" />}
+              {optimizing ? 'Optimizing...' : 'AI Optimize'}
+            </Button>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="aureos-btn-gold" data-testid="add-position-btn">
@@ -332,6 +359,32 @@ const PortfolioPage = () => {
             ))}
           </div>
         </div>
+
+        {/* ── AI PORTFOLIO OPTIMIZER RESULTS ── */}
+        {optimization && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="aureos-card p-6" data-testid="optimization-results">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-[#888] uppercase tracking-wider flex items-center gap-2">
+                <Brain size={14} className="text-[#00B4FF]" /> JARVIS Portfolio Optimization
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className="text-[9px] text-[#888] uppercase">Before</p>
+                  <p className="font-mono text-lg font-bold text-[#FF9800]">{optimization.before_score}</p>
+                </div>
+                <Zap size={16} className="text-aureos-gold" />
+                <div className="text-center">
+                  <p className="text-[9px] text-[#888] uppercase">After</p>
+                  <p className="font-mono text-lg font-bold text-[#00E676]">{optimization.after_score}</p>
+                </div>
+              </div>
+            </div>
+            <div className="text-sm text-[#ccc] leading-relaxed whitespace-pre-wrap">
+              {optimization.analysis}
+            </div>
+            <p className="text-[9px] text-[#555] mt-4">Powered by {optimization.model} &bull; Risk tolerance: {optimization.risk_tolerance}</p>
+          </motion.div>
+        )}
 
         <JarvisCopilot />
       </div>

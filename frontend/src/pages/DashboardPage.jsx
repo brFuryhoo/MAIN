@@ -32,6 +32,8 @@ const DashboardPage = () => {
   const [highlights, setHighlights] = useState([]);
   const [events, setEvents] = useState([]);
   const [portfolio, setPortfolio] = useState({ positions: [], total_value: 0, total_pnl: 0 });
+  const [globalOverview, setGlobalOverview] = useState(null);
+  const [fearGreed, setFearGreed] = useState(null);
   const [voiceBriefing, setVoiceBriefing] = useState({ loading: false, ready: false, playing: false, dismissed: false, progress: 0 });
   const voiceAudioRef = useRef(null);
 
@@ -87,18 +89,22 @@ const DashboardPage = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [pulseRes, riskRes, highlightsRes, eventsRes, portfolioRes] = await Promise.all([
+      const [pulseRes, riskRes, highlightsRes, eventsRes, portfolioRes, globalRes, fgRes] = await Promise.all([
         axios.get(`${API}/intelligence/market-pulse`).catch(() => ({ data: { indicators: [] } })),
         axios.get(`${API}/intelligence/geopolitical-risk`).catch(() => ({ data: null })),
         axios.get(`${API}/intelligence/performance-highlights`).catch(() => ({ data: { highlights: [] } })),
         axios.get(`${API}/intelligence/events-feed`).catch(() => ({ data: { events: [] } })),
         axios.get(`${API}/portfolio`, { headers }).catch(() => ({ data: { positions: [], total_value: 0, total_pnl: 0 } })),
+        axios.get(`${API}/intelligence/global-overview`).catch(() => ({ data: null })),
+        axios.get(`${API}/quantica/fear-greed`).catch(() => ({ data: null })),
       ]);
       setPulse(pulseRes.data.indicators || []);
       setGeoRisk(riskRes.data);
       setHighlights(highlightsRes.data.highlights || []);
       setEvents(eventsRes.data.events || []);
       setPortfolio(portfolioRes.data);
+      setGlobalOverview(globalRes.data);
+      setFearGreed(fgRes.data);
     } catch { /* silent */ }
     setLoading(false);
   };
@@ -255,7 +261,17 @@ const DashboardPage = () => {
               <Clock size={14} /> {dateStr}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            {/* Fear & Greed Badge */}
+            {fearGreed && (
+              <div className="rounded-xl px-3 py-2 flex items-center gap-2" style={{ background: fearGreed.color + '12', border: `1px solid ${fearGreed.color}25` }} data-testid="dashboard-fear-greed">
+                <span className="font-mono text-lg font-bold" style={{ color: fearGreed.color }}>{fearGreed.composite_score}</span>
+                <div>
+                  <p className="text-[8px] uppercase tracking-wider text-[#888]">Fear & Greed</p>
+                  <p className="text-[10px] font-bold" style={{ color: fearGreed.color }}>{fearGreed.label}</p>
+                </div>
+              </div>
+            )}
             <Button onClick={loadBriefing} disabled={briefingLoading} className="aureos-btn-gold" data-testid="load-briefing-btn">
               {briefingLoading ? <RefreshCw className="animate-spin mr-2" size={16} /> : <Brain size={16} className="mr-2" />}
               {briefingLoading ? 'Analyzing...' : 'Daily Intelligence'}
@@ -265,6 +281,37 @@ const DashboardPage = () => {
             </Button>
           </div>
         </div>
+
+        {/* ── GLOBAL MARKET OVERVIEW BAR ── */}
+        {globalOverview && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="aureos-glass px-5 py-3 flex items-center gap-6 overflow-x-auto text-[11px]" data-testid="global-overview-bar">
+            <span className="text-[9px] text-[#888] uppercase tracking-wider font-semibold whitespace-nowrap">Global Markets</span>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <span className="text-[#666]">Equities:</span>
+              <span className="font-mono font-bold text-aureos-gold">${(globalOverview.global_equity_market_cap / 1e12).toFixed(0)}T</span>
+            </div>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <span className="text-[#666]">Crypto:</span>
+              <span className="font-mono font-bold text-[#00B4FF]">
+                {globalOverview.crypto_market_cap > 0 ? `$${(globalOverview.crypto_market_cap / 1e12).toFixed(2)}T` : '$2.9T'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <span className="text-[#666]">Gold:</span>
+              <span className="font-mono font-bold text-[#CFAE46]">${(globalOverview.gold_market_cap / 1e12).toFixed(0)}T</span>
+            </div>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <span className="text-[#666]">FX Daily:</span>
+              <span className="font-mono font-bold text-[#00E676]">${(globalOverview.global_forex_daily_volume / 1e12).toFixed(1)}T</span>
+            </div>
+            {globalOverview.btc_dominance > 0 && (
+              <div className="flex items-center gap-1 whitespace-nowrap">
+                <span className="text-[#666]">BTC Dom:</span>
+                <span className="font-mono font-bold text-[#FF9800]">{globalOverview.btc_dominance.toFixed(1)}%</span>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* ── TOP ROW: PORTFOLIO + MARKET PULSE ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

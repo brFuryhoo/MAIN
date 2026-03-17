@@ -133,18 +133,19 @@ GEOPOLITICAL_REGIONS = [
 # ==================== MARKET PULSE DATA ====================
 
 def get_market_pulse():
-    """Real-time market pulse indicators"""
+    """Fallback market pulse (used by sync contexts like daily briefing builder).
+       For real-time data, use the async endpoint which calls market_data service."""
     return [
-        {"symbol": "S&P 500", "value": 5234.18 + random.uniform(-50, 50), "change": random.uniform(-1.5, 2.0), "type": "index"},
-        {"symbol": "NASDAQ", "value": 16742.39 + random.uniform(-100, 100), "change": random.uniform(-2.0, 2.5), "type": "index"},
-        {"symbol": "IBOVESPA", "value": 24850 + random.uniform(-200, 200), "change": random.uniform(-1.5, 1.8), "type": "index"},
-        {"symbol": "BTC/USD", "value": 87250 + random.uniform(-2000, 2000), "change": random.uniform(-3.0, 4.0), "type": "crypto"},
-        {"symbol": "ETH/USD", "value": 3180 + random.uniform(-100, 100), "change": random.uniform(-3.0, 4.0), "type": "crypto"},
-        {"symbol": "USD/BRL", "value": 5.78 + random.uniform(-0.05, 0.05), "change": random.uniform(-0.8, 0.8), "type": "forex"},
-        {"symbol": "GOLD", "value": 2950 + random.uniform(-30, 30), "change": random.uniform(-1.0, 1.5), "type": "commodity"},
-        {"symbol": "OIL (WTI)", "value": 78.50 + random.uniform(-2, 2), "change": random.uniform(-2.0, 3.0), "type": "commodity"},
-        {"symbol": "EUR/USD", "value": 1.0865 + random.uniform(-0.005, 0.005), "change": random.uniform(-0.5, 0.5), "type": "forex"},
-        {"symbol": "DXY", "value": 104.25 + random.uniform(-0.5, 0.5), "change": random.uniform(-0.5, 0.5), "type": "index"},
+        {"symbol": "S&P 500", "value": 5920, "change": 0.5, "type": "index"},
+        {"symbol": "NASDAQ", "value": 520, "change": 0.8, "type": "index"},
+        {"symbol": "BTC/USD", "value": 84000, "change": 2.1, "type": "crypto"},
+        {"symbol": "ETH/USD", "value": 1900, "change": 1.5, "type": "crypto"},
+        {"symbol": "SOL/USD", "value": 130, "change": 3.2, "type": "crypto"},
+        {"symbol": "EUR/USD", "value": 1.09, "change": -0.2, "type": "forex"},
+        {"symbol": "USD/BRL", "value": 5.75, "change": 0.3, "type": "forex"},
+        {"symbol": "GOLD", "value": 3000, "change": 0.8, "type": "commodity"},
+        {"symbol": "SILVER", "value": 33.5, "change": 1.2, "type": "commodity"},
+        {"symbol": "NVDA", "value": 120, "change": 1.5, "type": "stock"},
     ]
 
 # ==================== PERFORMANCE HIGHLIGHTS ====================
@@ -298,15 +299,40 @@ async def get_events_feed():
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
 
+@router.get("/global-overview")
+async def get_global_overview():
+    """Global market overview across ALL asset classes"""
+    try:
+        from services.market_data import get_global_market_overview
+        overview = await get_global_market_overview()
+        return {**overview, "updated_at": datetime.now(timezone.utc).isoformat()}
+    except Exception as e:
+        logger.warning(f"Global overview error: {e}")
+        return {
+            "global_equity_market_cap": 110_000_000_000_000,
+            "crypto_market_cap": 3_200_000_000_000,
+            "gold_market_cap": 16_000_000_000_000,
+            "btc_dominance": 56.5,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+
+
+
 
 @router.get("/market-pulse")
 async def get_market_pulse_endpoint():
-    """Key market indicators pulse"""
+    """Key market indicators pulse — fetches REAL data from CoinGecko + Twelve Data"""
+    try:
+        from services.market_data import get_real_market_pulse
+        real_pulse = await get_real_market_pulse()
+        if real_pulse and len(real_pulse) >= 3:
+            return {"indicators": real_pulse, "source": "live", "updated_at": datetime.now(timezone.utc).isoformat()}
+    except Exception as e:
+        logger.warning(f"Real market pulse failed, using fallback: {e}")
+
+    # Fallback to static data
     pulse = get_market_pulse()
-    return {
-        "indicators": pulse,
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
+    return {"indicators": pulse, "source": "cached", "updated_at": datetime.now(timezone.utc).isoformat()}
 
 
 @router.get("/performance-highlights")

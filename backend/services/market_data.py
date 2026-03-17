@@ -614,3 +614,109 @@ class MarketDataAdapter:
 
 # Singleton
 market_data_adapter = MarketDataAdapter()
+
+
+
+# ══════════════════════════════════════════════════════════════
+# ENHANCED REAL-TIME MARKET PULSE (Aureos AI Quantica)
+# ══════════════════════════════════════════════════════════════
+
+_pulse_cache = {"data": None, "ts": None}
+_PULSE_TTL = 120  # seconds
+
+async def get_real_market_pulse() -> list:
+    """Unified market pulse with REAL prices from CoinGecko + Twelve Data"""
+    import asyncio
+    from datetime import datetime, timezone
+
+    # Check cache
+    if _pulse_cache["data"] and _pulse_cache["ts"]:
+        age = (datetime.now(timezone.utc) - _pulse_cache["ts"]).total_seconds()
+        if age < _PULSE_TTL:
+            return _pulse_cache["data"]
+
+    indicators = []
+    adapter = market_data_adapter
+
+    # 1) Crypto from CoinGecko
+    try:
+        for sym, cg_id in [("BTC/USD", "bitcoin"), ("ETH/USD", "ethereum"), ("SOL/USD", "solana")]:
+            data = await adapter.coingecko.get_data(sym, cg_id)
+            if data and data.get("price"):
+                indicators.append({
+                    "symbol": sym, "value": data["price"],
+                    "change": data.get("change_percent_24h", 0), "type": "crypto"
+                })
+    except Exception as e:
+        logger.warning(f"Crypto pulse error: {e}")
+
+    # 2) Stocks & forex & commodities from Twelve Data
+    try:
+        td_symbols = ["SPY", "QQQ", "NVDA", "AAPL", "XAU/USD", "XAG/USD", "EUR/USD", "USD/BRL"]
+        sym_str = ",".join(td_symbols)
+        td_key = os.environ.get("TWELVE_DATA_KEY")
+        if td_key:
+            async with httpx.AsyncClient(timeout=15) as client:
+                resp = await client.get(f"https://api.twelvedata.com/quote?symbol={sym_str}&apikey={td_key}")
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if isinstance(data, dict) and "symbol" in data:
+                        data = {data["symbol"]: data}
+
+                    label_map = {"SPY": "S&P 500", "QQQ": "NASDAQ", "XAU/USD": "GOLD", "XAG/USD": "SILVER"}
+                    type_map = {"SPY": "index", "QQQ": "index", "NVDA": "stock", "AAPL": "stock",
+                                "XAU/USD": "commodity", "XAG/USD": "commodity", "EUR/USD": "forex", "USD/BRL": "forex"}
+
+                    for sym in td_symbols:
+                        if sym in data and isinstance(data[sym], dict) and "close" in data[sym]:
+                            try:
+                                indicators.append({
+                                    "symbol": label_map.get(sym, sym),
+                                    "value": float(data[sym]["close"]),
+                                    "change": float(data[sym].get("percent_change", 0)),
+                                    "type": type_map.get(sym, "stock")
+                                })
+                            except (ValueError, TypeError):
+                                pass
+    except Exception as e:
+        logger.warning(f"TD pulse error: {e}")
+
+    if indicators:
+        _pulse_cache["data"] = indicators
+        _pulse_cache["ts"] = datetime.now(timezone.utc)
+
+    return indicators
+
+
+async def get_global_market_overview() -> dict:
+    """Global market overview across ALL asset classes"""
+    adapter = market_data_adapter
+    crypto_global = {}
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get("https://api.coingecko.com/api/v3/global")
+            if resp.status_code == 200:
+                g = resp.json().get("data", {})
+                crypto_global = {
+                    "total_crypto_market_cap": g.get("total_market_cap", {}).get("usd", 0),
+                    "total_crypto_volume_24h": g.get("total_volume", {}).get("usd", 0),
+                    "btc_dominance": g.get("market_cap_percentage", {}).get("btc", 0),
+                    "eth_dominance": g.get("market_cap_percentage", {}).get("eth", 0),
+                    "active_cryptocurrencies": g.get("active_cryptocurrencies", 0),
+                    "market_cap_change_24h": g.get("market_cap_change_percentage_24h_usd", 0),
+                }
+    except Exception as e:
+        logger.warning(f"CG global error: {e}")
+
+    return {
+        "global_equity_market_cap": 110_000_000_000_000,
+        "global_bond_market": 130_000_000_000_000,
+        "global_forex_daily_volume": 7_500_000_000_000,
+        "crypto_market_cap": crypto_global.get("total_crypto_market_cap", 0),
+        "crypto_volume_24h": crypto_global.get("total_crypto_volume_24h", 0),
+        "gold_market_cap": 16_000_000_000_000,
+        "btc_dominance": crypto_global.get("btc_dominance", 0),
+        "eth_dominance": crypto_global.get("eth_dominance", 0),
+        "active_cryptocurrencies": crypto_global.get("active_cryptocurrencies", 0),
+        "market_cap_change_24h": crypto_global.get("market_cap_change_24h", 0),
+    }

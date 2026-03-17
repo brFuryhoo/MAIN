@@ -24,6 +24,8 @@ import ScannerPage from "@/pages/ScannerPage";
 import IntelMapPage from "@/pages/IntelMapPage";
 import SentimentPage from "@/pages/SentimentPage";
 import PaperTradingPage from "@/pages/PaperTradingPage";
+import MarketRadarPage from "@/pages/MarketRadarPage";
+import WeeklyDigestPage from "@/pages/WeeklyDigestPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -220,6 +222,8 @@ function AppRouter() {
       <Route path="/intelligence" element={<ProtectedRoute><IntelMapPage /></ProtectedRoute>} />
       <Route path="/sentiment" element={<ProtectedRoute><SentimentPage /></ProtectedRoute>} />
       <Route path="/paper-trading" element={<ProtectedRoute><PaperTradingPage /></ProtectedRoute>} />
+      <Route path="/market-radar" element={<ProtectedRoute><MarketRadarPage /></ProtectedRoute>} />
+      <Route path="/weekly-digest" element={<ProtectedRoute><WeeklyDigestPage /></ProtectedRoute>} />
       <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
