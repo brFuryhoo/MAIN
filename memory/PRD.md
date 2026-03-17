@@ -1,87 +1,65 @@
 # AUREOS AI — Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is a sophisticated fintech platform powered by an AI core named "JARVIS". The goal is to build an institutional-grade market analysis tool with a premium UI/UX — inspired by Cyber MoneyLab but **MORE POWERFUL and UNIQUE** as "AI Quantica".
-
-## Core User Persona
-**Fabricio Teodoroves** — An investor who wants a 24/7 intelligent system that crosses news, speculations, geopolitical events, and market data across ALL asset classes (crypto, stocks, forex, commodities) globally, with all values in **USD**.
+Aureos AI is a sophisticated fintech platform powered by an AI core named "JARVIS". The goal is to build an institutional-grade market analysis tool with a premium UI/UX — inspired by Cyber MoneyLab but **MORE POWERFUL and UNIQUE** as "AI Quantica". All values in USD.
 
 ## What's Been Implemented
 
-### Phase 1 — Dashboard Command Center (COMPLETE)
-- Personalized greeting with date/time
-- Portfolio overview with USD values and donut chart allocation
-- Market Pulse: 10 real-time indicators (S&P 500, NASDAQ, IBOVESPA, BTC/USD, ETH/USD, USD/BRL, GOLD, OIL, EUR/USD, DXY)
-- Intelligence of the Day: AI-generated daily briefing via GPT-5.2
-- OSINT Geopolitical Risk Monitor: 8 global regions with risk scores
-- Live Events Feed: Categorized events (geopolitics, macro, crypto, terrorism, etc.)
-- Performance Highlights: Top performing assets table
-- JARVIS Sentiment Banner: Dynamic market sentiment classification
+### Dashboard Command Center
+- Personalized greeting, Portfolio overview (USD), Market Pulse (10 indicators)
+- Intelligence of the Day (GPT-5.2), OSINT Geopolitical Risk Monitor (8 regions)
+- Live Events Feed, Performance Highlights, JARVIS Sentiment Banner
 
-### Phase 2 — Global Intelligence Terminal (COMPLETE)
-- Professional SVG World Map with detailed continent outlines, animated risk hotspots, connection lines between high-risk regions, hover interactions, risk legend, and "AUREOS AI QUANTICA" watermark
-- Region detail panel with events, risk score, and impacted assets
-- Intelligence Feed with category filter buttons (8 categories)
-- AI-powered Scenario Analysis: "What if..." questions answered by GPT-5.2
+### Global Intelligence Terminal
+- Professional SVG World Map with detailed continent outlines, animated risk hotspots
+- Region detail panel, Intelligence Feed with 8 category filters
+- AI-powered Scenario Analysis ("What if...")
 
-### Phase 3 — Premium Portfolio (COMPLETE)
-- Portfolio Health Score ring (0-100) with SVG animation
-- Enhanced positions table with USD values
-- Allocation pie chart
-- Quick Stats: Win rate, best performer, risk score, positions count
-- Market Performance Highlights: Top 10 performers
+### Premium Portfolio
+- Health Score ring (0-100), Positions table, Allocation pie chart
+- Quick Stats, Market Performance Highlights
 
-### Executive Report Narration (COMPLETE)
-- JARVIS narrates executive reports in 7 languages (English, Portuguese, Spanish, French, German, Chinese, Japanese)
-- Language selector dropdown in the Executive Report Modal
-- GPT-5.2 generates a natural narration script in the target language
-- OpenAI TTS (onyx voice) converts to audio for in-browser playback
-- Audio player with play/pause controls embedded in the modal
+### Executive Report Narration
+- JARVIS narrates reports in 7 languages via GPT-5.2 + OpenAI TTS
+
+### Daily Voice Briefing (AUTO)
+- JARVIS auto-generates 60-second morning market briefing on dashboard load
+- GPT-5.2 for script + OpenAI TTS (onyx voice)
+- Banner with loading/ready states, play/pause, progress bar, dismiss
+- Once-per-day via localStorage
+
+### SEO & Meta Tags (P0)
+- Open Graph tags, Twitter Cards, PWA meta tags
+- Professional title and description for search engines
+
+### API Rate Limiting (P0)
+- slowapi integration: 120 req/min default
+- Auth endpoints: 5-10/min, AI endpoints: 3-5/min, Copilot: 20/min
+- 429 responses with proper error handling
+
+### Error Monitoring (P0)
+- Structured logging: timestamp, level, source, method, path, status, duration, IP
+- Request middleware logs all /api calls
+- WARNING level for 4xx/5xx responses
 
 ### Previously Completed Features
-- Full 11-step analysis pipeline
-- JARVIS AI Copilot (GPT-5.2) with voice (TTS/STT)
-- Autonomous Quant Lab (AI Quantica) with backtester
-- Market Scanner, Watchlist Automation
-- Paper Trading ($100K virtual)
-- News Sentiment Analysis
-- WebSocket Real-Time Updates
-- PDF Report Export
-- Multi-Agent AI System
-- Google OAuth + JWT Authentication
-- Premium UI/UX Design System
-
-## Backend API Endpoints
-- `GET /api/intelligence/market-pulse` — 10 market indicators
-- `GET /api/intelligence/geopolitical-risk` — 8 regions with risk scores
-- `GET /api/intelligence/events-feed` — Categorized global events
-- `GET /api/intelligence/performance-highlights` — Top performing assets
-- `GET /api/intelligence/daily-briefing` — AI daily briefing (GPT-5.2)
-- `POST /api/intelligence/scenario-analysis` — AI scenario analysis (GPT-5.2)
-- `POST /api/voice/narrate-report` — AI narrated report in 7 languages (GPT-5.2 + TTS)
+- Full 11-step analysis pipeline, JARVIS Copilot (GPT-5.2 + voice)
+- Quant Lab, Market Scanner, Watchlist, Paper Trading
+- News Sentiment, WebSockets, PDF Export, Multi-Agent AI
+- Google OAuth + JWT Auth, Stripe Payments
 
 ## Tech Stack
-- **Frontend:** React, Vite, Tailwind CSS, Framer Motion, Shadcn UI, Recharts, Lightweight Charts
-- **Backend:** FastAPI (Python), Pydantic, WebSockets, ReportLab
-- **Database:** MongoDB
-- **AI:** OpenAI GPT-5.2 (via emergentintegrations), OpenAI TTS
+- **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Recharts
+- **Backend:** FastAPI, slowapi (rate limiting), MongoDB
+- **AI:** OpenAI GPT-5.2, OpenAI TTS (via emergentintegrations)
 - **Auth:** JWT + Google OAuth
-
-## Testing Status
-- Iteration 10: 100% pass rate (Intelligence Engine)
-- Iteration 11: 100% pass rate (Narrated Reports + Refined World Map)
 
 ## Prioritized Backlog
 
-### P0 — Launch Prep
-- [ ] SEO & Meta Tags (Open Graph, Twitter Cards)
-- [ ] API Rate Limiting
-- [ ] Error Monitoring / Structured Logging
-
 ### P1 — Data Integration
-- [ ] Real-time data feeds from multiple providers
-- [ ] On-chain data (Glassnode)
-- [ ] Macroeconomic data (FRED)
+- [ ] Real-time data feeds (Twelve Data, Polygon.io, Alpha Vantage)
+- [ ] On-chain data (Glassnode) — requires API key
+- [ ] Macroeconomic data (FRED) — requires API key
 
 ### P2 — Product Enhancements
 - [ ] Founder Dashboard (user metrics)

@@ -20,6 +20,9 @@ from emergentintegrations.llm.openai import OpenAITextToSpeech, OpenAISpeechToTe
 from fastapi import UploadFile, File
 from fastapi.responses import Response
 import base64
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -35,7 +38,10 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
 # Create the main app
+limiter = Limiter(key_func=get_remote_address, default_limits=["120/minute"])
 app = FastAPI(title="Aureos AI API", version="1.0.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -44,8 +50,26 @@ api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger("aureos")
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = datetime.now(timezone.utc)
+    response = await call_next(request)
+    duration = (datetime.now(timezone.utc) - start).total_seconds()
+    if request.url.path.startswith("/api") and request.url.path not in ("/api/health", "/api/ws"):
+        level = "WARNING" if response.status_code >= 400 else "INFO"
+        logger.log(
+            logging.WARNING if response.status_code >= 400 else logging.INFO,
+            f"{request.method} {request.url.path} -> {response.status_code} ({duration:.2f}s) [{request.client.host if request.client else 'unknown'}]"
+        )
+    return response
 
 # ==================== MODELS ====================
 
@@ -176,7 +200,8 @@ async def get_optional_user(credentials: HTTPAuthorizationCredentials = Depends(
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register", response_model=TokenResponse)
-async def register(data: UserCreate):
+@limiter.limit("5/minute")
+async def register(request: Request, data: UserCreate):
     existing = await db.users.find_one({"email": data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -208,7 +233,8 @@ async def register(data: UserCreate):
     )
 
 @api_router.post("/auth/login", response_model=TokenResponse)
-async def login(data: UserLogin):
+@limiter.limit("10/minute")
+async def login(request: Request, data: UserLogin):
     user = await db.users.find_one({"email": data.email}, {"_id": 0})
     if not user or not verify_password(data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -447,7 +473,8 @@ async def get_heatmap():
 # ==================== AI COPILOT ENDPOINTS ====================
 
 @api_router.post("/copilot/chat", response_model=CopilotResponse)
-async def chat_with_copilot(data: CopilotMessage, user: dict = Depends(get_current_user)):
+@limiter.limit("20/minute")
+async def chat_with_copilot(request: Request, data: CopilotMessage, user: dict = Depends(get_current_user)):
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not api_key:
@@ -940,7 +967,8 @@ class NarrateReportRequest(BaseModel):
     language: str = "en"
 
 @api_router.post("/voice/narrate-report")
-async def narrate_report(data: NarrateReportRequest):
+@limiter.limit("5/minute")
+async def narrate_report(request: Request, data: NarrateReportRequest):
     """Generate a natural-sounding AI narration of an executive report, in the chosen language. Returns audio/mpeg blob."""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
@@ -981,7 +1009,8 @@ async def narrate_report(data: NarrateReportRequest):
 
 
 @api_router.get("/voice/daily-briefing-audio")
-async def daily_briefing_audio():
+@limiter.limit("3/minute")
+async def daily_briefing_audio(request: Request):
     """Auto-generated daily voice briefing — JARVIS narrates the market overnight summary. Returns audio/mpeg."""
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
