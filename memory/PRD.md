@@ -1,76 +1,63 @@
 # AUREOS AI — Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is a sophisticated fintech platform powered by an AI core named "JARVIS". The goal is to build an institutional-grade market analysis tool with a premium UI/UX — inspired by Cyber MoneyLab but **MORE POWERFUL and UNIQUE** as "AI Quantica". All values in USD.
+Aureos AI is the most powerful AI-driven quantitative market intelligence platform ever built. Inspired by Cyber MoneyLab but UNIQUE as "AI Quantica". All values in USD. Global market coverage across ALL asset classes.
 
 ## What's Been Implemented
 
-### Dashboard Command Center
-- Personalized greeting, Portfolio overview (USD), Market Pulse (10 indicators)
-- Intelligence of the Day (GPT-5.2), OSINT Geopolitical Risk Monitor (8 regions)
-- Live Events Feed, Performance Highlights, JARVIS Sentiment Banner
+### Command Center Dashboard
+- Personalized greeting, Fear & Greed Index badge, Global Markets Overview bar ($110T equity, crypto, gold, FX)
+- Portfolio overview (USD), REAL Market Pulse (10 live indicators from CoinGecko + Twelve Data)
+- Intelligence of the Day (GPT-5.2), OSINT Geopolitical Risk Monitor, Live Events Feed
+- Daily Voice Briefing (auto-generated 60sec podcast by JARVIS)
 
 ### Global Intelligence Terminal
-- Professional SVG World Map with detailed continent outlines, animated risk hotspots
+- Professional SVG World Map with 8 animated risk hotspots and continent outlines
 - Region detail panel, Intelligence Feed with 8 category filters
-- AI-powered Scenario Analysis ("What if...")
+- AI Scenario Analysis ("What if..." powered by GPT-5.2)
 
-### Premium Portfolio
-- Health Score ring (0-100), Positions table, Allocation pie chart
-- Quick Stats, Market Performance Highlights
+### AI Quantica Engine (4-Tab Page)
+- **Market Radar:** Biggest gainers/losers, unusual volume, social trending
+- **AI Trading Signals:** 15 assets with signal/confidence/entry/stop/target/R:R
+- **Anomaly Detector:** 8 anomaly types (whale activity, volume spikes, options unusual, correlation breaks)
+- **Correlation Matrix:** 10x10 asset correlation heatmap
+
+### Fear & Greed Index
+- Composite score (0-100) from 7 components (market momentum, volatility, safe haven, junk bonds, crypto, options, geopolitical)
+- 30-day history, color-coded labels (EXTREME FEAR → EXTREME GREED)
+
+### AI Portfolio Optimizer
+- JARVIS analyzes portfolio + geopolitical risks + market conditions
+- Generates specific rebalancing recommendations
+- Before/after optimization score
+
+### Weekly Intelligence Digest
+- Comprehensive weekly market report by GPT-5.2
+- Podcast version (TTS narration)
+- Top performers, Fear & Greed context
 
 ### Executive Report Narration
-- JARVIS narrates reports in 7 languages via GPT-5.2 + OpenAI TTS
+- JARVIS narrates reports in 7 languages (EN, PT, ES, FR, DE, ZH, JA)
 
-### Daily Voice Briefing (AUTO)
-- JARVIS auto-generates 60-second morning market briefing on dashboard load
-- GPT-5.2 for script + OpenAI TTS (onyx voice)
-- Banner with loading/ready states, play/pause, progress bar, dismiss
-- Once-per-day via localStorage
+### Real Market Data
+- CoinGecko: 20 cryptocurrencies with live prices
+- Twelve Data: Stocks, ETFs, Forex, Commodities (AAPL, NVDA, SPY, QQQ, XAU/USD, EUR/USD, USD/BRL)
+- Global Overview: $110T equities, crypto MCap, gold, FX daily volume, BTC dominance
 
-### SEO & Meta Tags (P0)
-- Open Graph tags, Twitter Cards, PWA meta tags
-- Professional title and description for search engines
+### Infrastructure (P0)
+- SEO & Meta Tags, API Rate Limiting (slowapi), Structured Logging
 
-### API Rate Limiting (P0)
-- slowapi integration: 120 req/min default
-- Auth endpoints: 5-10/min, AI endpoints: 3-5/min, Copilot: 20/min
-- 429 responses with proper error handling
+### Previous Features
+- 11-step analysis pipeline, JARVIS Copilot (GPT-5.2 + voice TTS/STT)
+- Quant Lab, Market Scanner, Watchlist, Paper Trading ($100K), News Sentiment
+- WebSockets, PDF Export, Multi-Agent AI, Google OAuth + JWT, Stripe
 
-### Error Monitoring (P0)
-- Structured logging: timestamp, level, source, method, path, status, duration, IP
-- Request middleware logs all /api calls
-- WARNING level for 4xx/5xx responses
-
-### Previously Completed Features
-- Full 11-step analysis pipeline, JARVIS Copilot (GPT-5.2 + voice)
-- Quant Lab, Market Scanner, Watchlist, Paper Trading
-- News Sentiment, WebSockets, PDF Export, Multi-Agent AI
-- Google OAuth + JWT Auth, Stripe Payments
-
-## Tech Stack
-- **Frontend:** React, Tailwind CSS, Framer Motion, Shadcn UI, Recharts
-- **Backend:** FastAPI, slowapi (rate limiting), MongoDB
-- **AI:** OpenAI GPT-5.2, OpenAI TTS (via emergentintegrations)
-- **Auth:** JWT + Google OAuth
+## Testing Status
+- Iteration 13: 100% (37/37 backend, all frontend flows)
 
 ## Prioritized Backlog
-
-### P1 — Data Integration
-- [ ] Real-time data feeds (Twelve Data, Polygon.io, Alpha Vantage)
-- [ ] On-chain data (Glassnode) — requires API key
-- [ ] Macroeconomic data (FRED) — requires API key
-
-### P2 — Product Enhancements
-- [ ] Founder Dashboard (user metrics)
-- [ ] Advanced Backtesting (Sharpe ratio, drawdown)
-- [ ] Email alerts
-
-### P3 — Infrastructure
-- [ ] Redis caching
-- [ ] Kafka event streaming
-- [ ] TimescaleDB for time-series
-
-### P4 — Business Differentiation
-- [ ] Telegram/Discord bot for JARVIS alerts
-- [ ] Public API as revenue stream
+- P1: Expand real data feeds (more stocks, more assets)
+- P1: On-chain data (Glassnode), Macroeconomic (FRED)
+- P2: Founder Dashboard, Advanced Backtesting, Email alerts
+- P3: Redis caching, Kafka streaming
+- P4: Telegram/Discord bot, Public API
