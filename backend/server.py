@@ -718,7 +718,7 @@ async def create_checkout(data: CheckoutRequest, request: Request, user: dict = 
 async def get_payment_status(session_id: str, user: dict = Depends(get_current_user)):
     try:
         api_key = os.environ.get('STRIPE_API_KEY')
-        host_url = "https://fintech-powerhouse.preview.emergentagent.com"
+        host_url = "https://aureos-hub.preview.emergentagent.com"
         webhook_url = f"{host_url}/api/webhook/stripe"
         
         stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
@@ -1252,6 +1252,7 @@ from routes.paper_trading import router as paper_router
 from routes.aureos_score import router as score_router
 from routes.ultra_features import router as ultra_router
 from routes.aureos_tokens import router as tokens_router
+from routes.godmode import router as godmode_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1268,6 +1269,7 @@ app.include_router(paper_router)
 app.include_router(score_router)
 app.include_router(ultra_router)
 app.include_router(tokens_router)
+app.include_router(godmode_router)
 
 app.add_middleware(
     CORSMiddleware,
