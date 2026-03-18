@@ -1,65 +1,68 @@
 # AUREOS AI — Product Requirements Document
 
 ## Original Problem Statement
-Aureos AI is the most powerful AI-driven quantitative market intelligence platform ever built. The goal is to create a platform impossible to copy — combining Paper Trading, Aureos Score, Market Scanner, JARVIS AI, and unique differentiation features into the world's most powerful quant platform.
+Aureos AI is the most powerful AI-driven quantitative market intelligence platform ever built. The goal is to create a platform impossible to copy — combining Paper Trading, Aureos Score, Market Scanner, JARVIS AI, token economy, and unique differentiation features.
 
 ## What's Been Implemented
 
-### Aureos Score — Global Scoring & Ranking System (March 2026)
-- **Score Engine (0-1000):** 4 weighted components — Performance (40%), Risk Management (25%), Decision Quality (20%), Consistency (15%)
-- **Tier System:** Beginner (0-300), Intermediate (301-600), Advanced (601-800), Elite (801-1000)
-- **Leaderboard:** Global ranking with user scores, win rates, PnL, tier badges
-- **17 Achievements:** First Trade, Rising Star, Consistent Trader, Elite Quant Mind, etc.
-- **JARVIS Insights:** AI-powered score analysis with improvement suggestions
-- **Anti-Manipulation:** Spam trade detection and penalization
-- Backend: `/app/backend/routes/aureos_score.py` | Frontend: `/app/frontend/src/pages/LeaderboardPage.jsx`
+### Aureos Token Economy (March 2026 - LATEST)
+- **Internal Token (AT):** Earn tokens via trading, daily logins, achievements, weekly challenges
+- **16 Earning Rules:** trade_close (+5), trade_win (+10), trade_big_win (+25), daily_login (+3), score milestones (+100-750), achievements (+15), challenge wins (+200-500), login streaks (+25-100)
+- **Token Store:** 8 purchasable items across 4 categories — Signals unlock (50 AT), JARVIS insights (75 AT), Trade analysis (30 AT), PRO access (200-1000 AT), Cosmetics (300-500 AT)
+- **Paper Trading Integration:** Auto-grants tokens on trade close
+- **Daily Login with Streak Bonuses:** 7-day (+25 AT), 30-day (+100 AT)
+- Backend: `/app/backend/routes/aureos_tokens.py` | Frontend: `/app/frontend/src/pages/AureosTokensPage.jsx`
 
-### Ultra Differentiation Features (March 2026 - NEW)
-1. **JARVIS Institutional Briefing** — Full morning briefing: panorama, regime, top 3 opportunities, risks, capital flow, conviction call (GPT-5.2)
-2. **"Why This Trade?" Engine** — Deep explanation for every trade: liquidity, structure, probability, quant pattern, risk factors (GPT-5.2)
-3. **Decision Replay** — Complete post-trade analysis: entry/exit timing, risk grade, what went right/wrong, lessons (GPT-5.2)
-4. **Market Personality/DNA** — Every asset has a "personality": 10 tracked assets with traits, behavior, volatility/manipulation/trend/reversion scores
-5. **Signal Timeline** — Netflix-style timeline of all 30 JARVIS signals with outcomes, win rates, filters
-6. **Signal Confidence Lock** — Monetization: high-confidence signals (>=80%) locked for free users, require PRO
-7. **Capital Flow Heatmap** — 10 global sectors with flow direction, intensity, volume, leaders, dominant trend
-8. **Intelligence Mode** — Minimal UI: just regime, fear/greed, and actionable decisions for serious traders
-9. **Self-Improving User Model** — JARVIS learns: profile type, risk appetite, behavior, personalized recommendations
-10. **Live Cross-Analysis Engine** — The "mega brain": crosses all data sources for opportunities, warnings, insights
+### Weekly Score Challenge (March 2026 - LATEST)
+- Compete weekly for highest Aureos Score delta
+- Prizes: 1st = 500 AT + "Weekly Champion" badge, 2nd = 300 AT, 3rd = 200 AT
+- Tracks score_delta from registration point
 
-Backend: `/app/backend/routes/ultra_features.py` (12 endpoints)
-Frontend: 6 new pages — CrossAnalysisPage, DecisionReplayPage, MarketPersonalityPage, SignalTimelinePage, CapitalFlowPage, IntelligenceModePage
+### Price Accuracy Fix (March 2026 - LATEST)
+- **Validation Layer:** `PRICE_REFERENCE` dict with expected ranges for all major assets
+- **Normalization:** Auto-corrects abnormal Twelve Data prices (e.g., Gold 10oz batch price → per troy ounce)
+- **TD_NORMALIZATION:** Specific fixes for Twelve Data unit issues (XAU/USD, XAG/USD)
+- Applied to: market pulse, stock data, forex data functions
 
-### Command Center Dashboard
-- Personalized greeting, Fear & Greed badge, Aureos Score badge, Global Markets bar
-- Market Pulse (10 live indicators), Intelligence of the Day, OSINT Risk Monitor, Events Feed
-- Daily Voice Briefing (auto-generated JARVIS podcast)
+### Aureos Score — Global Scoring & Ranking System
+- Score Engine 0-1000, 4 components (Performance 40%, Risk 25%, Decision 20%, Consistency 15%)
+- Tier System (Beginner/Intermediate/Advanced/Elite), 17 Achievements, Leaderboard, JARVIS Insights
+
+### Ultra Differentiation Features (10 Features)
+1. JARVIS Institutional Briefing (GPT-5.2)
+2. "Why This Trade?" Engine (GPT-5.2)
+3. Decision Replay (GPT-5.2)
+4. Market Personality/DNA (10 assets)
+5. Signal Timeline (30 signals with outcomes)
+6. Signal Confidence Lock (monetization)
+7. Capital Flow Heatmap (10 sectors)
+8. Intelligence Mode (minimal UI)
+9. Self-Improving User Model
+10. Live Cross-Analysis Engine
 
 ### Previous Features (All Operational)
-- Global Intelligence Terminal (SVG World Map)
-- AI Quantica Engine (Market Radar, AI Trading Signals, Anomaly Detector, Correlation Matrix)
-- Fear & Greed Index, AI Portfolio Optimizer, Weekly Digest
-- Executive Report Narration (TTS, 7 languages)
+- Command Center Dashboard, Global Intelligence Terminal, AI Quantica Engine
+- Fear & Greed Index, AI Portfolio Optimizer, Weekly Digest, Report Narration
 - Real Market Data (CoinGecko, Twelve Data, Alpha Vantage)
-- 11-step Analysis Pipeline, JARVIS Copilot, Quant Lab, Market Scanner
-- Watchlist, Paper Trading ($100K), News Sentiment
-- WebSockets, PDF Export, Multi-Agent AI, Google OAuth + JWT, Stripe
-- SEO, API Rate Limiting, Structured Logging
+- 11-step Analysis, JARVIS Copilot, Quant Lab, Market Scanner
+- Watchlist, Paper Trading, News Sentiment, WebSockets, PDF Export
+- Multi-Agent AI, Google OAuth + JWT, Stripe, SEO, Rate Limiting
 
 ## Testing Status
-- Iteration 15: Backend 18/18 (100%), Frontend 100% — All Ultra features
-- Iteration 14: Backend 12/12 (100%) — Aureos Score
-- Iteration 13: Backend 37/37 (100%) — All previous features
+- Iteration 16: 20/20 (100%) — Tokens, Weekly Challenge, Price Validation
+- Iteration 15: 18/18 (100%) — Ultra features
+- Iteration 14: 12/12 (100%) — Aureos Score
 
 ## Architecture
-19 sidebar navigation pages. Backend: FastAPI + MongoDB. Frontend: React + Tailwind + Shadcn.
-AI: GPT-5.2 via Emergent LLM Key for briefings, trade analysis, decision replays.
+21 sidebar navigation pages. Backend: FastAPI + MongoDB. Frontend: React + Tailwind + Shadcn.
+Collections: token_wallets, token_transactions, weekly_challenge, score_history, score_snapshots, paper_trades, paper_portfolios
 
 ## Prioritized Backlog
-- P0: Fix Gold price accuracy, Expand asset coverage
-- P0: "FULL POWER MAXIMO" original features (Macro Dashboard, AI Newsfeed, Social Sentiment, etc.)
-- P1: Global Market Heatmap (real institutional flow data)
-- P1: "Ask JARVIS Anything" advanced mode
-- P2: Self-Improving User Model with ML
+- P0: Expand asset coverage (dynamic search)
+- P1: "FULL POWER MAXIMO" features (Macro Dashboard, AI Newsfeed, Social Sentiment, Regulatory Tracker, Supply Chain Intelligence)
+- P1: Global Market Heatmap with real institutional flow data
+- P1: Ask JARVIS Anything (advanced copilot mode)
+- P2: Token → on-chain migration (future wallet withdrawal)
 - P2: Founder Dashboard, Advanced Backtesting
-- P3: Redis caching, Kafka streaming
+- P3: Redis, Kafka, TimescaleDB
 - P4: Telegram/Discord bot, Public API
