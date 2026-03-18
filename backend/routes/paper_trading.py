@@ -7,7 +7,7 @@ Virtual portfolio simulation for testing strategies.
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import os
 import logging
 
@@ -206,6 +206,35 @@ async def close_trade(req: CloseRequest, request: Request):
                 "winning_trades": 1 if is_win else 0,
             }}
         )
+
+        # Grant Aureos Tokens for trade completion
+        try:
+            from routes.aureos_tokens import grant_tokens
+            await grant_tokens(user_id, "trade_close")
+            if is_win:
+                await grant_tokens(user_id, "trade_win")
+                if pnl_pct > 5:
+                    await grant_tokens(user_id, "trade_big_win")
+        except Exception as token_err:
+            logger.warning(f"Token grant error: {token_err}")
+
+        # Update weekly challenge if registered
+        try:
+            from routes.aureos_score import calculate_score
+            score_data = await calculate_score(db, user_id)
+            now = datetime.now(timezone.utc)
+            start_of_week = now - timedelta(days=now.weekday())
+            start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+            week_id = start_of_week.strftime("%Y-W%W")
+            challenge = await db.weekly_challenge.find_one({"user_id": user_id, "week_id": week_id})
+            if challenge:
+                await db.weekly_challenge.update_one(
+                    {"user_id": user_id, "week_id": week_id},
+                    {"$set": {"score_current": score_data["score"], "score_delta": score_data["score"] - challenge.get("score_start", 0)},
+                     "$inc": {"trades_this_week": 1}}
+                )
+        except Exception:
+            pass
 
         return {
             "status": "closed",

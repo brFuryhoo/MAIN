@@ -31,6 +31,7 @@ import {
   Clock,
   Map,
   Terminal,
+  Coins,
   RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,7 @@ const navItems = [
   { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
   { path: '/decision-replay', label: 'Decision Replay', icon: RotateCcw },
   { path: '/leaderboard', label: 'Aureos Score', icon: Trophy },
+  { path: '/aureos-tokens', label: 'Aureos Tokens', icon: Coins },
   { path: '/weekly-digest', label: 'Weekly Digest', icon: BookOpen },
   { path: '/sentiment', label: 'Sentiment', icon: Gauge },
   { path: '/copilot', label: 'JARVIS Copilot', icon: Bot },

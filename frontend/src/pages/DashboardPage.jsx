@@ -10,7 +10,7 @@ import {
   Bot, Target, Globe, Shield, AlertTriangle,
   ChevronRight, Flame, Eye, Brain, Radar,
   Clock, Newspaper, MessageSquare, Volume2, VolumeX,
-  Play, Pause, Radio, X, Trophy, ChevronUp, ChevronDown
+  Play, Pause, Radio, X, Trophy, ChevronUp, ChevronDown, Coins
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -36,6 +36,7 @@ const DashboardPage = () => {
   const [fearGreed, setFearGreed] = useState(null);
   const [voiceBriefing, setVoiceBriefing] = useState({ loading: false, ready: false, playing: false, dismissed: false, progress: 0 });
   const [aureosScore, setAureosScore] = useState(null);
+  const [tokenBalance, setTokenBalance] = useState(null);
   const voiceAudioRef = useRef(null);
 
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -90,7 +91,7 @@ const DashboardPage = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [pulseRes, riskRes, highlightsRes, eventsRes, portfolioRes, globalRes, fgRes, scoreRes] = await Promise.all([
+      const [pulseRes, riskRes, highlightsRes, eventsRes, portfolioRes, globalRes, fgRes, scoreRes, tokenRes] = await Promise.all([
         axios.get(`${API}/intelligence/market-pulse`).catch(() => ({ data: { indicators: [] } })),
         axios.get(`${API}/intelligence/geopolitical-risk`).catch(() => ({ data: null })),
         axios.get(`${API}/intelligence/performance-highlights`).catch(() => ({ data: { highlights: [] } })),
@@ -99,6 +100,7 @@ const DashboardPage = () => {
         axios.get(`${API}/intelligence/global-overview`).catch(() => ({ data: null })),
         axios.get(`${API}/quantica/fear-greed`).catch(() => ({ data: null })),
         axios.get(`${API}/score/my-score`, { headers }).catch(() => ({ data: null })),
+        axios.get(`${API}/tokens/balance`, { headers }).catch(() => ({ data: null })),
       ]);
       setPulse(pulseRes.data.indicators || []);
       setGeoRisk(riskRes.data);
@@ -108,6 +110,7 @@ const DashboardPage = () => {
       setGlobalOverview(globalRes.data);
       setFearGreed(fgRes.data);
       setAureosScore(scoreRes.data);
+      setTokenBalance(tokenRes.data);
     } catch { /* silent */ }
     setLoading(false);
   };
@@ -288,6 +291,18 @@ const DashboardPage = () => {
                       </span>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+            {/* Aureos Token Badge */}
+            {tokenBalance && (
+              <div className="rounded-xl px-3 py-2 flex items-center gap-2 cursor-pointer hover:border-aureos-gold/30 transition-all"
+                style={{ background: '#CFAE4612', border: '1px solid #CFAE4625' }}
+                onClick={() => navigate('/aureos-tokens')} data-testid="dashboard-token-balance">
+                <Coins size={16} className="text-aureos-gold" />
+                <div>
+                  <p className="text-[8px] uppercase tracking-wider text-[#888]">Tokens</p>
+                  <p className="font-mono text-sm font-bold text-aureos-gold">{(tokenBalance.balance || 0).toLocaleString()} AT</p>
                 </div>
               </div>
             )}

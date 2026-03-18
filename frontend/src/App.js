@@ -33,6 +33,7 @@ import MarketPersonalityPage from "@/pages/MarketPersonalityPage";
 import SignalTimelinePage from "@/pages/SignalTimelinePage";
 import CapitalFlowPage from "@/pages/CapitalFlowPage";
 import IntelligenceModePage from "@/pages/IntelligenceModePage";
+import AureosTokensPage from "@/pages/AureosTokensPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -238,6 +239,7 @@ function AppRouter() {
       <Route path="/signal-timeline" element={<ProtectedRoute><SignalTimelinePage /></ProtectedRoute>} />
       <Route path="/capital-flow" element={<ProtectedRoute><CapitalFlowPage /></ProtectedRoute>} />
       <Route path="/intelligence-mode" element={<ProtectedRoute><IntelligenceModePage /></ProtectedRoute>} />
+      <Route path="/aureos-tokens" element={<ProtectedRoute><AureosTokensPage /></ProtectedRoute>} />
       <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       

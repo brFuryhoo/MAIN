@@ -41,6 +41,84 @@ def _cache_set(key: str, data, ttl: int):
     _cache[key] = {"data": data, "ts": time.time(), "ttl": ttl}
 
 
+# ==================== PRICE VALIDATION & NORMALIZATION ====================
+# Reference ranges for major assets to detect and correct abnormal prices.
+# Format: symbol → (min, max, unit_note)
+# If a price falls outside range, we try alternative sources or normalize.
+
+PRICE_REFERENCE = {
+    # Commodities
+    "XAU/USD": (1800, 4000, "per troy ounce"),
+    "GOLD":    (1800, 4000, "per troy ounce"),
+    "XAG/USD": (15, 55, "per troy ounce"),
+    "SILVER":  (15, 55, "per troy ounce"),
+    # Major Stocks
+    "AAPL":    (100, 350, None),
+    "MSFT":    (200, 700, None),
+    "NVDA":    (200, 2000, None),
+    "GOOGL":   (80, 300, None),
+    "AMZN":    (80, 350, None),
+    "TSLA":    (80, 600, None),
+    "META":    (150, 800, None),
+    # Indices/ETFs
+    "SPY":     (300, 700, None),
+    "QQQ":     (200, 600, None),
+    # Forex
+    "EUR/USD": (0.85, 1.30, None),
+    "GBP/USD": (1.05, 1.55, None),
+    "USD/JPY": (100, 180, None),
+    "USD/BRL": (3.5, 7.5, None),
+    # Crypto (wide ranges due to volatility)
+    "BTC":     (20000, 250000, None),
+    "ETH":     (800, 20000, None),
+    "SOL":     (5, 500, None),
+}
+
+# Known Twelve Data scaling issues — some commodities return 10x or batch prices
+TD_NORMALIZATION = {
+    "XAU/USD": {"check": lambda p: p > 4500, "factor": 0.5, "note": "Twelve Data may return per 10oz batch"},
+    "XAG/USD": {"check": lambda p: p > 60, "factor": 0.5, "note": "Twelve Data may return per 10oz batch"},
+}
+
+
+def validate_and_normalize_price(symbol: str, price: float, source: str = "") -> tuple:
+    """Validate a price against known ranges and normalize if needed.
+    Returns (normalized_price, was_corrected, correction_note).
+    """
+    if price <= 0:
+        return (price, False, "")
+
+    sym = symbol.upper()
+
+    # Check Twelve Data normalization rules
+    if source in ("twelve_data", "td"):
+        norm = TD_NORMALIZATION.get(sym)
+        if norm and norm["check"](price):
+            corrected = price * norm["factor"]
+            logger.info(f"Price normalized: {sym} ${price:.2f} → ${corrected:.2f} ({norm['note']})")
+            return (corrected, True, norm["note"])
+
+    # Check against reference ranges
+    ref = PRICE_REFERENCE.get(sym)
+    if ref:
+        min_p, max_p, _ = ref
+        if price > max_p * 1.5:  # >150% of max — likely wrong unit
+            # Try dividing by common factors
+            for factor in [10, 100, 2, 5]:
+                normalized = price / factor
+                if min_p <= normalized <= max_p * 1.2:
+                    logger.info(f"Price auto-corrected: {sym} ${price:.2f} → ${normalized:.2f} (÷{factor})")
+                    return (normalized, True, f"Auto-corrected: divided by {factor}")
+        elif price < min_p * 0.5:  # <50% of min — likely wrong unit
+            for factor in [10, 100, 1000]:
+                normalized = price * factor
+                if min_p <= normalized <= max_p * 1.2:
+                    logger.info(f"Price auto-corrected: {sym} ${price:.2f} → ${normalized:.2f} (×{factor})")
+                    return (normalized, True, f"Auto-corrected: multiplied by {factor}")
+
+    return (price, False, "")
+
+
 # ==================== MOCK FALLBACK DATA ====================
 
 MOCK_DATA = {
@@ -149,8 +227,11 @@ class TwelveDataProvider:
             d = resp.json()
             if d.get("code"):
                 return None
+            raw_price = float(d.get("close", 0) or 0)
+            # Validate and normalize price
+            normalized_price, was_corrected, note = validate_and_normalize_price(symbol, raw_price, "twelve_data")
             result = {
-                "price": float(d.get("close", 0) or 0),
+                "price": normalized_price,
                 "open": float(d.get("open", 0) or 0),
                 "high": float(d.get("high", 0) or 0),
                 "low": float(d.get("low", 0) or 0),
@@ -159,6 +240,8 @@ class TwelveDataProvider:
                 "name": d.get("name", symbol),
                 "exchange": d.get("exchange", ""),
                 "source": "twelve_data",
+                "price_validated": True,
+                "price_corrected": was_corrected,
             }
             _cache_set(cache_key, result, CACHE_TTL_PRICE)
             return result
@@ -587,6 +670,9 @@ class MarketDataAdapter:
             }
 
         price = price_data["price"]
+        # Validate and normalize the final price
+        validated_price, was_corrected, note = validate_and_normalize_price(symbol, price, price_data.get("source", ""))
+        price = validated_price
         name = price_data.get("name", symbol)
         source = price_data.get("source", "unknown")
 
@@ -670,11 +756,15 @@ async def get_real_market_pulse() -> list:
                     for sym in td_symbols:
                         if sym in data and isinstance(data[sym], dict) and "close" in data[sym]:
                             try:
+                                raw_price = float(data[sym]["close"])
+                                # Validate and normalize price
+                                validated_price, was_corrected, note = validate_and_normalize_price(sym, raw_price, "twelve_data")
                                 indicators.append({
                                     "symbol": label_map.get(sym, sym),
-                                    "value": float(data[sym]["close"]),
+                                    "value": validated_price,
                                     "change": float(data[sym].get("percent_change", 0)),
-                                    "type": type_map.get(sym, "stock")
+                                    "type": type_map.get(sym, "stock"),
+                                    "price_corrected": was_corrected,
                                 })
                             except (ValueError, TypeError):
                                 pass
