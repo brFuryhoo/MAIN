@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Bot, Settings, LogOut, Menu, X, Wallet, Zap, Bell, Search,
   Crown, Eye, Brain, Radar, Globe, Gauge, Banknote, Activity, BookOpen, Trophy,
   Fingerprint, Clock, Map, Terminal, Coins, RotateCcw, ChevronLeft, ChevronRight,
-  ShieldCheck, Sparkles, BarChart3
+  ShieldCheck, Sparkles, BarChart3, Dna, ShoppingBag, Network, Users, ScanLine, Swords
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -41,8 +41,19 @@ const navSections = [
       { path: '/portfolio', label: 'My Portfolio', icon: Wallet },
       { path: '/watchlist', label: 'Watchlist', icon: Eye },
       { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
-      { path: '/decision-replay', label: 'Decision Replay', icon: RotateCcw },
       { path: '/trade-simulator', label: 'Trade Simulator', icon: Sparkles },
+      { path: '/decision-replay', label: 'Decision Replay', icon: RotateCcw },
+    ],
+  },
+  {
+    label: 'Unfair Advantage',
+    items: [
+      { path: '/trader-dna', label: 'Trader DNA', icon: Dna },
+      { path: '/strategy-marketplace', label: 'Marketplace', icon: ShoppingBag },
+      { path: '/global-intelligence', label: 'Global Intel', icon: Network },
+      { path: '/opportunity-scanner', label: 'Opp Scanner', icon: ScanLine },
+      { path: '/social-proof', label: 'Top Traders', icon: Users },
+      { path: '/jarvis-challenge', label: 'JARVIS Challenge', icon: Swords },
     ],
   },
   {

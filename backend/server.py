@@ -1253,6 +1253,7 @@ from routes.aureos_score import router as score_router
 from routes.ultra_features import router as ultra_router
 from routes.aureos_tokens import router as tokens_router
 from routes.godmode import router as godmode_router
+from routes.unfair_advantage import router as advantage_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1270,6 +1271,7 @@ app.include_router(score_router)
 app.include_router(ultra_router)
 app.include_router(tokens_router)
 app.include_router(godmode_router)
+app.include_router(advantage_router)
 
 app.add_middleware(
     CORSMiddleware,

@@ -34,6 +34,14 @@ import SignalTimelinePage from "@/pages/SignalTimelinePage";
 import CapitalFlowPage from "@/pages/CapitalFlowPage";
 import IntelligenceModePage from "@/pages/IntelligenceModePage";
 import AureosTokensPage from "@/pages/AureosTokensPage";
+import PerformancePage from "@/pages/PerformancePage";
+import TradeSimulatorPage from "@/pages/TradeSimulatorPage";
+import TraderDNAPage from "@/pages/TraderDNAPage";
+import StrategyMarketplacePage from "@/pages/StrategyMarketplacePage";
+import GlobalIntelligencePage from "@/pages/GlobalIntelligencePage";
+import OpportunityScannerPage from "@/pages/OpportunityScannerPage";
+import SocialProofPage from "@/pages/SocialProofPage";
+import JarvisChallengePage from "@/pages/JarvisChallengePage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -241,6 +249,14 @@ function AppRouter() {
       <Route path="/intelligence-mode" element={<ProtectedRoute><IntelligenceModePage /></ProtectedRoute>} />
       <Route path="/aureos-tokens" element={<ProtectedRoute><AureosTokensPage /></ProtectedRoute>} />
       <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
+      <Route path="/performance" element={<ProtectedRoute><PerformancePage /></ProtectedRoute>} />
+      <Route path="/trade-simulator" element={<ProtectedRoute><TradeSimulatorPage /></ProtectedRoute>} />
+      <Route path="/trader-dna" element={<ProtectedRoute><TraderDNAPage /></ProtectedRoute>} />
+      <Route path="/strategy-marketplace" element={<ProtectedRoute><StrategyMarketplacePage /></ProtectedRoute>} />
+      <Route path="/global-intelligence" element={<ProtectedRoute><GlobalIntelligencePage /></ProtectedRoute>} />
+      <Route path="/opportunity-scanner" element={<ProtectedRoute><OpportunityScannerPage /></ProtectedRoute>} />
+      <Route path="/social-proof" element={<ProtectedRoute><SocialProofPage /></ProtectedRoute>} />
+      <Route path="/jarvis-challenge" element={<ProtectedRoute><JarvisChallengePage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
       {/* Catch all */}

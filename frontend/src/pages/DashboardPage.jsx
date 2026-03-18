@@ -43,13 +43,7 @@ const DashboardPage = () => {
 
   useEffect(() => { fetchAll(); }, []);
 
-  // Auto-load daily voice briefing on mount
-  useEffect(() => {
-    const today = new Date().toDateString();
-    const lastBriefing = localStorage.getItem('aureos_last_voice_briefing');
-    if (lastBriefing === today) return; // Already played today
-    loadVoiceBriefing();
-  }, []);
+  // Voice briefing is user-triggered to avoid blocking the event loop
 
   const loadVoiceBriefing = async () => {
     setVoiceBriefing(v => ({ ...v, loading: true }));
