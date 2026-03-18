@@ -26,24 +26,34 @@ import {
   Banknote,
   Activity,
   BookOpen,
-  Trophy
+  Trophy,
+  Fingerprint,
+  Clock,
+  Map,
+  Terminal,
+  RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { path: '/dashboard', label: 'Command Center', icon: LayoutDashboard },
+  { path: '/cross-analysis', label: 'JARVIS Hub', icon: Brain },
   { path: '/intelligence', label: 'Intel Terminal', icon: Globe },
   { path: '/market-radar', label: 'AI Quantica Engine', icon: Activity },
   { path: '/analysis', label: 'Deep Analysis', icon: Zap },
   { path: '/scanner', label: 'Market Scanner', icon: Radar },
+  { path: '/signal-timeline', label: 'Signal Timeline', icon: Clock },
+  { path: '/capital-flow', label: 'Capital Flow', icon: Map },
+  { path: '/market-personality', label: 'Market DNA', icon: Fingerprint },
+  { path: '/intelligence-mode', label: 'Intel Mode', icon: Terminal },
   { path: '/portfolio', label: 'My Portfolio', icon: Wallet },
   { path: '/watchlist', label: 'Watchlist', icon: Eye },
-  { path: '/quant-lab', label: 'AI Quantica Lab', icon: Brain },
+  { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
+  { path: '/decision-replay', label: 'Decision Replay', icon: RotateCcw },
+  { path: '/leaderboard', label: 'Aureos Score', icon: Trophy },
   { path: '/weekly-digest', label: 'Weekly Digest', icon: BookOpen },
   { path: '/sentiment', label: 'Sentiment', icon: Gauge },
-  { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
-  { path: '/leaderboard', label: 'Aureos Score', icon: Trophy },
   { path: '/copilot', label: 'JARVIS Copilot', icon: Bot },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];

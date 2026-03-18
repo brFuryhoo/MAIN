@@ -27,6 +27,12 @@ import PaperTradingPage from "@/pages/PaperTradingPage";
 import MarketRadarPage from "@/pages/MarketRadarPage";
 import WeeklyDigestPage from "@/pages/WeeklyDigestPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
+import CrossAnalysisPage from "@/pages/CrossAnalysisPage";
+import DecisionReplayPage from "@/pages/DecisionReplayPage";
+import MarketPersonalityPage from "@/pages/MarketPersonalityPage";
+import SignalTimelinePage from "@/pages/SignalTimelinePage";
+import CapitalFlowPage from "@/pages/CapitalFlowPage";
+import IntelligenceModePage from "@/pages/IntelligenceModePage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -226,6 +232,12 @@ function AppRouter() {
       <Route path="/market-radar" element={<ProtectedRoute><MarketRadarPage /></ProtectedRoute>} />
       <Route path="/weekly-digest" element={<ProtectedRoute><WeeklyDigestPage /></ProtectedRoute>} />
       <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+      <Route path="/cross-analysis" element={<ProtectedRoute><CrossAnalysisPage /></ProtectedRoute>} />
+      <Route path="/decision-replay" element={<ProtectedRoute><DecisionReplayPage /></ProtectedRoute>} />
+      <Route path="/market-personality" element={<ProtectedRoute><MarketPersonalityPage /></ProtectedRoute>} />
+      <Route path="/signal-timeline" element={<ProtectedRoute><SignalTimelinePage /></ProtectedRoute>} />
+      <Route path="/capital-flow" element={<ProtectedRoute><CapitalFlowPage /></ProtectedRoute>} />
+      <Route path="/intelligence-mode" element={<ProtectedRoute><IntelligenceModePage /></ProtectedRoute>} />
       <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
