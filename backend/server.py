@@ -1077,6 +1077,66 @@ Rules:
 
 
 
+class NarrateRequest(BaseModel):
+    text: str
+    language: str = "en"
+
+LANG_VOICE_MAP = {
+    'pt': 'nova', 'en': 'onyx', 'es': 'nova', 'fr': 'alloy',
+    'de': 'echo', 'zh': 'alloy', 'ja': 'alloy', 'ko': 'alloy', 'ar': 'onyx',
+}
+
+LANG_NAMES = {
+    'pt': 'Portuguese', 'en': 'English', 'es': 'Spanish', 'fr': 'French',
+    'de': 'German', 'zh': 'Chinese', 'ja': 'Japanese', 'ko': 'Korean', 'ar': 'Arabic',
+}
+
+@api_router.post("/voice/narrate")
+@limiter.limit("10/minute")
+async def narrate_text(data: NarrateRequest, request: Request):
+    """Universal JARVIS narration — converts any text to speech in any language."""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Voice service not configured")
+
+        text = data.text[:4000]
+        lang = data.language
+        lang_name = LANG_NAMES.get(lang, 'English')
+        voice = LANG_VOICE_MAP.get(lang, 'onyx')
+
+        # If not English, translate the text first using GPT
+        if lang != 'en':
+            from emergentintegrations.llm.chat import LlmChat, UserMessage
+            chat = LlmChat(
+                api_key=api_key,
+                session_id=f"translate_{uuid.uuid4().hex[:8]}",
+                system_message=f"Translate the following text to {lang_name}. Keep numbers, tickers, and technical terms. Only output the translation, nothing else."
+            ).with_model("openai", "gpt-5.2")
+            text = await chat.send_message(UserMessage(text=text))
+            text = text[:4000]
+
+        tts = OpenAITextToSpeech(api_key=api_key)
+        audio_bytes = await tts.generate_speech(
+            text=text,
+            model="tts-1",
+            voice=voice,
+            speed=1.0,
+            response_format="mp3"
+        )
+
+        from fastapi.responses import Response as RawResponse
+        return RawResponse(
+            content=audio_bytes,
+            media_type="audio/mpeg",
+            headers={"Content-Disposition": "inline; filename=jarvis_narration.mp3"}
+        )
+    except Exception as e:
+        logger.error(f"Narration error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Narration error: {str(e)}")
+
+
+
 @api_router.post("/voice/speech-to-text")
 async def speech_to_text(
     audio: UploadFile = File(...),
@@ -1254,6 +1314,7 @@ from routes.ultra_features import router as ultra_router
 from routes.aureos_tokens import router as tokens_router
 from routes.godmode import router as godmode_router
 from routes.unfair_advantage import router as advantage_router
+from routes.dominance import router as dominance_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1272,6 +1333,7 @@ app.include_router(ultra_router)
 app.include_router(tokens_router)
 app.include_router(godmode_router)
 app.include_router(advantage_router)
+app.include_router(dominance_router)
 
 app.add_middleware(
     CORSMiddleware,

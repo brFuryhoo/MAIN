@@ -1,78 +1,84 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/App';
+import { useLanguage, LANGUAGES } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Bot, Settings, LogOut, Menu, X, Wallet, Zap, Bell, Search,
   Crown, Eye, Brain, Radar, Globe, Gauge, Banknote, Activity, BookOpen, Trophy,
   Fingerprint, Clock, Map, Terminal, Coins, RotateCcw, ChevronLeft, ChevronRight,
-  ShieldCheck, Sparkles, BarChart3, Dna, ShoppingBag, Network, Users, ScanLine, Swords
+  ShieldCheck, Sparkles, BarChart3, Dna, ShoppingBag, Network, Users, ScanLine, Swords,
+  Crosshair, Languages, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const navSections = [
   {
-    label: 'Intelligence',
+    label: 'nav.intelligence',
     items: [
-      { path: '/dashboard', label: 'Command Center', icon: LayoutDashboard },
-      { path: '/cross-analysis', label: 'JARVIS Hub', icon: Brain },
-      { path: '/intelligence', label: 'Intel Terminal', icon: Globe },
-      { path: '/intelligence-mode', label: 'Intel Mode', icon: Terminal },
-      { path: '/copilot', label: 'JARVIS Copilot', icon: Bot },
+      { path: '/dashboard', labelKey: 'nav.command_center', icon: LayoutDashboard },
+      { path: '/cross-analysis', labelKey: 'nav.jarvis_hub', icon: Brain },
+      { path: '/intelligence', labelKey: 'nav.intel_terminal', icon: Globe },
+      { path: '/intelligence-mode', labelKey: 'nav.intel_mode', icon: Terminal },
+      { path: '/copilot', labelKey: 'nav.jarvis_copilot', icon: Bot },
+      { path: '/alpha-radar', labelKey: 'nav.alpha_radar', icon: Crosshair },
+      { path: '/market-narrative', labelKey: 'nav.market_narrative', icon: BookOpen },
     ],
   },
   {
-    label: 'Analysis',
+    label: 'nav.analysis',
     items: [
-      { path: '/market-radar', label: 'AI Quantica', icon: Activity },
-      { path: '/analysis', label: 'Deep Analysis', icon: Zap },
-      { path: '/scanner', label: 'Market Scanner', icon: Radar },
-      { path: '/signal-timeline', label: 'Signal Timeline', icon: Clock },
-      { path: '/capital-flow', label: 'Capital Flow', icon: Map },
-      { path: '/market-personality', label: 'Market DNA', icon: Fingerprint },
-      { path: '/sentiment', label: 'Sentiment', icon: Gauge },
-      { path: '/weekly-digest', label: 'Weekly Digest', icon: BookOpen },
+      { path: '/market-radar', labelKey: 'nav.ai_quantica', icon: Activity },
+      { path: '/analysis', labelKey: 'nav.deep_analysis', icon: Zap },
+      { path: '/scanner', labelKey: 'nav.market_scanner', icon: Radar },
+      { path: '/signal-timeline', labelKey: 'nav.signal_timeline', icon: Clock },
+      { path: '/capital-flow', labelKey: 'nav.capital_flow', icon: Map },
+      { path: '/market-personality', labelKey: 'nav.market_dna', icon: Fingerprint },
+      { path: '/sentiment', labelKey: 'nav.sentiment', icon: Gauge },
+      { path: '/weekly-digest', labelKey: 'nav.weekly_digest', icon: BookOpen },
     ],
   },
   {
-    label: 'Trading',
+    label: 'nav.trading',
     items: [
-      { path: '/portfolio', label: 'My Portfolio', icon: Wallet },
-      { path: '/watchlist', label: 'Watchlist', icon: Eye },
-      { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
-      { path: '/trade-simulator', label: 'Trade Simulator', icon: Sparkles },
-      { path: '/decision-replay', label: 'Decision Replay', icon: RotateCcw },
+      { path: '/portfolio', labelKey: 'nav.my_portfolio', icon: Wallet },
+      { path: '/watchlist', labelKey: 'nav.watchlist', icon: Eye },
+      { path: '/paper-trading', labelKey: 'nav.paper_trading', icon: Banknote },
+      { path: '/trade-simulator', labelKey: 'nav.trade_simulator', icon: Sparkles },
+      { path: '/decision-replay', labelKey: 'nav.decision_replay', icon: RotateCcw },
     ],
   },
   {
-    label: 'Unfair Advantage',
+    label: 'nav.unfair_advantage',
     items: [
-      { path: '/trader-dna', label: 'Trader DNA', icon: Dna },
-      { path: '/strategy-marketplace', label: 'Marketplace', icon: ShoppingBag },
-      { path: '/global-intelligence', label: 'Global Intel', icon: Network },
-      { path: '/opportunity-scanner', label: 'Opp Scanner', icon: ScanLine },
-      { path: '/social-proof', label: 'Top Traders', icon: Users },
-      { path: '/jarvis-challenge', label: 'JARVIS Challenge', icon: Swords },
+      { path: '/trader-dna', labelKey: 'nav.trader_dna', icon: Dna },
+      { path: '/strategy-marketplace', labelKey: 'nav.marketplace', icon: ShoppingBag },
+      { path: '/global-intelligence', labelKey: 'nav.global_intel', icon: Network },
+      { path: '/opportunity-scanner', labelKey: 'nav.opp_scanner', icon: ScanLine },
+      { path: '/social-proof', labelKey: 'nav.top_traders', icon: Users },
+      { path: '/jarvis-challenge', labelKey: 'nav.jarvis_challenge', icon: Swords },
     ],
   },
   {
-    label: 'System',
+    label: 'nav.system',
     items: [
-      { path: '/leaderboard', label: 'Aureos Score', icon: Trophy },
-      { path: '/aureos-tokens', label: 'Aureos Tokens', icon: Coins },
-      { path: '/performance', label: 'Track Record', icon: ShieldCheck },
-      { path: '/settings', label: 'Settings', icon: Settings },
+      { path: '/leaderboard', labelKey: 'nav.aureos_score', icon: Trophy },
+      { path: '/aureos-tokens', labelKey: 'nav.aureos_tokens', icon: Coins },
+      { path: '/performance', labelKey: 'nav.track_record', icon: ShieldCheck },
+      { path: '/settings', labelKey: 'nav.settings', icon: Settings },
     ],
   },
 ];
 
 export const AureosLayout = ({ children }) => {
   const { user, logout } = useAuth();
+  const { t, lang, changeLang, LANGUAGES: langs } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -123,16 +129,17 @@ export const AureosLayout = ({ children }) => {
             {navSections.map((section) => (
               <div key={section.label} className="mb-3">
                 {!collapsed && (
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-[#555] font-semibold px-3 mb-1.5">{section.label}</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-[#555] font-semibold px-3 mb-1.5">{t(section.label)}</p>
                 )}
                 {collapsed && <div className="h-px bg-white/5 mx-1 mb-2" />}
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;
+                    const label = t(item.labelKey);
                     return (
                       <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
-                        title={collapsed ? item.label : undefined}
+                        title={collapsed ? label : undefined}
                         className={cn(
                           "flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all",
                           collapsed ? "justify-center p-2.5" : "px-3 py-2",
@@ -141,7 +148,7 @@ export const AureosLayout = ({ children }) => {
                             : "text-[#777] hover:text-white hover:bg-white/5"
                         )}>
                         <Icon size={16} className={cn("flex-shrink-0", isActive && "text-aureos-gold")} />
-                        {!collapsed && <span className="truncate">{item.label}</span>}
+                        {!collapsed && <span className="truncate">{label}</span>}
                         {!collapsed && isActive && <div className="ml-auto w-1 h-1 rounded-full bg-aureos-gold" />}
                       </Link>
                     );
@@ -209,6 +216,34 @@ export const AureosLayout = ({ children }) => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Language Selector */}
+              <div className="relative">
+                <button onClick={() => setLangOpen(!langOpen)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-colors text-[#888] text-xs"
+                  data-testid="language-selector-btn">
+                  <Languages size={14} />
+                  <span className="hidden sm:inline font-mono uppercase">{lang}</span>
+                  <ChevronDown size={10} />
+                </button>
+                <AnimatePresence>
+                  {langOpen && (
+                    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                      className="absolute right-0 top-full mt-1 w-40 bg-[#1a1a1a] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden"
+                      data-testid="language-dropdown">
+                      {(langs || LANGUAGES).map(l => (
+                        <button key={l.code} onClick={() => { changeLang(l.code); setLangOpen(false); }}
+                          className={cn("w-full flex items-center gap-2 px-3 py-2 text-xs hover:bg-white/5 transition-colors",
+                            lang === l.code ? 'text-aureos-gold bg-aureos-gold/5' : 'text-[#999]')}
+                          data-testid={`lang-option-${l.code}`}>
+                          <span className="font-mono text-[10px] w-5 uppercase">{l.code}</span>
+                          <span>{l.label}</span>
+                          {lang === l.code && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-aureos-gold" />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <button className="relative p-2 rounded-lg hover:bg-white/5 transition-colors">
                 <Bell size={18} className="text-[#888]" />
                 <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#FF5252]" />

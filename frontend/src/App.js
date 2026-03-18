@@ -3,6 +3,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Toaster } from "@/components/ui/sonner";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 // Pages
 import LandingPage from "@/pages/LandingPage";
@@ -42,6 +43,8 @@ import GlobalIntelligencePage from "@/pages/GlobalIntelligencePage";
 import OpportunityScannerPage from "@/pages/OpportunityScannerPage";
 import SocialProofPage from "@/pages/SocialProofPage";
 import JarvisChallengePage from "@/pages/JarvisChallengePage";
+import AlphaRadarPage from "@/pages/AlphaRadarPage";
+import MarketNarrativePage from "@/pages/MarketNarrativePage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -257,6 +260,8 @@ function AppRouter() {
       <Route path="/opportunity-scanner" element={<ProtectedRoute><OpportunityScannerPage /></ProtectedRoute>} />
       <Route path="/social-proof" element={<ProtectedRoute><SocialProofPage /></ProtectedRoute>} />
       <Route path="/jarvis-challenge" element={<ProtectedRoute><JarvisChallengePage /></ProtectedRoute>} />
+      <Route path="/alpha-radar" element={<ProtectedRoute><AlphaRadarPage /></ProtectedRoute>} />
+      <Route path="/market-narrative" element={<ProtectedRoute><MarketNarrativePage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
       {/* Catch all */}
@@ -267,6 +272,7 @@ function AppRouter() {
 
 function App() {
   return (
+    <LanguageProvider>
     <AuthProvider>
       <div className="App min-h-screen bg-[#0D0D0D]">
         <BrowserRouter>
@@ -284,6 +290,7 @@ function App() {
         />
       </div>
     </AuthProvider>
+    </LanguageProvider>
   );
 }
 
