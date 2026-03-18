@@ -1249,6 +1249,7 @@ from routes.pdf_export import router as pdf_export_router
 from routes.multi_agent import router as multi_agent_router
 from routes.news_sentiment import router as news_router
 from routes.paper_trading import router as paper_router
+from routes.aureos_score import router as score_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1262,6 +1263,7 @@ app.include_router(pdf_export_router)
 app.include_router(multi_agent_router)
 app.include_router(news_router)
 app.include_router(paper_router)
+app.include_router(score_router)
 
 app.add_middleware(
     CORSMiddleware,

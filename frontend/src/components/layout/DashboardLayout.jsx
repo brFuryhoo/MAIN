@@ -25,7 +25,8 @@ import {
   Gauge,
   Banknote,
   Activity,
-  BookOpen
+  BookOpen,
+  Trophy
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -42,6 +43,7 @@ const navItems = [
   { path: '/weekly-digest', label: 'Weekly Digest', icon: BookOpen },
   { path: '/sentiment', label: 'Sentiment', icon: Gauge },
   { path: '/paper-trading', label: 'Paper Trading', icon: Banknote },
+  { path: '/leaderboard', label: 'Aureos Score', icon: Trophy },
   { path: '/copilot', label: 'JARVIS Copilot', icon: Bot },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];

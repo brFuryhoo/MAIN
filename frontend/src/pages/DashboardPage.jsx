@@ -10,7 +10,7 @@ import {
   Bot, Target, Globe, Shield, AlertTriangle,
   ChevronRight, Flame, Eye, Brain, Radar,
   Clock, Newspaper, MessageSquare, Volume2, VolumeX,
-  Play, Pause, Radio, X
+  Play, Pause, Radio, X, Trophy, ChevronUp, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -35,6 +35,7 @@ const DashboardPage = () => {
   const [globalOverview, setGlobalOverview] = useState(null);
   const [fearGreed, setFearGreed] = useState(null);
   const [voiceBriefing, setVoiceBriefing] = useState({ loading: false, ready: false, playing: false, dismissed: false, progress: 0 });
+  const [aureosScore, setAureosScore] = useState(null);
   const voiceAudioRef = useRef(null);
 
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -89,7 +90,7 @@ const DashboardPage = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [pulseRes, riskRes, highlightsRes, eventsRes, portfolioRes, globalRes, fgRes] = await Promise.all([
+      const [pulseRes, riskRes, highlightsRes, eventsRes, portfolioRes, globalRes, fgRes, scoreRes] = await Promise.all([
         axios.get(`${API}/intelligence/market-pulse`).catch(() => ({ data: { indicators: [] } })),
         axios.get(`${API}/intelligence/geopolitical-risk`).catch(() => ({ data: null })),
         axios.get(`${API}/intelligence/performance-highlights`).catch(() => ({ data: { highlights: [] } })),
@@ -97,6 +98,7 @@ const DashboardPage = () => {
         axios.get(`${API}/portfolio`, { headers }).catch(() => ({ data: { positions: [], total_value: 0, total_pnl: 0 } })),
         axios.get(`${API}/intelligence/global-overview`).catch(() => ({ data: null })),
         axios.get(`${API}/quantica/fear-greed`).catch(() => ({ data: null })),
+        axios.get(`${API}/score/my-score`, { headers }).catch(() => ({ data: null })),
       ]);
       setPulse(pulseRes.data.indicators || []);
       setGeoRisk(riskRes.data);
@@ -105,6 +107,7 @@ const DashboardPage = () => {
       setPortfolio(portfolioRes.data);
       setGlobalOverview(globalRes.data);
       setFearGreed(fgRes.data);
+      setAureosScore(scoreRes.data);
     } catch { /* silent */ }
     setLoading(false);
   };
@@ -261,7 +264,33 @@ const DashboardPage = () => {
               <Clock size={14} /> {dateStr}
             </p>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-wrap">
+            {/* Aureos Score Badge */}
+            {aureosScore && (
+              <div className="rounded-xl px-3 py-2 flex items-center gap-2 cursor-pointer hover:border-[#CFAE46]/30 transition-all"
+                style={{ background: (aureosScore.tier?.color || '#CFAE46') + '12', border: `1px solid ${(aureosScore.tier?.color || '#CFAE46')}25` }}
+                onClick={() => navigate('/leaderboard')} data-testid="dashboard-aureos-score">
+                <div className="relative">
+                  <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
+                    <circle cx="20" cy="20" r="16" fill="none" stroke={aureosScore.tier?.color || '#CFAE46'} strokeWidth="3"
+                      strokeDasharray={`${(aureosScore.score / 1000) * 100.5} 100.5`} strokeLinecap="round" />
+                  </svg>
+                  <Trophy size={12} className="absolute inset-0 m-auto" style={{ color: aureosScore.tier?.color || '#CFAE46' }} />
+                </div>
+                <div>
+                  <p className="text-[8px] uppercase tracking-wider text-[#888]">Aureos Score</p>
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-sm font-bold" style={{ color: aureosScore.tier?.color || '#CFAE46' }}>{aureosScore.score}</span>
+                    {aureosScore.delta !== 0 && (
+                      <span className={`text-[9px] font-mono ${aureosScore.delta > 0 ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
+                        {aureosScore.delta > 0 ? '+' : ''}{aureosScore.delta}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Fear & Greed Badge */}
             {fearGreed && (
               <div className="rounded-xl px-3 py-2 flex items-center gap-2" style={{ background: fearGreed.color + '12', border: `1px solid ${fearGreed.color}25` }} data-testid="dashboard-fear-greed">
@@ -574,7 +603,7 @@ const DashboardPage = () => {
                 { label: 'AI Copilot', icon: Bot, path: '/copilot', color: '#00B4FF' },
                 { label: 'Intel Map', icon: Globe, path: '/intelligence', color: '#FF9800' },
                 { label: 'Scanner', icon: Radar, path: '/scanner', color: '#9C27B0' },
-                { label: 'Quant Lab', icon: Brain, path: '/quant-lab', color: '#00E676' },
+                { label: 'Aureos Score', icon: Trophy, path: '/leaderboard', color: '#CFAE46' },
                 { label: 'Watchlist', icon: Eye, path: '/watchlist', color: '#FF5252' },
               ].map((a) => {
                 const Icon = a.icon;

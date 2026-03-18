@@ -5,7 +5,8 @@ import JarvisCopilot from '@/components/jarvis/JarvisCopilot';
 import { motion } from 'framer-motion';
 import {
   Banknote, TrendingUp, TrendingDown, RefreshCw, Loader2, Plus,
-  X, DollarSign, Percent, Award, BarChart3, RotateCcw
+  X, DollarSign, Percent, Award, BarChart3, RotateCcw, Trophy,
+  ChevronUp, ChevronDown, Target, Shield, Crown, Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -18,12 +19,18 @@ const PaperTradingPage = () => {
   const [showTrade, setShowTrade] = useState(false);
   const [tradeForm, setTradeForm] = useState({ symbol: '', name: '', action: 'buy', quantity: 0, price: 0, asset_type: 'crypto' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scoreData, setScoreData] = useState(null);
+  const [scoreImpact, setScoreImpact] = useState(null);
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   const fetchPortfolio = useCallback(async () => {
     try {
-      const resp = await axios.get(`${API}/paper/portfolio`, { headers });
-      setPortfolio(resp.data);
+      const [portRes, scoreRes] = await Promise.all([
+        axios.get(`${API}/paper/portfolio`, { headers }),
+        axios.get(`${API}/score/my-score`, { headers }).catch(() => ({ data: null })),
+      ]);
+      setPortfolio(portRes.data);
+      setScoreData(scoreRes.data);
     } catch { toast.error('Failed to load portfolio'); }
     finally { setIsLoading(false); }
   }, [token]);
@@ -51,6 +58,12 @@ const PaperTradingPage = () => {
     try {
       const resp = await axios.post(`${API}/paper/close`, { trade_id: tradeId, close_price: parseFloat(price) }, { headers });
       toast.success(`Trade closed. P&L: ${resp.data.pnl > 0 ? '+' : ''}$${resp.data.pnl.toFixed(2)}`);
+      // Recalculate score and get impact
+      try {
+        await axios.post(`${API}/score/recalculate`, {}, { headers });
+        const impactRes = await axios.get(`${API}/score/trade-impact`, { headers });
+        setScoreImpact(impactRes.data);
+      } catch { /* score update non-critical */ }
       fetchPortfolio();
     } catch { toast.error('Close failed'); }
   };
@@ -92,7 +105,7 @@ const PaperTradingPage = () => {
         ) : portfolio && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             {/* Portfolio Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <StatCard icon={DollarSign} label="Balance" value={`$${portfolio.balance?.toLocaleString()}`} color="#CFAE46" />
               <StatCard icon={portfolio.total_pnl >= 0 ? TrendingUp : TrendingDown} label="Total P&L"
                 value={`${portfolio.total_pnl >= 0 ? '+' : ''}$${portfolio.total_pnl?.toLocaleString()}`}
@@ -101,7 +114,46 @@ const PaperTradingPage = () => {
                 color={portfolio.total_return_pct >= 0 ? '#00E676' : '#FF5252'} />
               <StatCard icon={Award} label="Win Rate" value={`${portfolio.win_rate}%`}
                 color={portfolio.win_rate > 50 ? '#00E676' : '#FF5252'} />
+              {/* Aureos Score Mini */}
+              <div className="aureos-card p-4 cursor-pointer hover:border-[#CFAE46]/20 transition-all" onClick={() => window.location.href = '/leaderboard'} data-testid="paper-score-card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center relative" style={{ background: scoreData?.tier?.color ? `${scoreData.tier.color}15` : '#CFAE4615' }}>
+                    <Trophy size={18} style={{ color: scoreData?.tier?.color || '#CFAE46' }} />
+                  </div>
+                  <div>
+                    <p className="font-bold font-mono text-lg" style={{ color: scoreData?.tier?.color || '#CFAE46' }}>{scoreData?.score || 0}</p>
+                    <p className="text-xs text-[#888]">Aureos Score</p>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Score Impact Banner */}
+            {scoreImpact && scoreImpact.delta !== 0 && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl p-4 flex items-center gap-4 relative" data-testid="score-impact-banner"
+                style={{
+                  background: scoreImpact.delta > 0 ? 'rgba(0,230,118,0.05)' : 'rgba(255,82,82,0.05)',
+                  border: `1px solid ${scoreImpact.delta > 0 ? 'rgba(0,230,118,0.2)' : 'rgba(255,82,82,0.2)'}`,
+                }}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${scoreImpact.delta > 0 ? 'bg-[#00E676]/15' : 'bg-[#FF5252]/15'}`}>
+                  {scoreImpact.delta > 0 ? <ChevronUp size={24} className="text-[#00E676]" /> : <ChevronDown size={24} className="text-[#FF5252]" />}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-lg font-bold font-mono ${scoreImpact.delta > 0 ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
+                      {scoreImpact.delta > 0 ? '+' : ''}{scoreImpact.delta} pts
+                    </span>
+                    <span className="text-sm text-[#888]">Score Impact</span>
+                  </div>
+                  <p className="text-xs text-[#aaa] mt-0.5">{scoreImpact.reason}</p>
+                </div>
+                <button onClick={() => setScoreImpact(null)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0">
+                  <X size={14} className="text-[#666]" />
+                </button>
+              </motion.div>
+            )}
 
             {/* Open Positions */}
             <div className="aureos-card p-6">
