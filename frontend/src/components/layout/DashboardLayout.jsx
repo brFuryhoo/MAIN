@@ -8,7 +8,7 @@ import {
   Crown, Eye, Brain, Radar, Globe, Gauge, Banknote, Activity, BookOpen, Trophy,
   Fingerprint, Clock, Map, Terminal, Coins, RotateCcw, ChevronLeft, ChevronRight,
   ShieldCheck, Sparkles, BarChart3, Dna, ShoppingBag, Network, Users, ScanLine, Swords,
-  Crosshair, Languages, ChevronDown
+  Crosshair, Languages, ChevronDown, Share2, Route, Wand2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -58,6 +58,9 @@ const navSections = [
       { path: '/opportunity-scanner', labelKey: 'nav.opp_scanner', icon: ScanLine },
       { path: '/social-proof', labelKey: 'nav.top_traders', icon: Users },
       { path: '/jarvis-challenge', labelKey: 'nav.jarvis_challenge', icon: Swords },
+      { path: '/share-cards', labelKey: 'nav.share_cards', icon: Share2 },
+      { path: '/evolution', labelKey: 'nav.evolution', icon: Route },
+      { path: '/strategy-creator', labelKey: 'nav.strategy_creator', icon: Wand2 },
     ],
   },
   {

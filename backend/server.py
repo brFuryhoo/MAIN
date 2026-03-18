@@ -1315,6 +1315,7 @@ from routes.aureos_tokens import router as tokens_router
 from routes.godmode import router as godmode_router
 from routes.unfair_advantage import router as advantage_router
 from routes.dominance import router as dominance_router
+from routes.distribution import router as distribution_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1334,6 +1335,7 @@ app.include_router(tokens_router)
 app.include_router(godmode_router)
 app.include_router(advantage_router)
 app.include_router(dominance_router)
+app.include_router(distribution_router)
 
 app.add_middleware(
     CORSMiddleware,

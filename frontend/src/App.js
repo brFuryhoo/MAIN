@@ -45,6 +45,9 @@ import SocialProofPage from "@/pages/SocialProofPage";
 import JarvisChallengePage from "@/pages/JarvisChallengePage";
 import AlphaRadarPage from "@/pages/AlphaRadarPage";
 import MarketNarrativePage from "@/pages/MarketNarrativePage";
+import ShareCardPage from "@/pages/ShareCardPage";
+import TraderEvolutionPage from "@/pages/TraderEvolutionPage";
+import StrategyCreatorPage from "@/pages/StrategyCreatorPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -262,6 +265,9 @@ function AppRouter() {
       <Route path="/jarvis-challenge" element={<ProtectedRoute><JarvisChallengePage /></ProtectedRoute>} />
       <Route path="/alpha-radar" element={<ProtectedRoute><AlphaRadarPage /></ProtectedRoute>} />
       <Route path="/market-narrative" element={<ProtectedRoute><MarketNarrativePage /></ProtectedRoute>} />
+      <Route path="/share-cards" element={<ProtectedRoute><ShareCardPage /></ProtectedRoute>} />
+      <Route path="/evolution" element={<ProtectedRoute><TraderEvolutionPage /></ProtectedRoute>} />
+      <Route path="/strategy-creator" element={<ProtectedRoute><StrategyCreatorPage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
       {/* Catch all */}
