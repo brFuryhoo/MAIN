@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aureos-hub.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ai-quantica.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 TEST_USER = {"email": "fabricio@aureos.ai", "password": "aureos2024"}

@@ -18,7 +18,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aureos-hub.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ai-quantica.preview.emergentagent.com')
 
 @pytest.fixture(scope="module")
 def api_client():

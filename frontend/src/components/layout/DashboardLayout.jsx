@@ -8,7 +8,8 @@ import {
   Crown, Eye, Brain, Radar, Globe, Gauge, Banknote, Activity, BookOpen, Trophy,
   Fingerprint, Clock, Map, Terminal, Coins, RotateCcw, ChevronLeft, ChevronRight,
   ShieldCheck, Sparkles, BarChart3, Dna, ShoppingBag, Network, Users, ScanLine, Swords,
-  Crosshair, Languages, ChevronDown, Share2, Route, Wand2
+  Crosshair, Languages, ChevronDown, Share2, Route, Wand2,
+  Copy, Droplets, BookMarked, Target, Grid3X3, Calendar, HelpCircle, UserPlus, Gift
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -19,11 +20,10 @@ const navSections = [
     items: [
       { path: '/dashboard', labelKey: 'nav.command_center', icon: LayoutDashboard },
       { path: '/cross-analysis', labelKey: 'nav.jarvis_hub', icon: Brain },
-      { path: '/intelligence', labelKey: 'nav.intel_terminal', icon: Globe },
-      { path: '/intelligence-mode', labelKey: 'nav.intel_mode', icon: Terminal },
-      { path: '/copilot', labelKey: 'nav.jarvis_copilot', icon: Bot },
       { path: '/alpha-radar', labelKey: 'nav.alpha_radar', icon: Crosshair },
       { path: '/market-narrative', labelKey: 'nav.market_narrative', icon: BookOpen },
+      { path: '/copilot', labelKey: 'nav.jarvis_copilot', icon: Bot },
+      { path: '/intelligence-mode', labelKey: 'nav.intel_mode', icon: Terminal },
     ],
   },
   {
@@ -32,35 +32,45 @@ const navSections = [
       { path: '/market-radar', labelKey: 'nav.ai_quantica', icon: Activity },
       { path: '/analysis', labelKey: 'nav.deep_analysis', icon: Zap },
       { path: '/scanner', labelKey: 'nav.market_scanner', icon: Radar },
-      { path: '/signal-timeline', labelKey: 'nav.signal_timeline', icon: Clock },
+      { path: '/correlation', labelKey: 'nav.correlation', icon: Grid3X3 },
+      { path: '/economic-calendar', labelKey: 'nav.econ_calendar', icon: Calendar },
+      { path: '/liquidity-map', labelKey: 'nav.liquidity_map', icon: Droplets },
       { path: '/capital-flow', labelKey: 'nav.capital_flow', icon: Map },
-      { path: '/market-personality', labelKey: 'nav.market_dna', icon: Fingerprint },
       { path: '/sentiment', labelKey: 'nav.sentiment', icon: Gauge },
-      { path: '/weekly-digest', labelKey: 'nav.weekly_digest', icon: BookOpen },
     ],
   },
   {
     label: 'nav.trading',
     items: [
       { path: '/portfolio', labelKey: 'nav.my_portfolio', icon: Wallet },
-      { path: '/watchlist', labelKey: 'nav.watchlist', icon: Eye },
       { path: '/paper-trading', labelKey: 'nav.paper_trading', icon: Banknote },
+      { path: '/copy-trading', labelKey: 'nav.copy_trading', icon: Copy },
       { path: '/trade-simulator', labelKey: 'nav.trade_simulator', icon: Sparkles },
-      { path: '/decision-replay', labelKey: 'nav.decision_replay', icon: RotateCcw },
+      { path: '/trade-journal', labelKey: 'nav.trade_journal', icon: BookMarked },
+      { path: '/watchlist', labelKey: 'nav.watchlist', icon: Eye },
     ],
   },
   {
     label: 'nav.unfair_advantage',
     items: [
       { path: '/trader-dna', labelKey: 'nav.trader_dna', icon: Dna },
-      { path: '/strategy-marketplace', labelKey: 'nav.marketplace', icon: ShoppingBag },
-      { path: '/global-intelligence', labelKey: 'nav.global_intel', icon: Network },
-      { path: '/opportunity-scanner', labelKey: 'nav.opp_scanner', icon: ScanLine },
-      { path: '/social-proof', labelKey: 'nav.top_traders', icon: Users },
+      { path: '/second-brain', labelKey: 'nav.second_brain', icon: Brain },
       { path: '/jarvis-challenge', labelKey: 'nav.jarvis_challenge', icon: Swords },
-      { path: '/share-cards', labelKey: 'nav.share_cards', icon: Share2 },
-      { path: '/evolution', labelKey: 'nav.evolution', icon: Route },
+      { path: '/opportunity-scanner', labelKey: 'nav.opp_scanner', icon: ScanLine },
+      { path: '/global-intelligence', labelKey: 'nav.global_intel', icon: Network },
+      { path: '/strategy-marketplace', labelKey: 'nav.marketplace', icon: ShoppingBag },
       { path: '/strategy-creator', labelKey: 'nav.strategy_creator', icon: Wand2 },
+    ],
+  },
+  {
+    label: 'nav.ecosystem',
+    items: [
+      { path: '/evolution', labelKey: 'nav.evolution', icon: Route },
+      { path: '/daily-missions', labelKey: 'nav.daily_missions', icon: Target },
+      { path: '/quiz', labelKey: 'nav.quiz', icon: HelpCircle },
+      { path: '/share-cards', labelKey: 'nav.share_cards', icon: Share2 },
+      { path: '/social-proof', labelKey: 'nav.top_traders', icon: Users },
+      { path: '/referral', labelKey: 'nav.referral', icon: UserPlus },
     ],
   },
   {

@@ -718,7 +718,7 @@ async def create_checkout(data: CheckoutRequest, request: Request, user: dict = 
 async def get_payment_status(session_id: str, user: dict = Depends(get_current_user)):
     try:
         api_key = os.environ.get('STRIPE_API_KEY')
-        host_url = "https://aureos-hub.preview.emergentagent.com"
+        host_url = "https://ai-quantica.preview.emergentagent.com"
         webhook_url = f"{host_url}/api/webhook/stripe"
         
         stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=webhook_url)
@@ -1316,6 +1316,7 @@ from routes.godmode import router as godmode_router
 from routes.unfair_advantage import router as advantage_router
 from routes.dominance import router as dominance_router
 from routes.distribution import router as distribution_router
+from routes.ecosystem import router as ecosystem_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1336,6 +1337,7 @@ app.include_router(godmode_router)
 app.include_router(advantage_router)
 app.include_router(dominance_router)
 app.include_router(distribution_router)
+app.include_router(ecosystem_router)
 
 app.add_middleware(
     CORSMiddleware,

@@ -48,6 +48,15 @@ import MarketNarrativePage from "@/pages/MarketNarrativePage";
 import ShareCardPage from "@/pages/ShareCardPage";
 import TraderEvolutionPage from "@/pages/TraderEvolutionPage";
 import StrategyCreatorPage from "@/pages/StrategyCreatorPage";
+import CopyTradingPage from "@/pages/CopyTradingPage";
+import LiquidityMapPage from "@/pages/LiquidityMapPage";
+import SecondBrainPage from "@/pages/SecondBrainPage";
+import DailyMissionsPage from "@/pages/DailyMissionsPage";
+import CorrelationPage from "@/pages/CorrelationPage";
+import EconomicCalendarPage from "@/pages/EconomicCalendarPage";
+import TradeJournalPage from "@/pages/TradeJournalPage";
+import QuizPage from "@/pages/QuizPage";
+import ReferralPage from "@/pages/ReferralPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -268,6 +277,15 @@ function AppRouter() {
       <Route path="/share-cards" element={<ProtectedRoute><ShareCardPage /></ProtectedRoute>} />
       <Route path="/evolution" element={<ProtectedRoute><TraderEvolutionPage /></ProtectedRoute>} />
       <Route path="/strategy-creator" element={<ProtectedRoute><StrategyCreatorPage /></ProtectedRoute>} />
+      <Route path="/copy-trading" element={<ProtectedRoute><CopyTradingPage /></ProtectedRoute>} />
+      <Route path="/liquidity-map" element={<ProtectedRoute><LiquidityMapPage /></ProtectedRoute>} />
+      <Route path="/second-brain" element={<ProtectedRoute><SecondBrainPage /></ProtectedRoute>} />
+      <Route path="/daily-missions" element={<ProtectedRoute><DailyMissionsPage /></ProtectedRoute>} />
+      <Route path="/correlation" element={<ProtectedRoute><CorrelationPage /></ProtectedRoute>} />
+      <Route path="/economic-calendar" element={<ProtectedRoute><EconomicCalendarPage /></ProtectedRoute>} />
+      <Route path="/trade-journal" element={<ProtectedRoute><TradeJournalPage /></ProtectedRoute>} />
+      <Route path="/quiz" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+      <Route path="/referral" element={<ProtectedRoute><ReferralPage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
       {/* Catch all */}
