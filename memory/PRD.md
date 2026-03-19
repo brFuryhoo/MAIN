@@ -1,12 +1,7 @@
 # AUREOS AI — Product Requirements Document
 
 ## Original Problem Statement
-Build "Aureos AI" / "AI Quantica" — the most powerful institutional-grade fintech platform ever made. A self-improving financial intelligence ecosystem with compounding advantages.
-
-## Core Vision
-A financial intelligence network with compounding advantage — starts simple, gets better by itself, gets stronger with more users.
-
----
+Build "Aureos AI" / "AI Quantica" — the most powerful institutional-grade fintech platform. A self-improving financial intelligence ecosystem with compounding advantages.
 
 ## Architecture
 - **Frontend:** React + Vite + Tailwind CSS + Shadcn UI + Framer Motion + Recharts
@@ -14,12 +9,12 @@ A financial intelligence network with compounding advantage — starts simple, g
 - **Database:** MongoDB
 - **Auth:** JWT (custom) + Google OAuth (Emergent-managed)
 - **AI:** OpenAI GPT-5.2 (via Emergent LLM Key), OpenAI TTS
-- **Data Providers:** Twelve Data, Alpha Vantage, CoinGecko
+- **Data Providers:** Twelve Data, Alpha Vantage, CoinGecko, Polygon.io
 
 ## Key DB Collections
 - users, paper_trades, paper_portfolios, aureos_scores, aureos_tokens, token_transactions
 - weekly_challenges, strategies, strategy_subscriptions, trader_dna, score_history
-- shared_cards, copy_trading, daily_missions, referrals
+- shared_cards, copy_trading, daily_missions, referrals, signals_log
 
 ---
 
@@ -38,37 +33,55 @@ A financial intelligence network with compounding advantage — starts simple, g
 - Internal token wallet, earning mechanisms, paper trading rewards
 
 ### UNFAIR ADVANTAGE LAYER
-1. Trader DNA System — Behavioral Intelligence Engine
-2. Strategy Marketplace — Browse/subscribe strategies
-3. Global Intelligence Layer — Crowd positioning, Smart Money
-4. Opportunity Scanner — Real-time breakout/reversal detection
-5. Social Proof Engine — Public profiles, top traders
-6. JARVIS Challenge Mode — Devil's advocate AI (GPT-5.2)
-7. Trade Simulator — Monte Carlo simulation
-8. Verified Track Record — Public performance dashboard
+1. Trader DNA System
+2. Strategy Marketplace + Creator Wizard
+3. Global Intelligence Layer
+4. Opportunity Scanner
+5. Social Proof Engine
+6. JARVIS Challenge Mode
+7. Trade Simulator (Monte Carlo)
+8. Verified Track Record
 
 ### DOMINANCE & SCALE LAYER
-1. **Multi-Language i18n** — 9 languages (PT, EN, ES, FR, DE, ZH, JA, KO, AR)
-2. **JARVIS Universal Narration** — Any text to speech in any language
-3. **Alpha Detection System** — GPT-5.2 Top 5 opportunity finder
-4. **Market Narrative Engine** — Bloomberg-level market storytelling
-5. **Distribution Engine / Intelligence Cards** — Shareable Score + Performance Cards
-6. **Strategy Creator Wizard** — 4-step wizard to create strategies
-7. **Trader Evolution Path** — 8-level gamified journey
+1. Multi-Language i18n (9 languages)
+2. JARVIS Universal Narration
+3. Alpha Detection System
+4. Market Narrative Engine
+5. Distribution Engine / Intelligence Cards
+6. Trader Evolution Path
 
-### ECOSYSTEM BATCH 1 (NEW - March 19, 2026)
-1. **Copy Trading Inteligente** — AI-filtered eligible traders, copy button, active copies tracking
-2. **Liquidity Intelligence Map** — Capital flows, sector flows, liquidity zones, market regime
-3. **Aureos Second Brain** — Complete trading memory, pattern detection, insights, monthly evolution
-4. **Daily Missions** — 5 daily missions with token rewards, auto-generated per user/day
-5. **AI Trade Journal** — Auto-analyzed trades with grades (A-F) and AI insights
-6. **Correlation Matrix** — 8x8 real-time asset correlation (BTC, ETH, SPY, GOLD, NVDA, TSLA, OIL, DXY)
-7. **Economic Calendar** — Events with AI impact analysis by JARVIS
-8. **Portfolio Rebalancer AI** — Suggestions based on trader DNA and market conditions
-9. **Trading Quiz** — Knowledge test with token rewards per correct answer
-10. **Referral System** — Unique codes, sharing (Twitter/WhatsApp), token rewards
+### ECOSYSTEM BATCH 1 (March 19, 2026)
+1. Copy Trading Inteligente
+2. Liquidity Intelligence Map
+3. Aureos Second Brain
+4. Daily Missions
+5. AI Trade Journal
+6. Correlation Matrix
+7. Economic Calendar
+8. Portfolio Rebalancer AI
+9. Trading Quiz
+10. Referral System
 
-All ecosystem pages have full i18n support (PT, EN, ES with fallback to EN for other languages).
+### DATA INFRASTRUCTURE (NEW - March 19, 2026)
+1. **500+ Asset Universe** — 220 US stocks, 69 international, 99 crypto, 54 ETFs, 25 forex, 15 commodities, 18 indices
+2. **Multi-Provider Data Engine** — CoinGecko, Twelve Data, Alpha Vantage, Polygon.io with failover
+3. **Unified Market Schema** — Standardized symbol, price, volume, timestamp, source
+4. **Data Normalization Engine** — Cross-provider consistency
+
+### TRUST LAYER (NEW - March 19, 2026)
+1. **Public Performance Dashboard** — Win rate, avg return, drawdown, risk/reward, Sharpe
+2. **Verified Track Record** — All signals logged with outcomes, streak tracking
+3. **Signal Transparency** — Every signal: probability, confidence, risk, reasoning, historical accuracy
+4. **Signal Auto-Logging** — Decisions automatically tracked in signals_log collection
+5. **Accuracy by Asset Class** — Breakdown of signal accuracy per asset type
+
+### DECISION ENGINE (NEW - March 19, 2026)
+1. **BUY/SELL/HOLD Engine** — Structured decision for any of 500+ assets
+2. **"Why This Trade?"** — Multi-factor explanation: market structure, liquidity, volatility, quant signals, sentiment
+3. **Technical Analysis** — RSI, MACD, Moving Averages, Momentum, Volume Analysis
+4. **Risk Parameters** — Entry, Target, Stop Loss, Risk/Reward ratio per trade
+5. **Top Opportunities Scanner** — Batch analysis of major assets, ranked by probability
+6. **Signal Confidence Tiers** — Low/Medium/High/Very High with probability scores
 
 ---
 
@@ -76,8 +89,9 @@ All ecosystem pages have full i18n support (PT, EN, ES with fallback to EN for o
 - `/api/auth/*`, `/api/portfolio`, `/api/paper-trading/*`, `/api/intelligence/*`
 - `/api/quantica/*`, `/api/score/*`, `/api/tokens/*`, `/api/ultra/*`
 - `/api/godmode/*`, `/api/advantage/*`, `/api/dominance/*`
-- `/api/distribution/*` — Card generation + Evolution path
-- `/api/ecosystem/*` — Copy Trading, Liquidity Map, Second Brain, Missions, Journal, Correlation, Calendar, Rebalancer, Quiz, Referral
+- `/api/distribution/*`, `/api/ecosystem/*`
+- `/api/decision/*` — Decision Engine, Asset Universe, Top Opportunities
+- `/api/trust/*` — Performance Dashboard, Track Record, Signal Transparency
 - `/api/voice/*` — Briefing, TTS, STT, Universal narration
 
 ---
@@ -85,42 +99,44 @@ All ecosystem pages have full i18n support (PT, EN, ES with fallback to EN for o
 ## Backlog
 
 ### P0 — Critical
-- Data Accuracy: Verify prices for ALL assets
-- Expand Asset Coverage to 500+ tradable assets
+- Self-Improving Signal Engine (track outcomes, reinforce winning models)
+- Data Confidence Engine (cross-provider scoring per datapoint)
+- Time-Series Storage (historical candles, indicators)
 
-### P1 — High Priority (Ecosystem Batch 2)
+### P1 — High Priority
+- Predictive User Engine (JARVIS proactive warnings)
+- Real-Time WebSocket (live prices, signals, alerts)
 - Trading Rooms / Social Trading
 - Mentorship System
 - Macro Regime Detector
 - Volatility Dashboard
 - Options Flow Detector
 - On-Chain Analytics
-- Achievement Badges expansion
-- Seasonal Events
 
 ### P2 — Medium
 - Monetization: Premium Signal Tiers, API/SDK billing, Stripe fees
-- Infrastructure: WebSocket real-time, Mobile PWA
-- New data providers (Polygon.io, Finnhub)
-- Collapsible sidebar (icon-only mode)
+- Platformization (Aureos OS): API + SDK for external developers
+- Defensibility System: Proprietary datasets
+- Mobile PWA
 
 ### P3 — Future
-- Trust: Public Audit Dashboard, Signal Backtester
-- Endgame: Live Broker Integration (Binance, Interactive Brokers)
+- Trust: Signal Backtester, Public Audit Dashboard
+- Live Broker Integration (Binance, Interactive Brokers)
 - Semi-Autonomous Trading
 - Aureos Token On-Chain
 - Telegram/Discord bot, Public API
 
 ### Refactoring
 - Break DashboardLayout.jsx into smaller components
-- Organize App.js routes into separate config files
+- Organize App.js routes into config files
 - Structure server.py with sub-routers
 
 ---
 
 ## Testing Status
-- Iteration 17: 100% (26/26) — Unfair Advantage backend
+- Iteration 17: 100% (26/26) — Unfair Advantage
 - Iteration 18: 100% (23/23) — i18n + Alpha + Narrative
 - Iteration 19: 100% (18/18) — Distribution + Evolution + Strategy Creator
-- Iteration 20: 100% (19/19 backend + all 9 frontend pages) — Ecosystem Batch 1
+- Iteration 20: 100% (19/19 + 9 frontend) — Ecosystem Batch 1
+- Iteration 21: 100% (18/18 + full frontend) — Data Infrastructure + Trust Layer + Decision Engine
 - Test credentials: test@test.com / test
