@@ -9,7 +9,8 @@ import {
   Fingerprint, Clock, Map, Terminal, Coins, RotateCcw, ChevronLeft, ChevronRight,
   ShieldCheck, Sparkles, BarChart3, Dna, ShoppingBag, Network, Users, ScanLine, Swords,
   Crosshair, Languages, ChevronDown, Share2, Route, Wand2,
-  Copy, Droplets, BookMarked, Target, Grid3X3, Calendar, HelpCircle, UserPlus, Gift
+  Copy, Droplets, BookMarked, Target, Grid3X3, Calendar, HelpCircle, UserPlus, Gift,
+  Shield, Cpu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,8 @@ const navSections = [
     label: 'nav.intelligence',
     items: [
       { path: '/dashboard', labelKey: 'nav.command_center', icon: LayoutDashboard },
+      { path: '/decision-engine', labelKey: 'nav.decision_engine', icon: Cpu },
+      { path: '/trust-dashboard', labelKey: 'nav.trust_dashboard', icon: Shield },
       { path: '/cross-analysis', labelKey: 'nav.jarvis_hub', icon: Brain },
       { path: '/alpha-radar', labelKey: 'nav.alpha_radar', icon: Crosshair },
       { path: '/market-narrative', labelKey: 'nav.market_narrative', icon: BookOpen },

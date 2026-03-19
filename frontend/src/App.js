@@ -57,6 +57,8 @@ import EconomicCalendarPage from "@/pages/EconomicCalendarPage";
 import TradeJournalPage from "@/pages/TradeJournalPage";
 import QuizPage from "@/pages/QuizPage";
 import ReferralPage from "@/pages/ReferralPage";
+import DecisionEnginePage from "@/pages/DecisionEnginePage";
+import TrustDashboardPage from "@/pages/TrustDashboardPage";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -286,6 +288,8 @@ function AppRouter() {
       <Route path="/trade-journal" element={<ProtectedRoute><TradeJournalPage /></ProtectedRoute>} />
       <Route path="/quiz" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/referral" element={<ProtectedRoute><ReferralPage /></ProtectedRoute>} />
+      <Route path="/decision-engine" element={<ProtectedRoute><DecisionEnginePage /></ProtectedRoute>} />
+      <Route path="/trust-dashboard" element={<ProtectedRoute><TrustDashboardPage /></ProtectedRoute>} />
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
       {/* Catch all */}

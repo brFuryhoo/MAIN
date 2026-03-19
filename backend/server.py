@@ -1317,6 +1317,8 @@ from routes.unfair_advantage import router as advantage_router
 from routes.dominance import router as dominance_router
 from routes.distribution import router as distribution_router
 from routes.ecosystem import router as ecosystem_router
+from routes.trust import router as trust_router
+from routes.decision import router as decision_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1338,6 +1340,8 @@ app.include_router(advantage_router)
 app.include_router(dominance_router)
 app.include_router(distribution_router)
 app.include_router(ecosystem_router)
+app.include_router(trust_router)
+app.include_router(decision_router)
 
 app.add_middleware(
     CORSMiddleware,

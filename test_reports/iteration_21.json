@@ -1,0 +1,90 @@
+{
+  "summary": "Iteration 21 - Data Infrastructure, Trust Layer, and Decision Engine testing complete. Backend: 18/18 tests passed (100%). Frontend: Both new pages (Decision Engine and Trust Dashboard) fully verified with Portuguese translations. All APIs returning correct data.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/decision/universe/catalog returns 500 assets (220 US stocks, 69 international, 99 crypto, 54 ETFs, 25 forex, 15 commodities, 18 indices)",
+    "Backend: GET /api/decision/universe/catalog?query=BTC returns 3 search results (FBTC, GBTC, BTC)",
+    "Backend: GET /api/decision/universe/catalog?asset_type=crypto filters to 99 crypto assets",
+    "Backend: GET /api/decision/universe/catalog?asset_type=stock filters to 289+ stocks",
+    "Backend: Search with filter (query=ETH&asset_type=crypto) returns filtered results",
+    "Backend: GET /api/decision/BTC?asset_type=crypto returns structured decision with BUY/SELL/HOLD, probability, entry/target/stop levels, reasoning",
+    "Backend: GET /api/decision/AAPL?asset_type=stock returns stock decision with full analysis",
+    "Backend: Decision endpoint auto-logs signal to signals_log collection with signal_id",
+    "Backend: GET /api/decision/batch/top-opportunities returns 9 opportunities from 13 scanned assets",
+    "Backend: Top opportunities limit parameter works correctly",
+    "Backend: GET /api/trust/performance returns overview (total_trades, win_rate, total_pnl, max_drawdown, risk_reward, sharpe), signals metrics, monthly_performance, platform_stats (500+ assets)",
+    "Backend: GET /api/trust/track-record returns signals list with current_streak, accuracy_by_class",
+    "Backend: Track record limit parameter works correctly",
+    "Backend: GET /api/trust/signal/{signal_id} returns signal transparency with factors, reasoning, historical similar signals",
+    "Backend: Signal transparency returns 404 for invalid signal_id",
+    "Backend: POST /api/trust/signal/log logs new signal with all required fields",
+    "Backend: Signal log validates required fields (returns 422 for invalid payload)",
+    "Backend: Full integration flow works: decision → signal logged → retrievable in track-record → transparency available",
+    "Frontend: Decision Engine page loads at /decision-engine with Portuguese title 'Motor de Decisao'",
+    "Frontend: Decision Engine search bar found with placeholder 'Pesquisar qualquer ativo (BTC, AAPL, EUR/USD...)'",
+    "Frontend: Decision Engine search works - typing 'BTC' shows 3 results dropdown (FBTC ETF, GBTC ETF, BTC Crypto)",
+    "Frontend: Clicking search result loads full decision analysis view with SELL verdict",
+    "Frontend: Decision result shows Probabilidade, Entrada, Alvo, Stop Loss, Risco/Retorno metrics",
+    "Frontend: 'Por que este trade?' section shows Estrutura, Liquidez, Volatilidade, Sentimento",
+    "Frontend: 'Sinais Quantitativos' shows RSI, MACD, Momento values",
+    "Frontend: 'Raciocinio da IA' section shows numbered reasoning points",
+    "Frontend: Factor scores display (Technical, Volume, Sentiment, Momentum, Risk, Score Total)",
+    "Frontend: Top Oportunidades section loads with 8 opportunity cards",
+    "Frontend: Clicking opportunity card (META) loads decision analysis",
+    "Frontend: Trust Dashboard page loads at /trust-dashboard with Portuguese title 'Performance Publica'",
+    "Frontend: Trust Dashboard shows 6 overview metrics (Total Trades, Taxa Vitoria, P&L Total, Max Drawdown, Risco/Retorno, Sharpe)",
+    "Frontend: Platform stats bar shows Usuarios, Estrategias, Ativos (500+), Acuracia Sinais, Total Sinais",
+    "Frontend: Performance Mensal section shows monthly performance with bar chart",
+    "Frontend: Track Record Verificado section shows signals list with direction, probability, outcome status",
+    "Frontend: Accuracy by class breakdown shows Etf, Stock, Crypto signal counts",
+    "Frontend: Atualizar (Refresh) button present",
+    "Frontend: Sidebar shows 'Motor de Decisao' and 'Transparencia' nav items under INTELIGENCIA section",
+    "Frontend: All Portuguese translations working correctly"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_decision_trust_layer.py",
+    "/app/test_reports/pytest/pytest_results_decision_trust.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Asset universe correctly returns exactly 500 assets as specified",
+    "Decision Engine uses real technical analysis (RSI, MACD, MA) on market data from providers",
+    "Signals are auto-logged to MongoDB signals_log collection for track record",
+    "Trust Layer aggregates real data from paper_trades and signals_log collections",
+    "All decision endpoints return signal_id for transparency tracking",
+    "Portuguese translations complete for both new pages"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_decision_trust_layer.py"
+  ],
+  "success_rate": {
+    "backend": "100% (18/18 tests passed)",
+    "frontend": "100% (all features verified via Playwright)"
+  },
+  "test_credentials": {
+    "email": "test@test.com",
+    "password": "test"
+  },
+  "seed_data_creation": "Signals auto-logged to signals_log collection during testing (BTC, ETH, AAPL, SOL, MSFT decisions)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 21 tested the new Data Infrastructure (500+ asset universe), Trust Layer, and Decision Engine. Decision Engine at /decision-engine provides BUY/SELL/HOLD signals with entry/target/stop levels, technical analysis, and multi-factor reasoning. Trust Dashboard at /trust-dashboard shows public performance metrics, monthly performance, and verified track record. All signals are auto-logged and can be retrieved via /api/trust/signal/{signal_id} for full transparency. Portuguese translations working (Motor de Decisao, Transparencia, Por que este trade?, Raciocinio da IA, etc). Asset universe has exactly 500 assets: 220 US stocks, 69 international stocks, 99 crypto, 54 ETFs, 25 forex, 15 commodities, 18 indices.",
+  "mocked_components": {
+    "note": "NO MOCKED APIS - All endpoints use real data",
+    "real_integrations": [
+      "Decision Engine: Uses real technical analysis on market data from CoinGecko, Twelve Data, Alpha Vantage",
+      "Asset Universe: Static catalog of 500 real tradeable assets",
+      "Trust Layer: Aggregates real data from MongoDB collections (paper_trades, signals_log, strategies)",
+      "Signal Logging: Real MongoDB writes to signals_log collection"
+    ]
+  },
+  "rca_of_the_issue": "N/A - No issues found. All Data Infrastructure, Trust Layer, and Decision Engine features working correctly."
+}
