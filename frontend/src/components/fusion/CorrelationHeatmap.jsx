@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Interpolate correlation value → CSS rgb color
 // -1.0 → #FF4444 (red), 0 → #1a1a1a (dark), +1.0 → #00E676 (green)
@@ -35,6 +36,7 @@ function corrDirection(value) {
 }
 
 export default function CorrelationHeatmap({ matrix, divergences = [] }) {
+  const { t } = useLanguage();
   const [tooltip, setTooltip] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
@@ -82,7 +84,7 @@ export default function CorrelationHeatmap({ matrix, divergences = [] }) {
   if (!assets.length || !values.length) {
     return (
       <div className="flex items-center justify-center h-48 text-[#666] text-sm">
-        No correlation data available
+        {t('heatmap.title')} — No data
       </div>
     );
   }
@@ -237,7 +239,7 @@ export default function CorrelationHeatmap({ matrix, divergences = [] }) {
 
       {/* Color scale legend */}
       <div className="flex items-center gap-3 mt-4 px-1">
-        <span style={{ fontSize: "9px", color: "#666", fontWeight: 600 }}>
+        <span style={{ fontSize: "9px", color: "#666", fontWeight: 600 }} title={t('heatmap.legend_negative')}>
           -1.0
         </span>
         <div
@@ -251,7 +253,7 @@ export default function CorrelationHeatmap({ matrix, divergences = [] }) {
             border: "1px solid #333",
           }}
         />
-        <span style={{ fontSize: "9px", color: "#666", fontWeight: 600 }}>
+        <span style={{ fontSize: "9px", color: "#666", fontWeight: 600 }} title={t('heatmap.legend_positive')}>
           +1.0
         </span>
         {divergences && divergences.length > 0 && (
@@ -268,7 +270,7 @@ export default function CorrelationHeatmap({ matrix, divergences = [] }) {
               }}
             />
             <span style={{ fontSize: "9px", color: "#F59E0B", fontWeight: 600 }}>
-              DIVERGÊNCIA HISTÓRICA
+              {t('heatmap.divergence_warning')}
             </span>
           </div>
         )}
@@ -317,7 +319,7 @@ export default function CorrelationHeatmap({ matrix, divergences = [] }) {
               marginBottom: "4px",
             }}
           >
-            {tooltip.rowAsset} / {tooltip.colAsset}
+            {t('heatmap.tooltip_pair').replace('{a}', tooltip.rowAsset).replace('{b}', tooltip.colAsset)}
           </div>
           <div
             style={{
@@ -346,7 +348,7 @@ export default function CorrelationHeatmap({ matrix, divergences = [] }) {
                 fontWeight: 600,
               }}
             >
-              ⚠ DIVERGÊNCIA DO HISTÓRICO DETECTADA
+              ⚠ {t('heatmap.divergence_warning')}
             </div>
           )}
         </div>

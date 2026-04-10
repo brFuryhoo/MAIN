@@ -24,25 +24,25 @@ const navSections = [
   {
     label: 'CORE',
     items: [
-      { path: '/dashboard',     label: 'Dashboard',      icon: LayoutDashboard },
-      { path: '/global-fusion', label: 'Global Fusion',  icon: Network, badge: 'LIVE' },
-      { path: '/analysis',      label: 'Analyze Asset',  icon: Zap },
-      { path: '/copilot',       label: 'JARVIS Copilot', icon: Bot },
-      { path: '/signals',       label: 'My Signals',     icon: Activity },
+      { path: '/dashboard',     labelKey: 'nav.command_center', icon: LayoutDashboard },
+      { path: '/global-fusion', labelKey: 'nav.global_fusion',  icon: Network, badge: 'LIVE' },
+      { path: '/analysis',      labelKey: 'nav.analyze_asset',  icon: Zap },
+      { path: '/copilot',       labelKey: 'nav.jarvis_copilot', icon: Bot },
+      { path: '/signals',       labelKey: 'nav.my_signals',     icon: Activity },
     ],
   },
   {
     label: 'PORTFOLIO',
     items: [
-      { path: '/watchlist',  label: 'Watchlist',  icon: Eye },
-      { path: '/portfolio',  label: 'Portfolio',  icon: Wallet },
+      { path: '/watchlist',  labelKey: 'nav.watchlist',    icon: Eye },
+      { path: '/portfolio',  labelKey: 'nav.my_portfolio', icon: Wallet },
     ],
   },
   {
     label: 'SYSTEM',
     items: [
-      { path: '/labs',     label: 'Labs',     icon: FlaskConical, badge: 'NEW' },
-      { path: '/settings', label: 'Settings', icon: Settings },
+      { path: '/labs',     labelKey: 'nav.labs',     icon: FlaskConical, badge: 'NEW' },
+      { path: '/settings', labelKey: 'nav.settings', icon: Settings },
     ],
   },
 ];

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AureosLayout from '@/components/layout/DashboardLayout';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { 
   FlaskConical, Lock, ArrowRight, Zap, Brain, Copy, Target,
@@ -49,8 +50,11 @@ const ETA_COLORS = {
   'Q4 2026': '#888',
 };
 
+const ETA_KEYS = { 'Q2 2026': 'labs.q2', 'Q3 2026': 'labs.q3', 'Q4 2026': 'labs.q4' };
+
 export default function LabsPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <AureosLayout>
@@ -64,16 +68,16 @@ export default function LabsPage() {
                 <FlaskConical size={18} className="text-[#D4AF37]" />
               </div>
               <h1 className="text-2xl font-bold font-['Poppins']">
-                AUREOS <span className="text-[#D4AF37]">LABS</span>
+AUREOS <span className="text-[#D4AF37]">LABS</span>
               </h1>
             </div>
             <p className="text-[#666] text-sm max-w-xl">
-              Features em desenvolvimento ativo. Cada uma será lançada conforme atingirmos os marcos de qualidade — sem feature flags, sem bugs públicos.
+              {t('labs.subtitle')}
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-xs text-[#555] bg-[#111] border border-[#1a1a1a] px-4 py-2 rounded-lg">
             <Lock size={12} />
-            <span>{LABS_FEATURES.length} features no pipeline</span>
+<span>{LABS_FEATURES.length} {t('labs.pipeline')}</span>
           </div>
         </div>
 
@@ -82,7 +86,7 @@ export default function LabsPage() {
           {Object.entries(ETA_COLORS).map(([eta, color]) => (
             <div key={eta} className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ background: color }} />
-              <span className="text-xs text-[#666]">{eta}</span>
+<span className="text-xs text-[#666]">{t(ETA_KEYS[eta] || eta)}</span>
             </div>
           ))}
         </div>
@@ -114,7 +118,7 @@ export default function LabsPage() {
                   {feat.label}
                 </p>
                 <p className="text-[10px] font-mono" style={{ color: etaColor }}>
-                  {feat.eta}
+                  {t(ETA_KEYS[feat.eta] || feat.eta)}
                 </p>
 
                 <ArrowRight size={11} className="absolute bottom-3 right-3 text-[#333] group-hover:text-[#D4AF37] transition-colors" />
@@ -126,10 +130,10 @@ export default function LabsPage() {
         {/* Footer note */}
         <div className="bg-[#0A0A0A] border border-[#1a1a1a] rounded-xl p-6 text-center">
           <p className="text-[#555] text-sm">
-            Cada feature do Labs já possui backend funcional — estamos refinando UX e qualidade antes do lançamento público.
+            {t('labs.footer')}
           </p>
           <p className="text-[#D4AF37] text-xs mt-2 font-mono">
-            30+ features · 1 core product · 0 compromissos com qualidade
+            {t('labs.tagline')}
           </p>
         </div>
 

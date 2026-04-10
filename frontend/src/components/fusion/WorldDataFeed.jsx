@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Globe,
@@ -14,14 +15,24 @@ import {
 } from "lucide-react";
 
 // ─── Category configuration ──────────────────────────────────────────────────
+const CATEGORY_TKEYS = {
+  "ALL": "fusion.filter_all",
+  "geopolitical": "fusion.filter_geo",
+  "macro": "fusion.filter_macro",
+  "crypto": "fusion.filter_crypto",
+  "equity": "fusion.filter_equity",
+  "commodity": "fusion.filter_commodity",
+  "forex": "fusion.filter_forex",
+};
+
 const CATEGORIES = [
-  { key: "ALL", label: "ALL" },
-  { key: "geopolitical", label: "GEO" },
-  { key: "macro", label: "MACRO" },
-  { key: "crypto", label: "CRYPTO" },
-  { key: "equity", label: "EQUITY" },
-  { key: "commodity", label: "COMMODITY" },
-  { key: "forex", label: "FOREX" },
+  { key: "ALL" },
+  { key: "geopolitical" },
+  { key: "macro" },
+  { key: "crypto" },
+  { key: "equity" },
+  { key: "commodity" },
+  { key: "forex" },
 ];
 
 const CATEGORY_ICON = {
@@ -34,9 +45,9 @@ const CATEGORY_ICON = {
 };
 
 const IMPACT_CONFIG = {
-  HIGH: { color: "#FF4444", bg: "rgba(255,68,68,0.12)", label: "HIGH" },
-  MEDIUM: { color: "#F59E0B", bg: "rgba(245,158,11,0.12)", label: "MED" },
-  LOW: { color: "#00E676", bg: "rgba(0,230,118,0.12)", label: "LOW" },
+  HIGH: { color: "#FF4444", bg: "rgba(255,68,68,0.12)", labelKey: "fusion.impact_high" },
+  MEDIUM: { color: "#F59E0B", bg: "rgba(245,158,11,0.12)", labelKey: "fusion.impact_medium" },
+  LOW: { color: "#00E676", bg: "rgba(0,230,118,0.12)", labelKey: "fusion.impact_low" },
 };
 
 const SOURCE_COLORS = {
@@ -84,6 +95,7 @@ function SentimentArrow({ sentiment }) {
 }
 
 function EventCard({ event, onClick, compact, isNew }) {
+  const { t } = useLanguage();
   const impact = IMPACT_CONFIG[event.impact_level] || IMPACT_CONFIG.LOW;
   const CategoryIcon = CATEGORY_ICON[event.category] || Zap;
   const sourceColor = SOURCE_COLORS[event.source] || "#888";
@@ -144,7 +156,7 @@ function EventCard({ event, onClick, compact, isNew }) {
             fontFamily: "monospace",
           }}
         >
-          {impact.label}
+          {t(impact.labelKey)}
         </span>
 
         {/* Category icon */}
@@ -264,6 +276,7 @@ function LoadingSkeleton() {
 }
 
 export default function WorldDataFeed({ events = [], onEventClick, compact = false, loading = false }) {
+  const { t } = useLanguage();
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [newEventIds, setNewEventIds] = useState(new Set());
   const prevEventsRef = useRef([]);
@@ -337,7 +350,7 @@ export default function WorldDataFeed({ events = [], onEventClick, compact = fal
                   : "none",
               }}
             >
-              {cat.label}
+              {t(CATEGORY_TKEYS[cat.key] || cat.key)}
               {count > 0 && (
                 <span
                   style={{
@@ -372,7 +385,7 @@ export default function WorldDataFeed({ events = [], onEventClick, compact = fal
             style={{ color: "#444" }}
           >
             <Globe size={32} style={{ marginBottom: "12px", opacity: 0.4 }} />
-            <p style={{ fontSize: "12px" }}>No events in this category</p>
+            <p style={{ fontSize: "12px" }}>{t('fusion.no_events')}</p>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
