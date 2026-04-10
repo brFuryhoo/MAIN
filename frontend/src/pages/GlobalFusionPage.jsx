@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import WorldDataFeed from "@/components/fusion/WorldDataFeed";
 import CorrelationHeatmap from "@/components/fusion/CorrelationHeatmap";
+import AureosLayout from "@/components/layout/DashboardLayout";
 
 // ─── Mock Data ─────────────────────────────────────────────────────────────────
 const MOCK_FUSION = {
@@ -808,10 +809,11 @@ export default function GlobalFusionPage() {
   const fusionData = data || MOCK_FUSION;
 
   return (
+    <AureosLayout>
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#050505",
+        backgroundColor: "transparent",
         color: "#e0e0e0",
         fontFamily: "'Inter', system-ui, sans-serif",
         overflowX: "hidden",

@@ -4,6 +4,9 @@ import { useAuth } from '@/App';
 import { useLanguage, LANGUAGES } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlaskConical } from 'lucide-react';
+import LivePriceTicker from '@/components/layout/LivePriceTicker';
+import AlertsBell from '@/components/layout/AlertsBell';
+import QuickAnalysisBar from '@/components/layout/QuickAnalysisBar';
 import { 
   LayoutDashboard, Bot, Settings, LogOut, Menu, X, Wallet, Zap, Bell, Search,
   Crown, Eye, Brain, Radar, Globe, Gauge, Banknote, Activity, BookOpen, Trophy,
@@ -187,12 +190,7 @@ export const AureosLayout = ({ children }) => {
               <Menu size={24} />
             </Button>
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#888]" size={16} />
-                <input type="text" placeholder="Search assets, commands, or ask JARVIS..."
-                  className="aureos-input pl-11 pr-4 py-2 text-sm rounded-lg w-full" />
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#888] bg-white/5 px-1.5 py-0.5 rounded">K</kbd>
-              </div>
+              <QuickAnalysisBar />
             </div>
             <div className="flex items-center gap-2">
               {/* Language Selector */}
@@ -223,16 +221,15 @@ export const AureosLayout = ({ children }) => {
                   )}
                 </AnimatePresence>
               </div>
-              <button className="relative p-2 rounded-lg hover:bg-white/5 transition-colors">
-                <Bell size={18} className="text-[#888]" />
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#FF5252]" />
-              </button>
+              <AlertsBell />
               <Button onClick={() => navigate('/analysis')} className="aureos-btn-gold hidden sm:flex text-xs h-8" data-testid="new-analysis-btn">
                 <Zap size={14} className="mr-1.5" /> New Analysis
               </Button>
             </div>
           </div>
         </header>
+        {/* Live Price Ticker — always visible below header */}
+        <LivePriceTicker />
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>
     </div>

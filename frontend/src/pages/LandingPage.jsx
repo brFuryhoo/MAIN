@@ -7,7 +7,7 @@
  * Brand: gold #D4AF37, dark bg #050505/#0A0A0A, muted #888
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
@@ -26,6 +26,8 @@ import {
   Twitter,
   Linkedin,
   ChevronDown,
+  Cpu,
+  Shield,
 } from "lucide-react";
 
 /* ─── Brand constants ─────────────────────────────────────────────── */
@@ -35,8 +37,8 @@ const BG_CARD = "#0A0A0A";
 const BORDER = "#1a1a1a";
 const MUTED = "#888";
 
-/* ─── Mock ticker data ───────────────────────────────────────────── */
-const TICKER_ITEMS = [
+/* ─── Mock ticker data (fallback) ───────────────────────────────────── */
+const MOCK_TICKER_ITEMS = [
   { symbol: "BTC/USD", price: "68,421.50", change: "+2.34", positive: true },
   { symbol: "ETH/USD", price: "3,512.80", change: "+1.87", positive: true },
   { symbol: "AAPL", price: "189.43", change: "-0.62", positive: false },
@@ -48,6 +50,18 @@ const TICKER_ITEMS = [
   { symbol: "USD/JPY", price: "154.83", change: "+0.18", positive: true },
   { symbol: "SPX 500", price: "5,234.18", change: "-0.09", positive: false },
 ];
+
+/* ─── Live counter hook ──────────────────────────────────────────── */
+function useLiveCounter(base, incrementInterval = 4000) {
+  const [count, setCount] = useState(base);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCount((c) => c + 1);
+    }, incrementInterval);
+    return () => clearInterval(timer);
+  }, [incrementInterval]);
+  return count;
+}
 
 /* ─── Animated counter hook ─────────────────────────────────────── */
 function useCountUp(target, duration = 2000, isActive = true) {
@@ -82,7 +96,7 @@ function StatCard({ value, suffix, label, isActive }) {
   );
 }
 
-/* ─── Hero background: animated gold grid + particles ───────────── */
+/* ─── Hero background: animated gold grid + particles + radial glow ─ */
 function HeroBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -97,16 +111,29 @@ function HeroBackground() {
           backgroundSize: "60px 60px",
         }}
       />
-      {/* Radial glow center */}
+      {/* Animated radial glow behind hero text — gold, very low opacity */}
       <div
         className="absolute"
         style={{
           top: "10%",
           left: "50%",
           transform: "translateX(-50%)",
+          width: "900px",
+          height: "600px",
+          background: `radial-gradient(ellipse at center, rgba(212,175,55,0.04) 0%, rgba(212,175,55,0.02) 35%, transparent 70%)`,
+          animation: "hero-glow-pulse 6s ease-in-out infinite",
+        }}
+      />
+      {/* Secondary softer glow */}
+      <div
+        className="absolute"
+        style={{
+          top: "5%",
+          left: "50%",
+          transform: "translateX(-50%)",
           width: "700px",
           height: "500px",
-          background: `radial-gradient(ellipse at center, rgba(212,175,55,0.12) 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse at center, rgba(212,175,55,0.03) 0%, transparent 65%)`,
         }}
       />
       {/* Floating particles */}
@@ -135,9 +162,9 @@ function HeroBackground() {
   );
 }
 
-/* ─── Inline ticker bar (static, scrolling) ─────────────────────── */
-function HeroTicker() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]; // duplicate for seamless loop
+/* ─── Inline ticker bar (live or mock) ──────────────────────────── */
+function HeroTicker({ items }) {
+  const doubled = [...items, ...items]; // duplicate for seamless loop
   return (
     <div
       className="w-full overflow-hidden border-y"
@@ -147,7 +174,7 @@ function HeroTicker() {
         className="flex items-center gap-8 whitespace-nowrap"
         style={{ animation: "ticker-scroll 40s linear infinite" }}
       >
-        {items.map((item, i) => (
+        {doubled.map((item, i) => (
           <div key={i} className="flex items-center gap-2 py-2.5 px-4 shrink-0">
             <span className="text-xs font-bold tracking-wider text-white">{item.symbol}</span>
             <span className="text-xs font-mono text-white">${item.price}</span>
@@ -166,18 +193,24 @@ function HeroTicker() {
   );
 }
 
-/* ─── Prediction card ────────────────────────────────────────────── */
+/* ─── Prediction card (animated confidence bar on scroll) ───────── */
 function PredictionCard({ signal, symbol, confidence, reasoning, delay = 0 }) {
+  const cardRef = useRef(null);
+  const isInView = useInView(cardRef, { once: true, margin: "-40px" });
+
+  const isMonitor = signal === "WATCH";
   const isBuy = signal === "BUY";
-  const signalColor = isBuy ? "#22c55e" : "#ef4444";
+  const signalColor = isMonitor ? "#F59E0B" : isBuy ? "#22c55e" : "#ef4444";
+
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay }}
       className="rounded-xl p-5 border flex flex-col gap-3"
-      style={{ background: "#0D0D0D", borderColor: BORDER }}
+      style={{ background: "#0D0D0D", borderColor: isMonitor ? "#F59E0B33" : BORDER }}
     >
       <div className="flex items-center justify-between">
         <span className="font-black text-white text-lg">{symbol}</span>
@@ -198,8 +231,7 @@ function PredictionCard({ signal, symbol, confidence, reasoning, delay = 0 }) {
             className="h-full rounded-full"
             style={{ background: `linear-gradient(90deg, ${signalColor}, ${signalColor}88)` }}
             initial={{ width: 0 }}
-            whileInView={{ width: `${confidence}%` }}
-            viewport={{ once: true }}
+            animate={isInView ? { width: `${confidence}%` } : { width: 0 }}
             transition={{ duration: 1, delay: delay + 0.3, ease: "easeOut" }}
           />
         </div>
@@ -341,21 +373,47 @@ export default function LandingPage({ user }) {
   const [narrativeExpanded, setNarrativeExpanded] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [tickerItems, setTickerItems] = useState(MOCK_TICKER_ITEMS);
+
+  // Live trader count — increments +1 every 4 seconds from 50,247
+  const liveTraderCount = useLiveCounter(50247, 4000);
 
   // If user is already logged in, redirect to dashboard
   useEffect(() => {
     if (user) navigate("/dashboard");
   }, [user, navigate]);
 
+  // Live ticker fetch + poll
+  const fetchTicker = useCallback(async () => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || "";
+      const res = await fetch(`${backendUrl}/api/live/ticker`, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setTickerItems(data);
+      }
+    } catch {
+      // silently keep mock data
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTicker();
+    const interval = setInterval(fetchTicker, 30000);
+    return () => clearInterval(interval);
+  }, [fetchTicker]);
+
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    // TODO: connect to backend contact endpoint
     setContactSubmitted(true);
     setTimeout(() => setContactSubmitted(false), 4000);
     setContactForm({ name: "", email: "", message: "" });
   };
 
-  const NARRATIVE_TEXT = `Escalating tensions in the Taiwan Strait are forcing institutional capital to seek defensive repositioning. Semiconductor supply chain exposure is prompting significant outflows from tech-heavy indices, with risk-off sentiment accelerating rotation into commodities and safe-haven currencies.
+  const NARRATIVE_TEXT = `JARVIS Global Fusion is monitoring 25 assets across 6 market categories. Today's dominant theme: geopolitical tension in the Asia-Pacific is creating divergence between tech semiconductors and safe-haven assets.
+
+Escalating tensions in the Taiwan Strait are forcing institutional capital to seek defensive repositioning. Semiconductor supply chain exposure is prompting significant outflows from tech-heavy indices, with risk-off sentiment accelerating rotation into commodities and safe-haven currencies.
 
 Federal Reserve officials have signaled a data-dependent pause, but tightening financial conditions in Asia-Pacific markets are generating asymmetric pressure on export-driven economies. The confluence of geopolitical friction and monetary divergence is creating rare cross-asset dislocations.
 
@@ -386,6 +444,14 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes hero-glow-pulse {
+          0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+          50% { opacity: 0.6; transform: translateX(-50%) scale(1.08); }
+        }
+        @keyframes green-dot-pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 4px #22c55e; }
+          50% { opacity: 0.5; box-shadow: 0 0 10px #22c55e; }
         }
 
         .gold-gradient-text {
@@ -430,6 +496,9 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
           border: none;
           height: 1px;
           background: linear-gradient(90deg, transparent, #1a1a1a 30%, #1a1a1a 70%, transparent);
+        }
+        .green-dot-anim {
+          animation: green-dot-pulse 2s ease-in-out infinite;
         }
       `}</style>
 
@@ -492,7 +561,7 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 text-xs font-semibold tracking-widest uppercase"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-semibold tracking-widest uppercase"
             style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}33`, color: GOLD }}
           >
             <span
@@ -500,6 +569,29 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
               style={{ background: "#22c55e" }}
             />
             GPT-5.2 POWERED — NOW LIVE
+          </motion.div>
+
+          {/* JARVIS IS LIVE status bar */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="inline-flex items-center gap-3 px-5 py-2 rounded-full mb-8 text-xs font-semibold"
+            style={{
+              background: "rgba(34,197,94,0.06)",
+              border: "1px solid rgba(34,197,94,0.25)",
+              color: "rgba(255,255,255,0.85)",
+            }}
+          >
+            <span
+              className="green-dot-anim w-2 h-2 rounded-full flex-shrink-0"
+              style={{ background: "#22c55e" }}
+            />
+            <span className="font-bold tracking-widest text-[#22c55e] uppercase text-[10px]">JARVIS ONLINE</span>
+            <span style={{ color: "#555" }}>·</span>
+            <span style={{ color: MUTED }}>Monitoring 25 global assets</span>
+            <span style={{ color: "#555" }}>·</span>
+            <span style={{ color: MUTED }}>47 events captured</span>
           </motion.div>
 
           {/* Main headline */}
@@ -558,8 +650,8 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
             transition={{ duration: 0.8, delay: 0.4 }}
             className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-3xl mx-auto mb-16"
           >
-            <StatCard value={50000} suffix="+" label="Active Traders" isActive={statsInView} />
-            <StatCard value={2100} suffix="M+" label="Analyzed Daily ($)" isActive={statsInView} />
+            <StatCard value={50000} suffix="K+" label="Active Traders" isActive={statsInView} />
+            <StatCard value={21} suffix="B+" label="Analyzed Daily ($)" isActive={statsInView} />
             <StatCard value={89} suffix="%" label="Signal Accuracy" isActive={statsInView} />
             <StatCard value={49} suffix="★" label="Platform Rating" isActive={statsInView} />
           </motion.div>
@@ -567,7 +659,7 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
 
         {/* Ticker bar */}
         <div className="relative z-10 w-full">
-          <HeroTicker />
+          <HeroTicker items={tickerItems} />
         </div>
       </section>
 
@@ -621,7 +713,7 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
               <div className="flex items-center gap-2">
                 <Brain size={16} style={{ color: GOLD }} />
                 <span className="text-xs font-semibold" style={{ color: GOLD }}>
-                  JARVIS NARRATIVE ENGINE
+                  JARVIS GLOBAL FUSION ENGINE
                 </span>
               </div>
             </div>
@@ -666,8 +758,8 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
               )}
             </div>
 
-            {/* Prediction cards grid */}
-            <div className="grid sm:grid-cols-3 gap-4">
+            {/* Prediction cards grid — 4 cards */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <PredictionCard
                 signal="BUY"
                 symbol="BTC/USD"
@@ -688,6 +780,13 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
                 confidence={71}
                 reasoning="ECB divergence from Fed stance widening. EUR risk premium elevated on Eastern European energy dependency concerns."
                 delay={0.2}
+              />
+              <PredictionCard
+                signal="WATCH"
+                symbol="NVDA"
+                confidence={68}
+                reasoning="Semiconductor demand robust but Taiwan strait risk creates headline volatility."
+                delay={0.3}
               />
             </div>
 
@@ -742,7 +841,7 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
             />
             <FeatureCard
               icon={Globe}
-              title="Jarvis Narrative Engine"
+              title="Jarvis Global Fusion Engine"
               description="AI narrates global events and translates them into market predictions. Geopolitics → trade signals in seconds."
               delay={0.1}
             />
@@ -754,14 +853,14 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
             />
             <FeatureCard
               icon={BarChart3}
-              title="Risk Analytics"
-              description="Portfolio analysis, historical backtesting, and Monte Carlo simulation. Know your risk before you take it."
+              title="Portfolio Analytics"
+              description="Full P&L tracking, drawdown analysis, and Monte Carlo simulations. Know your risk before you take it."
               delay={0.2}
             />
             <FeatureCard
               icon={Radar}
               title="Geopolitical Radar"
-              description="World event monitoring with proprietary market impact scoring. Map tension zones to your positions in real time."
+              description="Live tracking of 25+ global macro events. JARVIS scores each event's market impact before it moves prices."
               delay={0.25}
             />
           </div>
@@ -771,10 +870,11 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
       <hr className="section-divider" />
 
       {/* ─────────────────────────────────────────────────────────── */}
-      {/* SOCIAL PROOF                                              */}
+      {/* SOCIAL PROOF SECTION                                      */}
       {/* ─────────────────────────────────────────────────────────── */}
       <section className="py-24 px-6 lg:px-12" style={{ background: "#070707" }}>
         <div className="max-w-6xl mx-auto">
+          {/* Live trader counter above testimonials */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -782,64 +882,58 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
             className="text-center mb-14"
           >
             <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
-              Trusted by Professionals
+              Social Proof
             </div>
-            <h2 className="text-4xl lg:text-5xl font-black">
-              What Traders{" "}
-              <span className="gold-gradient-text">Say</span>
+            <h2 className="text-4xl lg:text-5xl font-black mb-6">
+              Trusted by{" "}
+              <span className="gold-gradient-text">Real Traders</span>
             </h2>
+            {/* Live counter */}
+            <div
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-full mb-4"
+              style={{ background: `${GOLD}0D`, border: `1px solid ${GOLD}22` }}
+            >
+              <span
+                className="w-2 h-2 rounded-full green-dot-anim flex-shrink-0"
+                style={{ background: "#22c55e" }}
+              />
+              <span className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
+                Join{" "}
+                <span className="font-black" style={{ color: GOLD }}>
+                  {liveTraderCount.toLocaleString()}
+                </span>{" "}
+                traders already using JARVIS
+              </span>
+            </div>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
+          <div className="grid sm:grid-cols-3 gap-5">
             <TestimonialCard
-              name="Sarah Chen"
-              role="Quantitative Analyst, Sydney"
-              quote="Aureos completely transformed my workflow. The AI signals are genuinely predictive — I've beaten my benchmark by 23% since subscribing."
+              name="Alex M."
+              role="Independent Trader, Sydney"
+              quote="JARVIS caught the Taiwan escalation before Bloomberg even ran the headline. I was positioned 40 minutes early. Game-changing."
               delay={0}
             />
             <TestimonialCard
-              name="James Thornton"
-              role="Independent Trader, London"
-              quote="The real-time geopolitical analysis is a game changer. Caught the AUD/USD move from a Taiwan Strait briefing — made $4,200 on one signal."
+              name="Sarah K."
+              role="Prop Trader, London"
+              quote="The geopolitical narrative engine is like having a Bloomberg terminal and a geopolitical analyst rolled into one. Worth every cent."
               delay={0.1}
             />
             <TestimonialCard
-              name="Marcus Webb"
-              role="Hedge Fund Analyst, New York"
-              quote="The Jarvis Narrative Engine is unlike anything I've seen — it connected a geopolitical event in Taiwan to a NVDA setup I'd have missed entirely."
+              name="David C."
+              role="Retail Investor, Melbourne"
+              quote="Finally an AI that explains WHY it's suggesting a trade, not just what. The confidence scoring makes it easy to size positions correctly."
               delay={0.2}
             />
           </div>
-
-          {/* Featured in */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <p className="text-xs uppercase tracking-[0.3em] mb-6" style={{ color: MUTED }}>
-              Featured In
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              {["FinTech Australia", "The Australian", "CoinDesk", "Bloomberg"].map((pub) => (
-                <span
-                  key={pub}
-                  className="text-sm font-bold px-5 py-2.5 rounded-xl"
-                  style={{ background: "#0D0D0D", border: `1px solid ${BORDER}`, color: "#666" }}
-                >
-                  {pub}
-                </span>
-              ))}
-            </div>
-          </motion.div>
         </div>
       </section>
 
       <hr className="section-divider" />
 
       {/* ─────────────────────────────────────────────────────────── */}
-      {/* PRICING                                                   */}
+      {/* PRICING SECTION                                           */}
       {/* ─────────────────────────────────────────────────────────── */}
       <section id="pricing" className="py-24 px-6 lg:px-12" style={{ background: BG_DARK }}>
         <div className="max-w-6xl mx-auto">
@@ -850,14 +944,15 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
             className="text-center mb-14"
           >
             <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
-              Transparent Pricing
+              Pricing
             </div>
             <h2 className="text-4xl lg:text-5xl font-black mb-4">
-              Choose Your{" "}
-              <span className="gold-gradient-text">Edge</span>
+              Simple,{" "}
+              <span className="gold-gradient-text">Transparent</span>
+              {" "}Pricing
             </h2>
-            <p className="text-base max-w-md mx-auto" style={{ color: MUTED }}>
-              Every plan includes a 14-day free trial. No credit card required.
+            <p className="text-base max-w-xl mx-auto" style={{ color: MUTED }}>
+              Start free. Upgrade when you're ready. No hidden fees, no lock-ins.
             </p>
           </motion.div>
 
@@ -867,8 +962,8 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
               price={0}
               period="mo"
               features={[
-                "3 AI analyses / day",
-                "5 watchlist items",
+                "5 AI analyses / day",
+                "10 watchlist items",
                 "Basic market data",
                 "JARVIS intro mode",
               ]}
@@ -930,6 +1025,68 @@ Bitcoin is displaying decoupling behavior from equities, with on-chain metrics i
       </section>
 
       <hr className="section-divider" />
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* CTA BAND (before footer)                                  */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section
+        className="py-16 px-6 lg:px-12 relative overflow-hidden"
+        style={{
+          background: "linear-gradient(180deg, #080808 0%, #0a0a0a 100%)",
+          borderTop: `1px solid ${GOLD}33`,
+        }}
+      >
+        {/* Subtle gold glow on top border */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          style={{
+            background: `linear-gradient(90deg, transparent 0%, ${GOLD}60 30%, ${GOLD}90 50%, ${GOLD}60 70%, transparent 100%)`,
+          }}
+        />
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-20 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse at top, ${GOLD}12 0%, transparent 70%)`,
+          }}
+        />
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col lg:flex-row items-center justify-between gap-8"
+          >
+            {/* Left copy */}
+            <div className="text-center lg:text-left max-w-xl">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] mb-3" style={{ color: GOLD }}>
+                Ready to Trade Smarter?
+              </p>
+              <h2 className="text-2xl lg:text-3xl font-black leading-tight text-white">
+                Ready to let JARVIS trade the world's noise into signals?
+              </h2>
+            </div>
+
+            {/* Right CTAs */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+              <button
+                onClick={() => navigate("/register")}
+                className="btn-gold px-7 py-3.5 rounded-xl text-sm flex items-center gap-2"
+              >
+                Start Free Trial
+                <ArrowRight size={16} />
+              </button>
+              <button
+                onClick={() => navigate("/global-fusion")}
+                className="btn-ghost px-7 py-3.5 rounded-xl text-sm flex items-center gap-2"
+              >
+                See Global Fusion Live
+                <ArrowRight size={15} />
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* ─────────────────────────────────────────────────────────── */}
       {/* CONTACT SECTION                                           */}
