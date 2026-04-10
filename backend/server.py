@@ -1323,6 +1323,7 @@ from routes.live_feed import router as live_feed_router
 from routes.alerts import router as alerts_router
 from routes.jarvis_narrative import router as jarvis_narrative_router
 from routes.predictions import router as predictions_router
+from routes.global_fusion import router as global_fusion_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1350,6 +1351,7 @@ app.include_router(live_feed_router)
 app.include_router(alerts_router)
 app.include_router(jarvis_narrative_router)
 app.include_router(predictions_router)
+app.include_router(global_fusion_router)
 
 app.add_middleware(
     CORSMiddleware,
