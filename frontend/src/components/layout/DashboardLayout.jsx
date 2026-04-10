@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/App';
 import { useLanguage, LANGUAGES } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FlaskConical } from 'lucide-react';
 import { 
   LayoutDashboard, Bot, Settings, LogOut, Menu, X, Wallet, Zap, Bell, Search,
   Crown, Eye, Brain, Radar, Globe, Gauge, Banknote, Activity, BookOpen, Trophy,
@@ -15,74 +16,30 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+// ─── MVP NAVIGATION — 5 core features ───────────────────────────────────────
 const navSections = [
   {
-    label: 'nav.intelligence',
+    label: 'CORE',
     items: [
-      { path: '/dashboard', labelKey: 'nav.command_center', icon: LayoutDashboard },
-      { path: '/decision-engine', labelKey: 'nav.decision_engine', icon: Cpu },
-      { path: '/trust-dashboard', labelKey: 'nav.trust_dashboard', icon: Shield },
-      { path: '/cross-analysis', labelKey: 'nav.jarvis_hub', icon: Brain },
-      { path: '/alpha-radar', labelKey: 'nav.alpha_radar', icon: Crosshair },
-      { path: '/market-narrative', labelKey: 'nav.market_narrative', icon: BookOpen },
-      { path: '/copilot', labelKey: 'nav.jarvis_copilot', icon: Bot },
-      { path: '/intelligence-mode', labelKey: 'nav.intel_mode', icon: Terminal },
+      { path: '/dashboard',     label: 'Dashboard',      icon: LayoutDashboard },
+      { path: '/global-fusion', label: 'Global Fusion',  icon: Network, badge: 'LIVE' },
+      { path: '/analysis',      label: 'Analyze Asset',  icon: Zap },
+      { path: '/copilot',       label: 'JARVIS Copilot', icon: Bot },
+      { path: '/signals',       label: 'My Signals',     icon: Activity },
     ],
   },
   {
-    label: 'nav.analysis',
+    label: 'PORTFOLIO',
     items: [
-      { path: '/market-radar', labelKey: 'nav.ai_quantica', icon: Activity },
-      { path: '/analysis', labelKey: 'nav.deep_analysis', icon: Zap },
-      { path: '/scanner', labelKey: 'nav.market_scanner', icon: Radar },
-      { path: '/correlation', labelKey: 'nav.correlation', icon: Grid3X3 },
-      { path: '/economic-calendar', labelKey: 'nav.econ_calendar', icon: Calendar },
-      { path: '/liquidity-map', labelKey: 'nav.liquidity_map', icon: Droplets },
-      { path: '/capital-flow', labelKey: 'nav.capital_flow', icon: Map },
-      { path: '/sentiment', labelKey: 'nav.sentiment', icon: Gauge },
+      { path: '/watchlist',  label: 'Watchlist',  icon: Eye },
+      { path: '/portfolio',  label: 'Portfolio',  icon: Wallet },
     ],
   },
   {
-    label: 'nav.trading',
+    label: 'SYSTEM',
     items: [
-      { path: '/portfolio', labelKey: 'nav.my_portfolio', icon: Wallet },
-      { path: '/paper-trading', labelKey: 'nav.paper_trading', icon: Banknote },
-      { path: '/copy-trading', labelKey: 'nav.copy_trading', icon: Copy },
-      { path: '/trade-simulator', labelKey: 'nav.trade_simulator', icon: Sparkles },
-      { path: '/trade-journal', labelKey: 'nav.trade_journal', icon: BookMarked },
-      { path: '/watchlist', labelKey: 'nav.watchlist', icon: Eye },
-    ],
-  },
-  {
-    label: 'nav.unfair_advantage',
-    items: [
-      { path: '/trader-dna', labelKey: 'nav.trader_dna', icon: Dna },
-      { path: '/second-brain', labelKey: 'nav.second_brain', icon: Brain },
-      { path: '/jarvis-challenge', labelKey: 'nav.jarvis_challenge', icon: Swords },
-      { path: '/opportunity-scanner', labelKey: 'nav.opp_scanner', icon: ScanLine },
-      { path: '/global-intelligence', labelKey: 'nav.global_intel', icon: Network },
-      { path: '/strategy-marketplace', labelKey: 'nav.marketplace', icon: ShoppingBag },
-      { path: '/strategy-creator', labelKey: 'nav.strategy_creator', icon: Wand2 },
-    ],
-  },
-  {
-    label: 'nav.ecosystem',
-    items: [
-      { path: '/evolution', labelKey: 'nav.evolution', icon: Route },
-      { path: '/daily-missions', labelKey: 'nav.daily_missions', icon: Target },
-      { path: '/quiz', labelKey: 'nav.quiz', icon: HelpCircle },
-      { path: '/share-cards', labelKey: 'nav.share_cards', icon: Share2 },
-      { path: '/social-proof', labelKey: 'nav.top_traders', icon: Users },
-      { path: '/referral', labelKey: 'nav.referral', icon: UserPlus },
-    ],
-  },
-  {
-    label: 'nav.system',
-    items: [
-      { path: '/leaderboard', labelKey: 'nav.aureos_score', icon: Trophy },
-      { path: '/aureos-tokens', labelKey: 'nav.aureos_tokens', icon: Coins },
-      { path: '/performance', labelKey: 'nav.track_record', icon: ShieldCheck },
-      { path: '/settings', labelKey: 'nav.settings', icon: Settings },
+      { path: '/labs',     label: 'Labs',     icon: FlaskConical, badge: 'NEW' },
+      { path: '/settings', label: 'Settings', icon: Settings },
     ],
   },
 ];
@@ -145,14 +102,14 @@ export const AureosLayout = ({ children }) => {
             {navSections.map((section) => (
               <div key={section.label} className="mb-3">
                 {!collapsed && (
-                  <p className="text-[9px] uppercase tracking-[0.2em] text-[#555] font-semibold px-3 mb-1.5">{t(section.label)}</p>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-[#555] font-semibold px-3 mb-1.5">{section.label}</p>
                 )}
                 {collapsed && <div className="h-px bg-white/5 mx-1 mb-2" />}
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.path;
-                    const label = t(item.labelKey);
+                    const label = item.label || t(item.labelKey || '');
                     return (
                       <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
                         title={collapsed ? label : undefined}
@@ -165,7 +122,13 @@ export const AureosLayout = ({ children }) => {
                         )}>
                         <Icon size={16} className={cn("flex-shrink-0", isActive && "text-aureos-gold")} />
                         {!collapsed && <span className="truncate">{label}</span>}
-                        {!collapsed && isActive && <div className="ml-auto w-1 h-1 rounded-full bg-aureos-gold" />}
+                        {!collapsed && item.badge && (
+                          <span className="ml-auto text-[8px] font-bold tracking-widest px-1.5 py-0.5 rounded font-mono"
+                            style={{color:'#FF4444', background:'rgba(255,68,68,0.12)', border:'1px solid rgba(255,68,68,0.3)'}}>
+                            {item.badge}
+                          </span>
+                        )}
+                        {!collapsed && !item.badge && isActive && <div className="ml-auto w-1 h-1 rounded-full bg-aureos-gold" />}
                       </Link>
                     );
                   })}

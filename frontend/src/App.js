@@ -40,6 +40,8 @@ import TradeSimulatorPage from "@/pages/TradeSimulatorPage";
 import TraderDNAPage from "@/pages/TraderDNAPage";
 import StrategyMarketplacePage from "@/pages/StrategyMarketplacePage";
 import GlobalIntelligencePage from "@/pages/GlobalIntelligencePage";
+import GlobalFusionPage from "@/pages/GlobalFusionPage";
+import LabsPage from "@/pages/LabsPage";
 import OpportunityScannerPage from "@/pages/OpportunityScannerPage";
 import SocialProofPage from "@/pages/SocialProofPage";
 import JarvisChallengePage from "@/pages/JarvisChallengePage";
@@ -293,6 +295,8 @@ function AppRouter() {
       <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
       
       {/* Catch all */}
+      <Route path="/global-fusion" element={<ProtectedRoute><GlobalFusionPage /></ProtectedRoute>} />
+      <Route path="/labs" element={<ProtectedRoute><LabsPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
