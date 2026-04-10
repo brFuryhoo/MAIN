@@ -1324,6 +1324,8 @@ from routes.alerts import router as alerts_router
 from routes.jarvis_narrative import router as jarvis_narrative_router
 from routes.predictions import router as predictions_router
 from routes.global_fusion import router as global_fusion_router
+from routes.signal_learning import router as signal_learning_router
+from routes.data_confidence import router as data_confidence_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1352,6 +1354,8 @@ app.include_router(alerts_router)
 app.include_router(jarvis_narrative_router)
 app.include_router(predictions_router)
 app.include_router(global_fusion_router)
+app.include_router(signal_learning_router)
+app.include_router(data_confidence_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -1374,6 +1378,8 @@ async def start_background_tasks():
                 pass
             await asyncio.sleep(60)
     asyncio.create_task(_alert_checker_loop())
+    from services.signal_learning_scheduler import start_signal_resolver
+    asyncio.create_task(start_signal_resolver())
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

@@ -12,7 +12,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
+import DataQualityWidget from "@/components/shared/DataQualityWidget";
 import {
   Brain,
   RefreshCw,
@@ -104,6 +106,7 @@ function SignalBadge({ signal }) {
 
 /* ── Prediction card ───────────────────────────────────────────────── */
 function PredictionCard({ prediction }) {
+  const { t } = useLanguage();
   const { signal, symbol, confidence, reasoning } = prediction;
   const isBuy = signal === "BUY";
   const isSell = signal === "SELL";
@@ -128,7 +131,7 @@ function PredictionCard({ prediction }) {
       {/* Confidence bar */}
       <div>
         <div className="flex justify-between text-xs mb-1.5">
-          <span style={{ color: MUTED }}>Confidence</span>
+          <span style={{ color: MUTED }}>{t('jarvis.confidence')}</span>
           <span className="font-bold text-white">{confidence}%</span>
         </div>
         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#1f1f1f" }}>
@@ -151,6 +154,7 @@ function PredictionCard({ prediction }) {
 
 /* ── Geopolitical event pill ───────────────────────────────────────── */
 function EventPill({ event }) {
+  const { t } = useLanguage();
   const impactColors = {
     HIGH: "#ef4444",
     MEDIUM: "#f59e0b",
@@ -168,7 +172,7 @@ function EventPill({ event }) {
       />
       <span className="text-white/80 leading-snug">{event.title}</span>
       <span className="ml-auto shrink-0 text-[10px] font-bold" style={{ color: impactColors[impact] }}>
-        {impact}
+        {impact === 'HIGH' ? t('jarvis.impact_high') : impact === 'MEDIUM' ? t('jarvis.impact_medium') : t('jarvis.impact_low')}
       </span>
     </div>
   );
@@ -176,11 +180,12 @@ function EventPill({ event }) {
 
 /* ── Error state ───────────────────────────────────────────────────── */
 function ErrorState({ onRetry }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center gap-4 p-8 text-center">
       <AlertCircle size={28} style={{ color: "#ef4444" }} />
       <div>
-        <p className="text-sm text-white/70 mb-1">Failed to load JARVIS Narrative</p>
+        <p className="text-sm text-white/70 mb-1">{t('jarvis.error')}</p>
         <p className="text-xs" style={{ color: MUTED }}>
           Check your connection or API status.
         </p>
@@ -191,7 +196,7 @@ function ErrorState({ onRetry }) {
         style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}33`, color: GOLD }}
       >
         <RefreshCw size={14} />
-        Retry
+        {t('jarvis.retry')}
       </button>
     </div>
   );
@@ -239,6 +244,7 @@ const MOCK_NARRATIVE = {
    MAIN WIDGET COMPONENT
 ═══════════════════════════════════════════════════════════════════ */
 export default function JarvisNarrativeWidget() {
+  const { t } = useLanguage();
   const [state, setState] = useState("loading"); // loading | loaded | error
   const [data, setData] = useState(null);
   const [expanded, setExpanded] = useState(false);
@@ -348,7 +354,7 @@ export default function JarvisNarrativeWidget() {
               className="w-1.5 h-1.5 rounded-full"
               style={{ background: "#22c55e", animation: "live-pulse 2s ease-in-out infinite" }}
             />
-            LIVE
+            {t('jarvis.live')}
           </div>
           <div className="flex items-center gap-2">
             <Brain size={16} style={{ color: GOLD }} />
@@ -361,14 +367,14 @@ export default function JarvisNarrativeWidget() {
           {data && (
             <div className="hidden sm:flex items-center gap-1.5 text-xs" style={{ color: MUTED }}>
               <Clock size={11} />
-              {minutesAgo < 1 ? "Just now" : `${minutesAgo}m ago`}
+              {minutesAgo < 1 ? 'Just now' : t('jarvis.updated').replace('{m}', minutesAgo)}
             </div>
           )}
 
           {/* Narrate button */}
           <button
             onClick={handleNarrate}
-            title={isNarrating ? "Stop narrating" : "Narrate with audio"}
+            title={isNarrating ? t('jarvis.stop') : t('jarvis.listen')}
             className="p-2 rounded-lg transition-colors"
             style={{
               background: isNarrating ? `${GOLD}20` : "transparent",
@@ -457,9 +463,9 @@ export default function JarvisNarrativeWidget() {
                 style={{ color: GOLD }}
               >
                 {expanded ? (
-                  <>Show less <ChevronUp size={13} /></>
+<>{t('jarvis.read_less')} <ChevronUp size={13} /></>
                 ) : (
-                  <>Read more <ChevronDown size={13} /></>
+<>{t('jarvis.read_more')} <ChevronDown size={13} /></>
                 )}
               </button>
             </div>
@@ -468,7 +474,7 @@ export default function JarvisNarrativeWidget() {
             {data.events && data.events.length > 0 && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: MUTED }}>
-                  Geopolitical Events
+                  {t('jarvis.geopolitical_events')}
                 </p>
                 <div className="space-y-1.5">
                   {data.events.map((event, i) => (
@@ -482,7 +488,7 @@ export default function JarvisNarrativeWidget() {
             {data.predictions && data.predictions.length > 0 && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: MUTED }}>
-                  AI Predictions
+                  {t('jarvis.predictions')}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {data.predictions.map((pred, i) => (
@@ -491,6 +497,14 @@ export default function JarvisNarrativeWidget() {
                 </div>
               </div>
             )}
+
+            {/* Data Quality — compact inline indicator */}
+            <div
+              className="pt-2"
+              style={{ borderTop: `1px solid ${BORDER}`, paddingTop: "10px" }}
+            >
+              <DataQualityWidget compact={true} />
+            </div>
 
             {/* Footer CTA */}
             <div
@@ -507,7 +521,7 @@ export default function JarvisNarrativeWidget() {
                 style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}33`, color: GOLD }}
               >
                 <RefreshCw size={11} className={isRefreshing ? "animate-spin" : ""} />
-                {isRefreshing ? "Generating..." : "Refresh"}
+                {isRefreshing ? '...' : t('jarvis.refresh')}
               </button>
             </div>
           </motion.div>

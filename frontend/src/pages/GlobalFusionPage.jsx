@@ -21,6 +21,8 @@ import {
 import WorldDataFeed from "@/components/fusion/WorldDataFeed";
 import CorrelationHeatmap from "@/components/fusion/CorrelationHeatmap";
 import AureosLayout from "@/components/layout/DashboardLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
+import ConfidenceBadge from "@/components/shared/ConfidenceBadge";
 
 // ─── Mock Data ─────────────────────────────────────────────────────────────────
 const MOCK_FUSION = {
@@ -179,60 +181,70 @@ const MOCK_FUSION = {
       bias: "bullish",
       risk_level: "MEDIUM",
       key_drivers: ["Institutional accumulation above $85k", "Safe-haven narrative gaining traction"],
+      data_confidence: 91,
     },
     GOLD: {
       impact_score: 88,
       bias: "bullish",
       risk_level: "LOW",
       key_drivers: ["Geopolitical flight to safety", "Fed uncertainty fueling demand"],
+      data_confidence: 88,
     },
     NVDA: {
       impact_score: 61,
       bias: "bullish",
       risk_level: "MEDIUM",
       key_drivers: ["Strong Q2 guidance beat", "AI infrastructure demand unabated"],
+      data_confidence: 87,
     },
     XOM: {
       impact_score: 75,
       bias: "bullish",
       risk_level: "MEDIUM",
       key_drivers: ["Oil supply disruption risk premium", "Middle East tension"],
+      data_confidence: 82,
     },
     "EUR/USD": {
       impact_score: 55,
       bias: "bearish",
       risk_level: "MEDIUM",
       key_drivers: ["USD strength cycle intact", "ECB dovish pivot expectations"],
+      data_confidence: 94,
     },
     ETH: {
       impact_score: 64,
       bias: "bullish",
       risk_level: "MEDIUM",
       key_drivers: ["BTC correlation carrying", "DeFi TVL growth"],
+      data_confidence: 89,
     },
     SPY: {
       impact_score: 48,
       bias: "bearish",
       risk_level: "HIGH",
       key_drivers: ["Risk-off macro sentiment", "Rate fears resurfacing"],
+      data_confidence: 93,
     },
     TSLA: {
       impact_score: 42,
       bias: "bearish",
       risk_level: "HIGH",
       key_drivers: ["EV demand slowdown signals", "China competition intensifying"],
+      data_confidence: 79,
     },
     "USD/JPY": {
       impact_score: 70,
       bias: "bullish",
       risk_level: "MEDIUM",
       key_drivers: ["BOJ intervention risks", "Fed-BOJ policy divergence"],
+      data_confidence: 86,
     },
     SOL: {
       impact_score: 58,
       bias: "bullish",
       risk_level: "HIGH",
       key_drivers: ["Crypto market momentum", "Ecosystem activity expansion"],
+      data_confidence: 84,
     },
   },
   correlation_matrix: {
@@ -440,7 +452,7 @@ function SignalCard({ signal, index }) {
         </span>
         <div className="flex-1" />
         <span style={{ fontSize: "10px", color: "#555", fontFamily: "monospace" }}>
-          {signal.confidence}% conf.
+          {signal.confidence}% {t('fusion.confidence').toLowerCase()}
         </span>
       </div>
 
@@ -499,7 +511,7 @@ function SignalCard({ signal, index }) {
                 }`,
               }}
             >
-              {idea.direction} {idea.asset}
+              {idea.direction === 'BUY' ? t('fusion.signal_buy') : idea.direction === 'SELL' ? t('fusion.signal_sell') : idea.direction === 'HOLD' ? t('fusion.signal_hold') : t('fusion.signal_watch')} {idea.asset}
             </span>
           );
         })}
@@ -549,6 +561,15 @@ function AssetImpactRow({ symbol, data, index }) {
             {symbol}
           </span>
 
+          {/* Data Confidence Badge (sm dot) */}
+          {data.data_confidence != null && (
+            <ConfidenceBadge
+              score={data.data_confidence}
+              size="sm"
+              showTooltip={false}
+            />
+          )}
+
           {/* Bias badge */}
           <span
             style={{
@@ -563,7 +584,7 @@ function AssetImpactRow({ symbol, data, index }) {
               fontFamily: "monospace",
             }}
           >
-            {data.bias?.toUpperCase()}
+            {data.bias?.toLowerCase() === 'bullish' ? t('fusion.bias_bullish') : data.bias?.toLowerCase() === 'bearish' ? t('fusion.bias_bearish') : t('fusion.bias_neutral')}
           </span>
 
           <div className="flex-1" />
@@ -643,7 +664,7 @@ function AssetImpactRow({ symbol, data, index }) {
           >
             <div style={{ padding: "8px 10px" }}>
               <p style={{ fontSize: "9px", color: "#555", fontWeight: 700, letterSpacing: "0.1em", marginBottom: "5px" }}>
-                KEY DRIVERS
+                {t('fusion.key_drivers')}
               </p>
               {(data.key_drivers || []).map((driver, i) => (
                 <div key={i} className="flex items-start gap-2" style={{ marginBottom: "3px" }}>
@@ -700,7 +721,7 @@ function MacroRegimeBadge({ regime, description }) {
           marginBottom: "4px",
         }}
       >
-        MACRO REGIME
+        {t('fusion.macro_regime').toUpperCase()}
       </div>
       <motion.div
         animate={{ opacity: [0.85, 1, 0.85] }}
@@ -745,6 +766,7 @@ function SkeletonBlock({ height = 80, width = "100%" }) {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function GlobalFusionPage() {
+  const { t } = useLanguage();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
@@ -860,7 +882,7 @@ export default function GlobalFusionPage() {
                     margin: 0,
                   }}
                 >
-                  JARVIS GLOBAL FUSION
+                  {t('fusion.title')}
                 </h1>
                 {/* LIVE indicator */}
                 <div className="flex items-center gap-1.5">
@@ -876,7 +898,7 @@ export default function GlobalFusionPage() {
                       fontFamily: "monospace",
                     }}
                   >
-                    LIVE
+                    {t('fusion.live')}
                   </motion.span>
                 </div>
               </div>
@@ -888,7 +910,7 @@ export default function GlobalFusionPage() {
                   letterSpacing: "0.04em",
                 }}
               >
-                Cruzamento de Dados Mundiais — Notícias × Preços × Geopolítica → Sinais
+                {t('fusion.subtitle')}
               </p>
             </div>
           </div>
@@ -906,7 +928,7 @@ export default function GlobalFusionPage() {
                 fontFamily: "monospace",
               }}
             >
-              Updated: {secondsAgo}s ago
+              {t('fusion.last_updated').replace('{s}', secondsAgo)}
             </div>
 
             <button
@@ -938,7 +960,7 @@ export default function GlobalFusionPage() {
               >
                 <RefreshCw size={12} />
               </motion.div>
-              Refresh
+              {t('fusion.refresh')}
             </button>
           </div>
         </div>
@@ -948,28 +970,28 @@ export default function GlobalFusionPage() {
         {/* ── STATS STRIP ──────────────────────────────────────────────── */}
         <div className="flex gap-3 mb-5 flex-wrap">
           <StatCard
-            label="Events Captured"
+            label={t('fusion.events_captured')}
             value={fusionData.events?.length || 0}
             sub="Last 24 hours"
             icon={Activity}
             accent="#D4AF37"
           />
           <StatCard
-            label="Assets Under Analysis"
+            label={t('fusion.assets_analyzed')}
             value={Object.keys(fusionData.asset_impact || {}).length}
             sub="Multi-class coverage"
             icon={BarChart2}
             accent="#00E676"
           />
           <StatCard
-            label="Active Signals"
+            label={t('fusion.active_signals')}
             value={fusionData.cross_asset_signals?.length || 0}
             sub="High confidence only"
             icon={Zap}
             accent="#F59E0B"
           />
           <StatCard
-            label="Macro Regime"
+            label={t('fusion.macro_regime')}
             value={fusionData.macro_regime}
             sub="Global risk classification"
             icon={TrendingUp}
@@ -1054,7 +1076,7 @@ export default function GlobalFusionPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: "11px", fontWeight: 700, color: "#D4AF37", letterSpacing: "0.15em", fontFamily: "monospace" }}>
-                    JARVIS EXECUTIVE SUMMARY
+                    {t('fusion.executive_summary')}
                   </div>
                   <div style={{ fontSize: "9px", color: "#444" }}>AI-synthesized market intelligence</div>
                 </div>
@@ -1114,7 +1136,7 @@ export default function GlobalFusionPage() {
               <div className="flex items-center gap-2 mb-4">
                 <Target size={12} style={{ color: "#D4AF37" }} />
                 <h2 style={{ fontSize: "11px", fontWeight: 700, color: "#D4AF37", letterSpacing: "0.15em", fontFamily: "monospace", margin: 0 }}>
-                  CROSS-ASSET SIGNALS
+                  {t('fusion.cross_asset_signals')}
                 </h2>
                 <div
                   style={{
@@ -1171,7 +1193,7 @@ export default function GlobalFusionPage() {
                   margin: 0,
                 }}
               >
-                ASSET IMPACT MAP
+                {t('fusion.asset_impact')}
               </h2>
               <div className="flex-1" />
               {/* Legend dots */}

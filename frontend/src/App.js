@@ -42,6 +42,7 @@ import StrategyMarketplacePage from "@/pages/StrategyMarketplacePage";
 import GlobalIntelligencePage from "@/pages/GlobalIntelligencePage";
 import GlobalFusionPage from "@/pages/GlobalFusionPage";
 import LabsPage from "@/pages/LabsPage";
+import SignalPerformancePage from "@/pages/SignalPerformancePage";
 import OpportunityScannerPage from "@/pages/OpportunityScannerPage";
 import SocialProofPage from "@/pages/SocialProofPage";
 import JarvisChallengePage from "@/pages/JarvisChallengePage";
@@ -297,6 +298,7 @@ function AppRouter() {
       {/* Catch all */}
       <Route path="/global-fusion" element={<ProtectedRoute><GlobalFusionPage /></ProtectedRoute>} />
       <Route path="/labs" element={<ProtectedRoute><LabsPage /></ProtectedRoute>} />
+      <Route path="/signal-performance" element={<ProtectedRoute><SignalPerformancePage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

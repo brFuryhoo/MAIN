@@ -9,6 +9,7 @@ Endpoints:
   GET  /api/predictions/market-overview  — signals for top 10 assets
 """
 
+import asyncio
 import json
 import logging
 import uuid
@@ -17,6 +18,20 @@ from typing import Any, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+
+# Signal learning engine — apply learning adjustments and record every signal
+try:
+    from services.signal_learning_engine import apply_learning_to_signal, record_signal  # noqa: PLC0415
+    _LEARNING_ENABLED = True
+except Exception as _le:
+    logging.getLogger(__name__).warning("Signal learning engine unavailable: %s", _le)
+    _LEARNING_ENABLED = False
+
+    async def apply_learning_to_signal(sig):  # type: ignore[misc]
+        return sig
+
+    async def record_signal(sig):  # type: ignore[misc]
+        return sig.get("signal_id", "")
 
 logger = logging.getLogger(__name__)
 
@@ -400,10 +415,22 @@ async def get_signal(req: SignalRequest):
       1. Fetch live price + candle data (market_data_adapter)
       2. Run technical analysis (technical_engine.compute_technical_analysis)
       3. Synthesise final signal via GPT-5.2 with full context
+      4. Apply learning multiplier to confidence (self-improving engine)
+      5. Fire-and-forget: persist signal to signal_ledger for outcome tracking
     """
     try:
         result = await _generate_signal(req.symbol.upper(), req.asset_type, req.timeframe)
-        return SignalResponse(**result)
+
+        # Tag the source so the learning engine knows where it came from
+        result["source"] = "predictions"
+
+        # Step 4: apply learning adjustments (confidence multiplier)
+        result = await apply_learning_to_signal(result)
+
+        # Step 5: fire-and-forget persistence (non-blocking)
+        asyncio.create_task(record_signal(result))
+
+        return SignalResponse(**{k: v for k, v in result.items() if k in SignalResponse.model_fields})
     except HTTPException:
         raise
     except Exception as exc:
