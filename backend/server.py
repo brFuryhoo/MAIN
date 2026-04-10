@@ -1319,6 +1319,10 @@ from routes.distribution import router as distribution_router
 from routes.ecosystem import router as ecosystem_router
 from routes.trust import router as trust_router
 from routes.decision import router as decision_router
+from routes.live_feed import router as live_feed_router
+from routes.alerts import router as alerts_router
+from routes.jarvis_narrative import router as jarvis_narrative_router
+from routes.predictions import router as predictions_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
 app.include_router(jarvis_router)
@@ -1342,6 +1346,10 @@ app.include_router(distribution_router)
 app.include_router(ecosystem_router)
 app.include_router(trust_router)
 app.include_router(decision_router)
+app.include_router(live_feed_router)
+app.include_router(alerts_router)
+app.include_router(jarvis_narrative_router)
+app.include_router(predictions_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -1350,6 +1358,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def start_background_tasks():
+    import asyncio
+    async def _alert_checker_loop():
+        await asyncio.sleep(30)  # wait for server to be fully up
+        while True:
+            try:
+                async with httpx.AsyncClient() as hclient:
+                    await hclient.post("http://localhost:8001/api/alerts/check", timeout=10)
+            except Exception:
+                pass
+            await asyncio.sleep(60)
+    asyncio.create_task(_alert_checker_loop())
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
@@ -1417,3 +1439,4 @@ async def websocket_endpoint(websocket: WebSocket, channel: str):
 @app.get("/api/ws/status")
 async def ws_status():
     return {"active_connections": ws_manager.connection_count, "channels": list(ws_manager.active.keys())}
+

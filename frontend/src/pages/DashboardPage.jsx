@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import JarvisNarrativeWidget from '@/components/jarvis/JarvisNarrativeWidget';
 
 /* ──────────────────────────────────────────────────────────────
    DASHBOARD — COMMAND CENTER
@@ -163,6 +164,19 @@ const DashboardPage = () => {
 
         {/* Hidden audio element for voice briefing */}
         <audio ref={voiceAudioRef} className="hidden" />
+
+      {/* ── JARVIS Narrative Widget ──────────────────────────────── */}
+      <section className="w-full mb-6">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-[0.2em]" style={{color: '#D4AF37'}}>
+              ◆ JARVIS Intelligence
+            </span>
+          </div>
+          <span className="text-xs text-[#666]">Geopolitical narrative &amp; AI trade signals</span>
+        </div>
+        <JarvisNarrativeWidget />
+      </section>
 
         {/* ── DAILY VOICE BRIEFING BANNER ── */}
         <AnimatePresence>

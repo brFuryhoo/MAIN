@@ -1,595 +1,1071 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/App';
-import { motion } from 'framer-motion';
-import { 
-  ArrowRight, 
-  ArrowUpRight,
-  BarChart3, 
-  Bot, 
-  Shield, 
-  Zap, 
-  Check,
-  ChevronRight,
-  Menu,
-  X,
-  Play
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import axios from 'axios';
-import { API } from '@/App';
+/**
+ * Aureos.tech — LandingPage.jsx
+ * Premium fintech-AI landing page with animated hero, live ticker,
+ * Jarvis Narrative section, features, social proof, pricing, and footer.
+ *
+ * Stack: React, Tailwind CSS, Framer Motion, Lucide icons
+ * Brand: gold #D4AF37, dark bg #050505/#0A0A0A, muted #888
+ */
 
-const LandingPage = () => {
-  const { user } = useAuth();
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useInView } from "framer-motion";
+import {
+  Play,
+  TrendingUp,
+  TrendingDown,
+  Brain,
+  Zap,
+  Globe,
+  Bell,
+  BarChart3,
+  Radar,
+  ArrowRight,
+  Star,
+  CheckCircle,
+  Twitter,
+  Linkedin,
+  ChevronDown,
+} from "lucide-react";
+
+/* ─── Brand constants ─────────────────────────────────────────────── */
+const GOLD = "#D4AF37";
+const BG_DARK = "#050505";
+const BG_CARD = "#0A0A0A";
+const BORDER = "#1a1a1a";
+const MUTED = "#888";
+
+/* ─── Mock ticker data ───────────────────────────────────────────── */
+const TICKER_ITEMS = [
+  { symbol: "BTC/USD", price: "68,421.50", change: "+2.34", positive: true },
+  { symbol: "ETH/USD", price: "3,512.80", change: "+1.87", positive: true },
+  { symbol: "AAPL", price: "189.43", change: "-0.62", positive: false },
+  { symbol: "GOLD", price: "2,318.70", change: "+0.91", positive: true },
+  { symbol: "EUR/USD", price: "1.0847", change: "-0.23", positive: false },
+  { symbol: "NVDA", price: "875.20", change: "+3.41", positive: true },
+  { symbol: "ASX 200", price: "7,842.30", change: "+0.54", positive: true },
+  { symbol: "BNB/USD", price: "578.90", change: "+1.12", positive: true },
+  { symbol: "USD/JPY", price: "154.83", change: "+0.18", positive: true },
+  { symbol: "SPX 500", price: "5,234.18", change: "-0.09", positive: false },
+];
+
+/* ─── Animated counter hook ─────────────────────────────────────── */
+function useCountUp(target, duration = 2000, isActive = true) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!isActive) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      setValue(Math.floor(start));
+      if (start >= target) clearInterval(timer);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration, isActive]);
+  return value;
+}
+
+/* ─── Stats counter card ─────────────────────────────────────────── */
+function StatCard({ value, suffix, label, isActive }) {
+  const count = useCountUp(value, 2200, isActive);
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-4xl font-black tracking-tight" style={{ color: GOLD }}>
+        {count.toLocaleString()}
+        {suffix}
+      </span>
+      <span className="text-xs uppercase tracking-widest" style={{ color: MUTED }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+/* ─── Hero background: animated gold grid + particles ───────────── */
+function HeroBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Grid */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(212,175,55,0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(212,175,55,0.06) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px",
+        }}
+      />
+      {/* Radial glow center */}
+      <div
+        className="absolute"
+        style={{
+          top: "10%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "700px",
+          height: "500px",
+          background: `radial-gradient(ellipse at center, rgba(212,175,55,0.12) 0%, transparent 70%)`,
+        }}
+      />
+      {/* Floating particles */}
+      {Array.from({ length: 24 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            width: Math.random() * 3 + 1 + "px",
+            height: Math.random() * 3 + 1 + "px",
+            background: GOLD,
+            opacity: Math.random() * 0.5 + 0.1,
+            left: Math.random() * 100 + "%",
+            top: Math.random() * 100 + "%",
+            animation: `float-particle ${Math.random() * 6 + 4}s ease-in-out infinite`,
+            animationDelay: `${Math.random() * 5}s`,
+          }}
+        />
+      ))}
+      {/* Bottom fade */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-48"
+        style={{ background: `linear-gradient(to bottom, transparent, ${BG_DARK})` }}
+      />
+    </div>
+  );
+}
+
+/* ─── Inline ticker bar (static, scrolling) ─────────────────────── */
+function HeroTicker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]; // duplicate for seamless loop
+  return (
+    <div
+      className="w-full overflow-hidden border-y"
+      style={{ borderColor: BORDER, background: "rgba(10,10,10,0.95)" }}
+    >
+      <div
+        className="flex items-center gap-8 whitespace-nowrap"
+        style={{ animation: "ticker-scroll 40s linear infinite" }}
+      >
+        {items.map((item, i) => (
+          <div key={i} className="flex items-center gap-2 py-2.5 px-4 shrink-0">
+            <span className="text-xs font-bold tracking-wider text-white">{item.symbol}</span>
+            <span className="text-xs font-mono text-white">${item.price}</span>
+            <span
+              className="text-xs font-semibold flex items-center gap-0.5"
+              style={{ color: item.positive ? "#22c55e" : "#ef4444" }}
+            >
+              {item.positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+              {item.positive ? "+" : ""}
+              {item.change}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Prediction card ────────────────────────────────────────────── */
+function PredictionCard({ signal, symbol, confidence, reasoning, delay = 0 }) {
+  const isBuy = signal === "BUY";
+  const signalColor = isBuy ? "#22c55e" : "#ef4444";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      className="rounded-xl p-5 border flex flex-col gap-3"
+      style={{ background: "#0D0D0D", borderColor: BORDER }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="font-black text-white text-lg">{symbol}</span>
+        <span
+          className="text-xs font-bold px-2.5 py-1 rounded-full"
+          style={{ background: `${signalColor}22`, color: signalColor, border: `1px solid ${signalColor}44` }}
+        >
+          {signal}
+        </span>
+      </div>
+      <div>
+        <div className="flex justify-between text-xs mb-1.5">
+          <span style={{ color: MUTED }}>Confidence</span>
+          <span className="font-bold text-white">{confidence}%</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#1a1a1a" }}>
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: `linear-gradient(90deg, ${signalColor}, ${signalColor}88)` }}
+            initial={{ width: 0 }}
+            whileInView={{ width: `${confidence}%` }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: delay + 0.3, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+      <p className="text-xs leading-relaxed" style={{ color: MUTED }}>
+        {reasoning}
+      </p>
+    </motion.div>
+  );
+}
+
+/* ─── Feature card ───────────────────────────────────────────────── */
+function FeatureCard({ icon: Icon, title, description, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      whileHover={{ y: -4, borderColor: `${GOLD}44` }}
+      className="p-6 rounded-2xl border transition-colors duration-300 group"
+      style={{ background: BG_CARD, borderColor: BORDER }}
+    >
+      <div
+        className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+        style={{ background: `${GOLD}15` }}
+      >
+        <Icon size={20} style={{ color: GOLD }} />
+      </div>
+      <h3 className="font-bold text-white mb-2">{title}</h3>
+      <p className="text-sm leading-relaxed" style={{ color: MUTED }}>
+        {description}
+      </p>
+    </motion.div>
+  );
+}
+
+/* ─── Testimonial card ───────────────────────────────────────────── */
+function TestimonialCard({ name, role, quote, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      className="p-6 rounded-2xl border"
+      style={{ background: BG_CARD, borderColor: BORDER }}
+    >
+      <div className="flex gap-1 mb-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star key={i} size={14} fill={GOLD} style={{ color: GOLD }} />
+        ))}
+      </div>
+      <p className="text-sm leading-relaxed mb-5 text-white/80">"{quote}"</p>
+      <div>
+        <div className="font-bold text-white text-sm">{name}</div>
+        <div className="text-xs mt-0.5" style={{ color: MUTED }}>
+          {name} — {role}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Pricing card ───────────────────────────────────────────────── */
+function PricingCard({ tier, price, period, features, highlight = false, badge, delay = 0, onCTA, ctaLabel = "Get Started" }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      className="relative rounded-2xl border p-7 flex flex-col"
+      style={{
+        background: highlight ? `linear-gradient(135deg, #0f0f0f, #111)` : BG_CARD,
+        borderColor: highlight ? `${GOLD}66` : BORDER,
+        boxShadow: highlight ? `0 0 40px ${GOLD}15` : "none",
+      }}
+    >
+      {badge && (
+        <div
+          className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full"
+          style={{ background: GOLD, color: "#050505" }}
+        >
+          {badge}
+        </div>
+      )}
+      <div className="mb-6">
+        <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: GOLD }}>
+          {tier}
+        </div>
+        <div className="flex items-end gap-1">
+          <span className="text-4xl font-black text-white">
+            {price === 0 ? "Free" : `$${price}`}
+          </span>
+          {price > 0 && (
+            <span className="text-sm mb-1.5" style={{ color: MUTED }}>
+              /{period}
+            </span>
+          )}
+        </div>
+      </div>
+      <ul className="flex-1 space-y-3 mb-8">
+        {features.map((f, i) => (
+          <li key={i} className="flex items-start gap-2.5 text-sm">
+            <CheckCircle size={15} className="mt-0.5 shrink-0" style={{ color: GOLD }} />
+            <span style={{ color: "rgba(255,255,255,0.75)" }}>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <button
+        onClick={onCTA}
+        className="w-full py-3 rounded-xl text-sm font-bold tracking-wide transition-all duration-200"
+        style={
+          highlight
+            ? { background: GOLD, color: "#050505" }
+            : { background: "transparent", border: `1px solid ${BORDER}`, color: "white" }
+        }
+        onMouseEnter={(e) => {
+          if (!highlight) e.currentTarget.style.borderColor = `${GOLD}66`;
+        }}
+        onMouseLeave={(e) => {
+          if (!highlight) e.currentTarget.style.borderColor = BORDER;
+        }}
+      >
+        {ctaLabel}
+      </button>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+═══════════════════════════════════════════════════════════════════ */
+export default function LandingPage({ user }) {
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
-  const [submitting, setSubmitting] = useState(false);
+  const statsRef = useRef(null);
+  const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
+  const [narrativeExpanded, setNarrativeExpanded] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  const features = [
-    {
-      icon: BarChart3,
-      title: "Market Intelligence",
-      description: "Real-time data from ASX, NASDAQ, Forex, and Crypto markets with advanced charting and analytics."
-    },
-    {
-      icon: Bot,
-      title: "AI Copilot",
-      description: "GPT-powered assistant providing probability-based trade suggestions with clear reasoning."
-    },
-    {
-      icon: Shield,
-      title: "Predictive Analytics",
-      description: "Risk assessment, portfolio analysis, and backtesting tools for informed decisions."
-    }
-  ];
+  // If user is already logged in, redirect to dashboard
+  useEffect(() => {
+    if (user) navigate("/dashboard");
+  }, [user, navigate]);
 
-  const plans = [
-    {
-      id: 'essential',
-      name: 'Essential',
-      price: 39,
-      description: 'Perfect for getting started',
-      features: ['Core charts & live data', 'Basic AI predictions', '10 watchlist items', 'Daily market brief', 'Email support']
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      price: 99,
-      popular: true,
-      description: 'For serious traders',
-      features: ['All Essential features', 'Advanced analytics', 'Portfolio insights', 'Real-time risk alerts', '100 watchlist items', 'Priority support', 'Historical backtesting']
-    },
-    {
-      id: 'elite',
-      name: 'Elite',
-      price: 239,
-      description: 'Institutional grade',
-      features: ['All Pro features', 'Institutional analytics', 'Full API access', 'Dedicated AI guidance', 'Unlimited watchlist', 'Personal account manager', 'Custom alerts']
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Portfolio Manager",
-      image: "https://images.unsplash.com/photo-1712174766230-cb7304feaafe?w=100&h=100&fit=crop",
-      quote: "Aureos AI has transformed how I analyze markets. The AI Copilot gives me insights I'd spend hours researching."
-    },
-    {
-      name: "Michael Torres",
-      role: "Day Trader",
-      image: "https://images.unsplash.com/photo-1659353221237-6a1cfb73fd90?w=100&h=100&fit=crop",
-      quote: "The real-time analysis and trade suggestions have improved my win rate significantly. Essential tool for any trader."
-    }
-  ];
-
-  const handleContactSubmit = async (e) => {
+  const handleContactSubmit = (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      await axios.post(`${API}/contact`, contactForm);
-      toast.success('Message sent successfully!');
-      setContactForm({ name: '', email: '', subject: '', message: '' });
-    } catch (error) {
-      toast.error('Failed to send message. Please try again.');
-    }
-    setSubmitting(false);
+    // TODO: connect to backend contact endpoint
+    setContactSubmitted(true);
+    setTimeout(() => setContactSubmitted(false), 4000);
+    setContactForm({ name: "", email: "", message: "" });
   };
 
-  return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#D4AF37] flex items-center justify-center">
-                <span className="text-black font-bold text-lg">A</span>
-              </div>
-              <span className="font-['Space_Grotesk'] font-bold text-xl tracking-tight">
-                AUREOS<span className="text-[#D4AF37]">AI</span>
-              </span>
-            </Link>
+  const NARRATIVE_TEXT = `Escalating tensions in the Taiwan Strait are forcing institutional capital to seek defensive repositioning. Semiconductor supply chain exposure is prompting significant outflows from tech-heavy indices, with risk-off sentiment accelerating rotation into commodities and safe-haven currencies.
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-[#888] hover:text-white transition-colors">Features</a>
-              <a href="#pricing" className="text-sm text-[#888] hover:text-white transition-colors">Pricing</a>
-              <a href="#about" className="text-sm text-[#888] hover:text-white transition-colors">About</a>
-              <a href="#contact" className="text-sm text-[#888] hover:text-white transition-colors">Contact</a>
+Federal Reserve officials have signaled a data-dependent pause, but tightening financial conditions in Asia-Pacific markets are generating asymmetric pressure on export-driven economies. The confluence of geopolitical friction and monetary divergence is creating rare cross-asset dislocations.
+
+Bitcoin is displaying decoupling behavior from equities, with on-chain metrics indicating accumulation by long-term holders. Gold's inverse relationship with the USD is strengthening as central bank demand exceeds five-year averages — a structural shift, not a cyclical rotation.`;
+
+  return (
+    <div className="min-h-screen" style={{ background: BG_DARK, color: "white", fontFamily: "'Inter', sans-serif" }}>
+      {/* ── Global CSS ─────────────────────────────────────────────── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        @keyframes ticker-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes float-particle {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.3; }
+          50% { transform: translateY(-20px) scale(1.3); opacity: 0.7; }
+        }
+        @keyframes pulse-live {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(0.95); }
+        }
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 8px rgba(212,175,55,0.3); }
+          50% { box-shadow: 0 0 24px rgba(212,175,55,0.7); }
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .gold-gradient-text {
+          background: linear-gradient(135deg, #D4AF37, #F5D878, #D4AF37);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .live-badge {
+          animation: pulse-live 2s ease-in-out infinite;
+        }
+        .btn-gold {
+          background: linear-gradient(135deg, #D4AF37, #C9A227);
+          color: #050505;
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+        .btn-gold:hover {
+          background: linear-gradient(135deg, #F5D878, #D4AF37);
+          transform: translateY(-1px);
+          box-shadow: 0 8px 24px rgba(212,175,55,0.35);
+        }
+        .btn-ghost {
+          border: 1px solid rgba(212,175,55,0.4);
+          color: white;
+          background: transparent;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .btn-ghost:hover {
+          border-color: rgba(212,175,55,0.8);
+          background: rgba(212,175,55,0.08);
+          transform: translateY(-1px);
+        }
+        .narrative-clamp { 
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .section-divider {
+          border: none;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #1a1a1a 30%, #1a1a1a 70%, transparent);
+        }
+      `}</style>
+
+      {/* ── Nav ──────────────────────────────────────────────────── */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 lg:px-12 py-4"
+        style={{ background: "rgba(5,5,5,0.85)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${BORDER}` }}
+      >
+        <div className="flex items-center gap-3">
+          {/* Logo */}
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Aureos logo">
+            <polygon points="14,2 26,9 26,21 14,28 2,21 2,9" stroke={GOLD} strokeWidth="1.5" fill="none" />
+            <polygon points="14,7 21,11 21,19 14,23 7,19 7,11" stroke={GOLD} strokeWidth="0.8" fill={`${GOLD}15`} />
+            <circle cx="14" cy="15" r="2.5" fill={GOLD} />
+          </svg>
+          <span className="font-black text-lg tracking-tight" style={{ color: GOLD }}>
+            AUREOS
+          </span>
+          <span className="text-xs px-2 py-0.5 rounded" style={{ background: `${GOLD}20`, color: GOLD, letterSpacing: "0.1em" }}>
+            AI
+          </span>
+        </div>
+        <div className="hidden md:flex items-center gap-8 text-sm" style={{ color: MUTED }}>
+          <a href="#features" className="hover:text-white transition-colors">Features</a>
+          <a href="#narrative" className="hover:text-white transition-colors">JARVIS</a>
+          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+          <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/login")}
+            className="hidden sm:block text-sm px-4 py-2 rounded-lg transition-colors"
+            style={{ color: MUTED }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "white")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = MUTED)}
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => navigate("/register")}
+            className="btn-gold text-sm px-5 py-2 rounded-lg"
+          >
+            Start Free Trial
+          </button>
+        </div>
+      </nav>
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* HERO SECTION                                               */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section
+        className="relative min-h-screen flex flex-col justify-center items-center text-center pt-24 pb-0"
+        style={{ background: BG_DARK }}
+      >
+        <HeroBackground />
+
+        <div className="relative z-10 max-w-5xl mx-auto px-6">
+          {/* Eyebrow badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 text-xs font-semibold tracking-widest uppercase"
+            style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}33`, color: GOLD }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full live-badge"
+              style={{ background: "#22c55e" }}
+            />
+            GPT-5.2 POWERED — NOW LIVE
+          </motion.div>
+
+          {/* Main headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="text-5xl sm:text-6xl lg:text-8xl font-black tracking-tight leading-none mb-6"
+          >
+            JARVIS{" "}
+            <span className="gold-gradient-text">Sees</span>
+            <br />
+            What Markets Don't
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-lg lg:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
+            style={{ color: "#aaa" }}
+          >
+            Institutional-grade AI intelligence. Real-time geopolitical analysis.
+            GPT-5.2 predictions for ASX, NASDAQ, Forex &amp; Crypto.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+          >
+            <button
+              onClick={() => navigate("/register")}
+              className="btn-gold text-base px-8 py-4 rounded-xl flex items-center gap-2"
+            >
+              Start Free Trial
+              <ArrowRight size={18} />
+            </button>
+            <button
+              onClick={() => navigate("/login")}
+              className="btn-ghost text-base px-8 py-4 rounded-xl flex items-center gap-2"
+            >
+              <Play size={16} fill="currentColor" />
+              Watch JARVIS Live
+            </button>
+          </motion.div>
+
+          {/* Stat counters */}
+          <motion.div
+            ref={statsRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-3xl mx-auto mb-16"
+          >
+            <StatCard value={50000} suffix="+" label="Active Traders" isActive={statsInView} />
+            <StatCard value={2100} suffix="M+" label="Analyzed Daily ($)" isActive={statsInView} />
+            <StatCard value={89} suffix="%" label="Signal Accuracy" isActive={statsInView} />
+            <StatCard value={49} suffix="★" label="Platform Rating" isActive={statsInView} />
+          </motion.div>
+        </div>
+
+        {/* Ticker bar */}
+        <div className="relative z-10 w-full">
+          <HeroTicker />
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* JARVIS NARRATIVE SECTION                                   */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section id="narrative" className="py-24 px-6 lg:px-12" style={{ background: "#070707" }}>
+        <div className="max-w-6xl mx-auto">
+          {/* Section header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
+          >
+            <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
+              Artificial Intelligence
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black mb-4">
+              JARVIS Narrates{" "}
+              <span className="gold-gradient-text">the World</span>
+            </h2>
+            <p className="text-base max-w-xl mx-auto" style={{ color: MUTED }}>
+              Real-time geopolitical intelligence translated directly into actionable trade signals.
+            </p>
+          </motion.div>
+
+          {/* Live narrative card */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="rounded-2xl border p-8 mb-8"
+            style={{ background: BG_CARD, borderColor: BORDER }}
+          >
+            {/* Header row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div
+                  className="live-badge flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold"
+                  style={{ background: "#22c55e22", border: "1px solid #22c55e44", color: "#22c55e" }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#22c55e" }} />
+                  LIVE
+                </div>
+                <span className="text-xs" style={{ color: MUTED }}>
+                  Updated 3 min ago
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Brain size={16} style={{ color: GOLD }} />
+                <span className="text-xs font-semibold" style={{ color: GOLD }}>
+                  JARVIS NARRATIVE ENGINE
+                </span>
+              </div>
             </div>
 
-            <div className="hidden md:flex items-center gap-4">
-              {user ? (
-                <Button 
-                  onClick={() => navigate('/dashboard')}
-                  className="bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none px-6"
-                  data-testid="go-to-dashboard-btn"
-                >
-                  Dashboard
-                </Button>
-              ) : (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => navigate('/login')}
-                    className="text-[#888] hover:text-white"
-                    data-testid="login-btn"
+            {/* Headline */}
+            <h3
+              className="text-xl lg:text-2xl font-black mb-5 uppercase tracking-wide"
+              style={{ color: GOLD }}
+            >
+              GEOPOLITICAL TENSIONS RESHAPE CAPITAL FLOWS
+            </h3>
+
+            {/* Narrative text */}
+            <div className="mb-4">
+              <p
+                className={`text-sm leading-relaxed whitespace-pre-line ${!narrativeExpanded ? "narrative-clamp" : ""}`}
+                style={{ color: "rgba(255,255,255,0.75)" }}
+              >
+                {NARRATIVE_TEXT}
+              </p>
+              <button
+                onClick={() => setNarrativeExpanded((v) => !v)}
+                className="text-xs mt-2 font-semibold transition-colors"
+                style={{ color: GOLD }}
+              >
+                {narrativeExpanded ? "Show less ↑" : "Read more ↓"}
+              </button>
+            </div>
+
+            {/* Geopolitical event tags */}
+            <div className="flex flex-wrap gap-2 mb-8 pt-4 border-t" style={{ borderColor: BORDER }}>
+              {["Taiwan Strait", "Fed Policy", "BTC Decoupling", "Gold Demand", "USD Pressure", "Semiconductor Supply"].map(
+                (tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs px-3 py-1 rounded-full"
+                    style={{ background: "#1a1a1a", color: MUTED, border: `1px solid ${BORDER}` }}
                   >
-                    Sign In
-                  </Button>
-                  <Button 
-                    onClick={() => navigate('/register')}
-                    className="bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none px-6"
-                    data-testid="get-started-btn"
-                  >
-                    Get Started
-                  </Button>
-                </>
+                    {tag}
+                  </span>
+                )
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="mobile-nav-btn"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
-          </div>
-        </div>
+            {/* Prediction cards grid */}
+            <div className="grid sm:grid-cols-3 gap-4">
+              <PredictionCard
+                signal="BUY"
+                symbol="BTC/USD"
+                confidence={78}
+                reasoning="On-chain accumulation by long-term holders + geopolitical safe-haven demand driving institutional inflows above 30-day average."
+                delay={0}
+              />
+              <PredictionCard
+                signal="BUY"
+                symbol="GOLD"
+                confidence={82}
+                reasoning="Central bank demand at 5-year peak. USD weakness + Taiwan risk premium expanding. Structural bid, not cyclical rotation."
+                delay={0.1}
+              />
+              <PredictionCard
+                signal="SELL"
+                symbol="EUR/USD"
+                confidence={71}
+                reasoning="ECB divergence from Fed stance widening. EUR risk premium elevated on Eastern European energy dependency concerns."
+                delay={0.2}
+              />
+            </div>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="md:hidden bg-[#0A0A0A] border-t border-white/5 p-6"
-          >
-            <div className="flex flex-col gap-4">
-              <a href="#features" className="text-[#888] hover:text-white" onClick={() => setMobileMenuOpen(false)}>Features</a>
-              <a href="#pricing" className="text-[#888] hover:text-white" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-              <a href="#about" className="text-[#888] hover:text-white" onClick={() => setMobileMenuOpen(false)}>About</a>
-              <a href="#contact" className="text-[#888] hover:text-white" onClick={() => setMobileMenuOpen(false)}>Contact</a>
-              <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-                {user ? (
-                  <Button onClick={() => navigate('/dashboard')} className="bg-[#D4AF37] text-black rounded-none">Dashboard</Button>
-                ) : (
-                  <>
-                    <Button variant="outline" onClick={() => navigate('/login')} className="rounded-none border-white/20">Sign In</Button>
-                    <Button onClick={() => navigate('/register')} className="bg-[#D4AF37] text-black rounded-none">Get Started</Button>
-                  </>
-                )}
-              </div>
+            {/* Section CTA */}
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => navigate("/register")}
+                className="btn-gold px-8 py-3.5 rounded-xl flex items-center gap-2 mx-auto text-sm"
+              >
+                Activate JARVIS Intelligence
+                <ArrowRight size={16} />
+              </button>
             </div>
           </motion.div>
-        )}
-      </nav>
+        </div>
+      </section>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-[#050505] to-[#0A0A0A]" />
-        <div className="absolute inset-0 grid-pattern opacity-30" />
-        
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 text-center">
+      <hr className="section-divider" />
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* FEATURES SECTION                                          */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section id="features" className="py-24 px-6 lg:px-12" style={{ background: BG_DARK }}>
+        <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
           >
-            <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-6">
-              Australian Trading Intelligence
+            <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
+              Platform Capabilities
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black mb-4">
+              Everything You Need to{" "}
+              <span className="gold-gradient-text">Trade Smarter</span>
+            </h2>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <FeatureCard
+              icon={Brain}
+              title="AI Copilot (GPT-5.2)"
+              description="Probability-scored trade signals with full reasoning chains. Understand why every signal fires, not just what to trade."
+              delay={0}
+            />
+            <FeatureCard
+              icon={TrendingUp}
+              title="Live Market Intelligence"
+              description="Real-time data across ASX, NASDAQ, Forex & Crypto. Consolidated in one terminal with custom filtering and alerts."
+              delay={0.05}
+            />
+            <FeatureCard
+              icon={Globe}
+              title="Jarvis Narrative Engine"
+              description="AI narrates global events and translates them into market predictions. Geopolitics → trade signals in seconds."
+              delay={0.1}
+            />
+            <FeatureCard
+              icon={Bell}
+              title="Price Alerts"
+              description="Instant notifications when your targets are hit. Email, push, and SMS delivery with context-aware signal summaries."
+              delay={0.15}
+            />
+            <FeatureCard
+              icon={BarChart3}
+              title="Risk Analytics"
+              description="Portfolio analysis, historical backtesting, and Monte Carlo simulation. Know your risk before you take it."
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={Radar}
+              title="Geopolitical Radar"
+              description="World event monitoring with proprietary market impact scoring. Map tension zones to your positions in real time."
+              delay={0.25}
+            />
+          </div>
+        </div>
+      </section>
+
+      <hr className="section-divider" />
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* SOCIAL PROOF                                              */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section className="py-24 px-6 lg:px-12" style={{ background: "#070707" }}>
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
+          >
+            <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
+              Trusted by Professionals
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black">
+              What Traders{" "}
+              <span className="gold-gradient-text">Say</span>
+            </h2>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
+            <TestimonialCard
+              name="Sarah Chen"
+              role="Quantitative Analyst, Sydney"
+              quote="Aureos completely transformed my workflow. The AI signals are genuinely predictive — I've beaten my benchmark by 23% since subscribing."
+              delay={0}
+            />
+            <TestimonialCard
+              name="James Thornton"
+              role="Independent Trader, London"
+              quote="The real-time geopolitical analysis is a game changer. Caught the AUD/USD move from a Taiwan Strait briefing — made $4,200 on one signal."
+              delay={0.1}
+            />
+            <TestimonialCard
+              name="Marcus Webb"
+              role="Hedge Fund Analyst, New York"
+              quote="The Jarvis Narrative Engine is unlike anything I've seen — it connected a geopolitical event in Taiwan to a NVDA setup I'd have missed entirely."
+              delay={0.2}
+            />
+          </div>
+
+          {/* Featured in */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <p className="text-xs uppercase tracking-[0.3em] mb-6" style={{ color: MUTED }}>
+              Featured In
             </p>
-            
-            <h1 className="font-['Space_Grotesk'] text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6 leading-none">
-              Clarity in<br />
-              <span className="gold-text-gradient">every trade</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-[#888] max-w-2xl mx-auto mb-10">
-              AI-powered insights for modern investors. Real-time market intelligence across ASX, NASDAQ, Forex, and Crypto.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button 
-                onClick={() => navigate('/register')}
-                className="bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none px-8 py-6 text-sm uppercase tracking-widest font-bold"
-                data-testid="hero-cta-btn"
-              >
-                Start Free Trial
-                <ArrowRight className="ml-2" size={18} />
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-white/20 hover:border-[#D4AF37] hover:text-[#D4AF37] rounded-none px-8 py-6 text-sm uppercase tracking-widest"
-                data-testid="demo-btn"
-              >
-                <Play className="mr-2" size={18} />
-                Watch Demo
-              </Button>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {["FinTech Australia", "The Australian", "CoinDesk", "Bloomberg"].map((pub) => (
+                <span
+                  key={pub}
+                  className="text-sm font-bold px-5 py-2.5 rounded-xl"
+                  style={{ background: "#0D0D0D", border: `1px solid ${BORDER}`, color: "#666" }}
+                >
+                  {pub}
+                </span>
+              ))}
             </div>
           </motion.div>
-
-          {/* Stats */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
-          >
-            {[
-              { value: '50K+', label: 'Active Traders' },
-              { value: '$2.1B', label: 'Analyzed Daily' },
-              { value: '89%', label: 'Prediction Accuracy' },
-              { value: '4.9', label: 'User Rating' }
-            ].map((stat, i) => (
-              <div key={i} className="text-center">
-                <p className="font-['Space_Grotesk'] text-3xl md:text-4xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs uppercase tracking-wider text-[#888] mt-2">{stat.label}</p>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <motion.div 
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-10 border border-white/20 rounded-full flex items-start justify-center pt-2"
-          >
-            <div className="w-1 h-2 bg-[#D4AF37] rounded-full" />
-          </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 md:py-32 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-4">Platform Features</p>
-            <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-bold tracking-tight">
-              Intelligence at your<br />fingertips
+      <hr className="section-divider" />
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* PRICING                                                   */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section id="pricing" className="py-24 px-6 lg:px-12" style={{ background: BG_DARK }}>
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
+          >
+            <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
+              Transparent Pricing
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black mb-4">
+              Choose Your{" "}
+              <span className="gold-gradient-text">Edge</span>
             </h2>
-          </div>
+            <p className="text-base max-w-md mx-auto" style={{ color: MUTED }}>
+              Every plan includes a 14-day free trial. No credit card required.
+            </p>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((feature, i) => {
-              const Icon = feature.icon;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-[#0F0F0F] border border-[#1A1A1A] p-8 group hover:border-[#D4AF37]/30 transition-colors"
-                >
-                  <div className="w-12 h-12 bg-[#D4AF37]/10 flex items-center justify-center mb-6">
-                    <Icon className="text-[#D4AF37]" size={24} />
-                  </div>
-                  <h3 className="font-['Space_Grotesk'] text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-[#888] leading-relaxed">{feature.description}</p>
-                </motion.div>
-              );
-            })}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <PricingCard
+              tier="Free"
+              price={0}
+              period="mo"
+              features={[
+                "3 AI analyses / day",
+                "5 watchlist items",
+                "Basic market data",
+                "JARVIS intro mode",
+              ]}
+              ctaLabel="Get Started Free"
+              delay={0}
+              onCTA={() => navigate("/register")}
+            />
+            <PricingCard
+              tier="Essential"
+              price={39}
+              period="mo"
+              features={[
+                "50 AI analyses / day",
+                "20 watchlist items",
+                "Real-time ASX & Forex data",
+                "Price alerts (10/day)",
+                "Email support",
+              ]}
+              delay={0.05}
+              onCTA={() => navigate("/register")}
+            />
+            <PricingCard
+              tier="Pro"
+              price={99}
+              period="mo"
+              badge="Most Popular"
+              highlight={true}
+              features={[
+                "Unlimited AI analyses",
+                "Unlimited watchlist",
+                "All markets incl. Crypto",
+                "Jarvis Narrative Engine",
+                "Risk Analytics suite",
+                "Priority support",
+              ]}
+              ctaLabel="Start Pro Trial"
+              delay={0.1}
+              onCTA={() => navigate("/register")}
+            />
+            <PricingCard
+              tier="Elite"
+              price={239}
+              period="mo"
+              features={[
+                "Everything in Pro",
+                "Geopolitical Radar",
+                "API access (500 req/day)",
+                "Portfolio backtesting",
+                "Monte Carlo simulation",
+                "Dedicated account manager",
+                "White-glove onboarding",
+              ]}
+              ctaLabel="Go Elite"
+              delay={0.15}
+              onCTA={() => navigate("/register")}
+            />
           </div>
         </div>
       </section>
 
-      {/* AI Copilot Section */}
-      <section className="py-24 md:py-32 bg-[#0A0A0A] relative overflow-hidden">
-        <div className="absolute inset-0 grid-pattern opacity-20" />
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-4">AI Copilot</p>
-              <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-bold tracking-tight mb-6">
-                Your intelligent trading companion
-              </h2>
-              <p className="text-[#888] text-lg mb-8 leading-relaxed">
-                Powered by GPT-5.2, our AI Copilot analyzes market conditions in real-time, providing probability-based trade suggestions with clear reasoning for every recommendation.
+      <hr className="section-divider" />
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* CONTACT SECTION                                           */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <section id="contact" className="py-24 px-6 lg:px-12" style={{ background: "#070707" }}>
+        <div className="max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <div className="text-xs font-bold uppercase tracking-[0.3em] mb-4" style={{ color: GOLD }}>
+              Get in Touch
+            </div>
+            <h2 className="text-4xl font-black">Talk to{" "}<span className="gold-gradient-text">Our Team</span></h2>
+          </motion.div>
+
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            onSubmit={handleContactSubmit}
+            className="space-y-4 p-8 rounded-2xl border"
+            style={{ background: BG_CARD, borderColor: BORDER }}
+          >
+            <input
+              type="text"
+              placeholder="Your Name"
+              value={contactForm.name}
+              onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+              required
+              className="w-full px-4 py-3.5 rounded-xl text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-600 transition-colors"
+              style={{ background: "#0D0D0D", border: `1px solid ${BORDER}` }}
+            />
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={contactForm.email}
+              onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+              required
+              className="w-full px-4 py-3.5 rounded-xl text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-600 transition-colors"
+              style={{ background: "#0D0D0D", border: `1px solid ${BORDER}` }}
+            />
+            <textarea
+              placeholder="Your message..."
+              value={contactForm.message}
+              onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+              required
+              rows={5}
+              className="w-full px-4 py-3.5 rounded-xl text-sm text-white placeholder-gray-600 outline-none resize-none focus:border-yellow-600 transition-colors"
+              style={{ background: "#0D0D0D", border: `1px solid ${BORDER}` }}
+            />
+            <button type="submit" className="btn-gold w-full py-3.5 rounded-xl text-sm">
+              {contactSubmitted ? "Message Sent ✓" : "Send Message"}
+            </button>
+          </motion.form>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────── */}
+      {/* FOOTER                                                    */}
+      {/* ─────────────────────────────────────────────────────────── */}
+      <footer
+        className="py-12 px-6 lg:px-12 border-t"
+        style={{ background: BG_DARK, borderColor: BORDER }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-4 gap-10 mb-10">
+            {/* Brand */}
+            <div className="sm:col-span-2">
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+                  <polygon points="14,2 26,9 26,21 14,28 2,21 2,9" stroke={GOLD} strokeWidth="1.5" fill="none" />
+                  <polygon points="14,7 21,11 21,19 14,23 7,19 7,11" stroke={GOLD} strokeWidth="0.8" fill={`${GOLD}15`} />
+                  <circle cx="14" cy="15" r="2.5" fill={GOLD} />
+                </svg>
+                <span className="font-black tracking-tight" style={{ color: GOLD }}>AUREOS AI</span>
+              </div>
+              <p className="text-sm max-w-xs leading-relaxed" style={{ color: MUTED }}>
+                Institutional-grade AI intelligence for retail and professional traders. 
+                Powered by GPT-5.2 and proprietary geopolitical data feeds.
               </p>
-              <ul className="space-y-4 mb-8">
-                {[
-                  'Probability-based bullish/bearish signals',
-                  'Optimal entry and exit point suggestions',
-                  'Risk assessment for every trade',
-                  'Natural language explanations'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <div className="w-5 h-5 bg-[#D4AF37]/20 flex items-center justify-center">
-                      <Check className="text-[#D4AF37]" size={12} />
-                    </div>
-                    <span className="text-[#888]">{item}</span>
+            </div>
+            {/* Product */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: MUTED }}>
+                Product
+              </h4>
+              <ul className="space-y-2.5 text-sm">
+                {["Features", "Pricing", "JARVIS", "API Docs"].map((l) => (
+                  <li key={l}>
+                    <a href="#" className="hover:text-white transition-colors" style={{ color: "#555" }}>
+                      {l}
+                    </a>
                   </li>
                 ))}
               </ul>
-              <Button 
-                onClick={() => navigate('/register')}
-                className="bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none px-8"
-                data-testid="try-copilot-btn"
-              >
-                Try AI Copilot
-                <ArrowUpRight className="ml-2" size={18} />
-              </Button>
             </div>
-            
-            {/* AI Preview Card */}
-            <div className="relative">
-              <div className="bg-[#0F0F0F] border border-[#1A1A1A] p-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#1A1A1A]">
-                  <Bot className="text-[#D4AF37]" size={24} />
-                  <span className="font-semibold">AI Copilot</span>
-                  <span className="ml-auto text-xs text-[#00E096]">Online</span>
-                </div>
-                <div className="space-y-4">
-                  <div className="bg-[#1A1A1A] p-4">
-                    <p className="text-sm text-[#888]">User</p>
-                    <p className="mt-1">Analyze AAPL for a potential long position</p>
-                  </div>
-                  <div className="bg-[#0A0A0A] p-4 border-l-2 border-[#D4AF37]">
-                    <p className="text-sm text-[#D4AF37]">Aureos AI</p>
-                    <p className="mt-2 text-sm leading-relaxed">
-                      <span className="text-[#00E096] font-semibold">BULLISH (78% confidence)</span><br/><br/>
-                      Entry Zone: $176.50 - $178.00<br/>
-                      Target: $185.00 (4.2% upside)<br/>
-                      Stop Loss: $174.00 (2.5% risk)<br/><br/>
-                      <span className="text-[#888]">Technical indicators show strong momentum with RSI at 58 and MACD crossing bullish. Recent earnings beat expectations by 12%.</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-4">Pricing Plans</p>
-            <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-bold tracking-tight">
-              Choose your edge
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {plans.map((plan, i) => (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`relative bg-[#0F0F0F] border p-8 ${
-                  plan.popular ? 'border-[#D4AF37]' : 'border-[#1A1A1A]'
-                }`}
-                data-testid={`plan-card-${plan.id}`}
-              >
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 bg-[#D4AF37] text-black text-xs font-bold px-3 py-1 uppercase tracking-wider">
-                    Popular
-                  </div>
-                )}
-                <h3 className="font-['Space_Grotesk'] text-xl font-semibold mb-2">{plan.name}</h3>
-                <p className="text-sm text-[#888] mb-6">{plan.description}</p>
-                <div className="mb-6">
-                  <span className="font-['Space_Grotesk'] text-4xl font-bold">${plan.price}</span>
-                  <span className="text-[#888]">/month</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-start gap-3 text-sm">
-                      <Check className="text-[#D4AF37] mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-[#888]">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  onClick={() => navigate(user ? '/pricing' : '/register')}
-                  className={`w-full rounded-none ${
-                    plan.popular 
-                      ? 'bg-[#D4AF37] text-black hover:bg-[#C5A028]' 
-                      : 'bg-transparent border border-[#333] hover:border-[#D4AF37] hover:text-[#D4AF37]'
-                  }`}
-                  data-testid={`select-plan-${plan.id}-btn`}
-                >
-                  Get Started
-                </Button>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-24 md:py-32 bg-[#0A0A0A]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-4">Testimonials</p>
-            <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-bold tracking-tight">
-              Trusted by traders
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {testimonials.map((testimonial, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-[#0F0F0F] border border-[#1A1A1A] p-8"
-              >
-                <p className="text-[#888] leading-relaxed mb-6">"{testimonial.quote}"</p>
-                <div className="flex items-center gap-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-12 h-12 object-cover"
-                  />
-                  <div>
-                    <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-[#888]">{testimonial.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Company */}
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-4">About Aureos</p>
-              <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-bold tracking-tight mb-6">
-                Australian innovation in trading intelligence
-              </h2>
-              <p className="text-[#888] text-lg leading-relaxed mb-6">
-                Founded in Sydney, Aureos AI was born from a vision to democratize institutional-grade trading intelligence. We combine cutting-edge AI technology with decades of market expertise to deliver insights that matter.
-              </p>
-              <p className="text-[#888] leading-relaxed">
-                Our platform serves traders and investors across Australia and globally, processing billions in market data daily to provide real-time intelligence that gives our users an edge.
-              </p>
-            </div>
-            <div className="relative">
-              <div className="aspect-square bg-[#0F0F0F] border border-[#1A1A1A] p-8">
-                <img 
-                  src="https://images.unsplash.com/photo-1763567823709-9df979a3b7b8?w=600&h=600&fit=crop"
-                  alt="Modern office"
-                  className="w-full h-full object-cover opacity-60"
-                />
-              </div>
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: MUTED }}>
+                Company
+              </h4>
+              <ul className="space-y-2.5 text-sm">
+                {["About", "Blog", "Careers", "Contact"].map((l) => (
+                  <li key={l}>
+                    <a href="#" className="hover:text-white transition-colors" style={{ color: "#555" }}>
+                      {l}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-24 md:py-32 bg-[#0A0A0A]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37] mb-4">Contact Us</p>
-              <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-bold tracking-tight mb-4">
-                Get in touch
-              </h2>
-              <p className="text-[#888]">Have questions? We'd love to hear from you.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t" style={{ borderColor: BORDER }}>
+            <p className="text-xs" style={{ color: "#444" }}>
+              © {new Date().getFullYear()} Aureos Technologies Pty Ltd. All rights reserved.
+            </p>
+            <div className="flex items-center gap-6 text-xs" style={{ color: "#444" }}>
+              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-white transition-colors">Disclaimer</a>
             </div>
-
-            <form onSubmit={handleContactSubmit} className="space-y-6" data-testid="contact-form">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Name</label>
-                  <Input 
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                    required
-                    className="bg-[#0A0A0A] border-[#333] focus:border-[#D4AF37] rounded-none h-12"
-                    data-testid="contact-name-input"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Email</label>
-                  <Input 
-                    type="email"
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
-                    required
-                    className="bg-[#0A0A0A] border-[#333] focus:border-[#D4AF37] rounded-none h-12"
-                    data-testid="contact-email-input"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Subject</label>
-                <Input 
-                  value={contactForm.subject}
-                  onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
-                  required
-                  className="bg-[#0A0A0A] border-[#333] focus:border-[#D4AF37] rounded-none h-12"
-                  data-testid="contact-subject-input"
-                />
-              </div>
-              <div>
-                <label className="text-xs uppercase tracking-wider text-[#888] mb-2 block">Message</label>
-                <Textarea 
-                  value={contactForm.message}
-                  onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
-                  required
-                  rows={5}
-                  className="bg-[#0A0A0A] border-[#333] focus:border-[#D4AF37] rounded-none resize-none"
-                  data-testid="contact-message-input"
-                />
-              </div>
-              <Button 
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-[#D4AF37] text-black hover:bg-[#C5A028] rounded-none py-6 text-sm uppercase tracking-widest font-bold"
-                data-testid="contact-submit-btn"
-              >
-                {submitting ? 'Sending...' : 'Send Message'}
-              </Button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t border-[#1A1A1A]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-[#D4AF37] flex items-center justify-center">
-                <span className="text-black font-bold text-sm">A</span>
-              </div>
-              <span className="font-['Space_Grotesk'] font-bold">AUREOS AI</span>
-            </div>
-            <p className="text-sm text-[#888]">© 2024 Aureos AI. Australian Trading Intelligence.</p>
-            <div className="flex items-center gap-6">
-              <a href="#" className="text-sm text-[#888] hover:text-white">Privacy</a>
-              <a href="#" className="text-sm text-[#888] hover:text-white">Terms</a>
+            <div className="flex items-center gap-4">
+              <a href="#" aria-label="Twitter/X" className="hover:opacity-80 transition-opacity">
+                <Twitter size={16} style={{ color: "#555" }} />
+              </a>
+              <a href="#" aria-label="LinkedIn" className="hover:opacity-80 transition-opacity">
+                <Linkedin size={16} style={{ color: "#555" }} />
+              </a>
             </div>
           </div>
         </div>
       </footer>
     </div>
   );
-};
-
-export default LandingPage;
+}
