@@ -117,11 +117,11 @@ const JarvisCopilot = ({ analysisContext = null }) => {
           <motion.button
             initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-24 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #CFAE46, #B8941E)', boxShadow: '0 0 25px rgba(207,174,70,0.4)' }}
+            className="fixed bottom-24 lg:bottom-6 right-5 lg:right-6 z-40 w-13 h-13 rounded-full flex items-center justify-center shadow-lg"
+            style={{ width: 52, height: 52, background: '#C9A94A', boxShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
             data-testid="jarvis-trigger-btn"
           >
-            <Brain className="text-black" size={24} />
+            <Brain className="text-black" size={22} />
           </motion.button>
         )}
       </AnimatePresence>
@@ -132,10 +132,14 @@ const JarvisCopilot = ({ analysisContext = null }) => {
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className={`fixed z-50 ${isMinimized ? 'bottom-6 right-24 w-72' : 'bottom-6 right-6 w-[420px]'}`}
+            className={`fixed z-50 ${
+              isMinimized
+                ? 'bottom-24 lg:bottom-6 right-5 lg:right-6 w-64 lg:w-72'
+                : 'bottom-20 lg:bottom-6 right-3 left-3 lg:left-auto lg:right-6 lg:w-[420px]'
+            }`}
             data-testid="jarvis-copilot-window"
           >
-            <div className="aureos-card overflow-hidden flex flex-col" style={{ maxHeight: isMinimized ? '60px' : '600px', boxShadow: '0 0 40px rgba(0,0,0,0.5)' }}>
+            <div className="aureos-card overflow-hidden flex flex-col" style={{ maxHeight: isMinimized ? '60px' : '70vh', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-[#CFAE46]/10 to-transparent cursor-pointer"
                 onClick={() => isMinimized && setIsMinimized(false)}>
