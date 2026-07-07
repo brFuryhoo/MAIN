@@ -23,6 +23,7 @@ import WatchlistPage from "@/pages/WatchlistPage";
 import QuantLabPage from "@/pages/QuantLabPage";
 import ScannerPage from "@/pages/ScannerPage";
 import IntelMapPage from "@/pages/IntelMapPage";
+import SatelliteIntelligencePage from "@/pages/SatelliteIntelligencePage";
 import SentimentPage from "@/pages/SentimentPage";
 import PaperTradingPage from "@/pages/PaperTradingPage";
 import MarketRadarPage from "@/pages/MarketRadarPage";
@@ -256,6 +257,7 @@ function AppRouter() {
       <Route path="/quant-lab" element={<ProtectedRoute><QuantLabPage /></ProtectedRoute>} />
       <Route path="/scanner" element={<ProtectedRoute><ScannerPage /></ProtectedRoute>} />
       <Route path="/intelligence" element={<ProtectedRoute><IntelMapPage /></ProtectedRoute>} />
+      <Route path="/satellite" element={<ProtectedRoute><SatelliteIntelligencePage /></ProtectedRoute>} />
       <Route path="/sentiment" element={<ProtectedRoute><SentimentPage /></ProtectedRoute>} />
       <Route path="/paper-trading" element={<ProtectedRoute><PaperTradingPage /></ProtectedRoute>} />
       <Route path="/market-radar" element={<ProtectedRoute><MarketRadarPage /></ProtectedRoute>} />
