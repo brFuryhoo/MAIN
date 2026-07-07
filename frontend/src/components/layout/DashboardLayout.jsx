@@ -29,6 +29,7 @@ const navSections = [
       { path: '/analysis',      labelKey: 'nav.analyze_asset',  icon: Zap },
       { path: '/copilot',       labelKey: 'nav.jarvis_copilot', icon: Bot },
       { path: '/signals',       labelKey: 'nav.my_signals',     icon: Activity },
+      { path: '/satellite',     labelKey: 'nav.satellite',      icon: Radar, badge: 'NEW' },
     ],
   },
   {
@@ -45,6 +46,15 @@ const navSections = [
       { path: '/settings', labelKey: 'nav.settings', icon: Settings },
     ],
   },
+];
+
+// ─── MOBILE BOTTOM NAV — 5 thumb-reachable core items ──────────────────────
+const mobileNavItems = [
+  { path: '/dashboard', label: 'Início',    icon: LayoutDashboard },
+  { path: '/global-fusion', label: 'Fusão', icon: Network },
+  { path: '/copilot',    label: 'JARVIS',   icon: Bot, isCenter: true },
+  { path: '/signals',    label: 'Sinais',   icon: Activity },
+  { path: '/portfolio',  label: 'Carteira', icon: Wallet },
 ];
 
 export const AureosLayout = ({ children }) => {
@@ -67,7 +77,7 @@ export const AureosLayout = ({ children }) => {
   })();
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] flex">
+    <div className="min-h-screen bg-[#060607] flex">
       {/* Mobile Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -230,8 +240,54 @@ export const AureosLayout = ({ children }) => {
         </header>
         {/* Live Price Ticker — always visible below header */}
         <LivePriceTicker />
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        <main className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8">{children}</main>
       </div>
+
+      {/* Mobile Bottom Nav — thumb-reachable, sticky, safe-area aware */}
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0a0b]/95 backdrop-blur-xl border-t border-white/[0.06] aureos-safe-bottom"
+        data-testid="mobile-bottom-nav"
+      >
+        <div className="flex items-stretch justify-between px-1">
+          {mobileNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            if (item.isCenter) {
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="flex-1 flex flex-col items-center justify-center py-2 relative"
+                  data-testid={`mobile-nav-${item.label.toLowerCase()}`}
+                >
+                  <div className={cn(
+                    "w-11 h-11 rounded-full flex items-center justify-center -mt-5 border-4 border-[#0a0a0b] transition-colors",
+                    isActive ? "bg-[#C9A94A]" : "bg-[#1B1B1E]"
+                  )}>
+                    <Icon size={20} className={isActive ? "text-black" : "text-[#C9A94A]"} />
+                  </div>
+                  <span className={cn("text-[9px] mt-0.5 font-medium tracking-wide", isActive ? "text-aureos-gold" : "text-[#666]")}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            }
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 aureos-tap-target"
+                data-testid={`mobile-nav-${item.label.toLowerCase()}`}
+              >
+                <Icon size={19} className={isActive ? "text-aureos-gold" : "text-[#666]"} />
+                <span className={cn("text-[9px] font-medium tracking-wide", isActive ? "text-aureos-gold" : "text-[#666]")}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 };
