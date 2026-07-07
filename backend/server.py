@@ -1325,6 +1325,7 @@ from routes.jarvis_narrative import router as jarvis_narrative_router
 from routes.predictions import router as predictions_router
 from routes.global_fusion import router as global_fusion_router
 from routes.signal_learning import router as signal_learning_router
+from routes.satellite import router as satellite_router
 from routes.data_confidence import router as data_confidence_router
 app.include_router(analysis_router)
 app.include_router(assets_router)
@@ -1355,6 +1356,7 @@ app.include_router(jarvis_narrative_router)
 app.include_router(predictions_router)
 app.include_router(global_fusion_router)
 app.include_router(signal_learning_router)
+app.include_router(satellite_router)
 app.include_router(data_confidence_router)
 
 app.add_middleware(
